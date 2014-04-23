@@ -123,3 +123,7 @@ virtual_host = goobi
 username = goobi
 password = 
 queue_to_databank = temp___databank_archiver
+
+[test]
+log = /dev/null
+
