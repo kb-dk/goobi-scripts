@@ -25,11 +25,11 @@ def fix_path(p, check_p = False, logger=None):
     if check_p:
         if not os.path.exists(p):
             msg = p+' does not exist or cannot be accessed'
-            logger.error(msg)
+            if logger: logger.error(msg)
             return p,msg
         elif not os.path.isdir(p):
             msg = p+' is does not a valid directory.'
-            logger.error(msg)
+            if logger: logger.error(msg)
             return p,msg
         p = os.path.normpath(p) + os.sep
         return p,None
