@@ -37,6 +37,23 @@ def fix_path(p, check_p = False, logger=None):
         p = os.path.normpath(p) + os.sep
         return p,None
 
+
+# Given a folder path, check to see 
+# if folder exists or create it
+# return true if successful
+# false if folder could not be created
+def find_or_create_dir(path):
+    if os.path.exists(path) and os.path.isdir(path):
+        return True
+    else:
+        try:
+            os.makedirs(path)
+            return True
+        except IOError as e:
+            print e
+            return False
+
+
 def move_file(file_path,dest_folder,logger=None):
     '''Moves a file from file_path to dest_folder.
     Checks paths and logs errors.
