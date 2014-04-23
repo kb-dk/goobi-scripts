@@ -408,12 +408,14 @@ class Step( object ):
 	def exit( self, message,log=None ) :
 		''' Nice exit '''
 
-		if log:
+		print "Exit being called with args: "
+		print "Message is {0}".format(str( message))
+		print "Log is {0}".format(str(log))
+
+		if log.__class__.__name__  == 'Logger':
 			log.error( message )
 		else:
 			self.glogger.error(message)
-
-		print "Exit message: " + str( message )
 
 		sys.exit(1)
 		
@@ -421,10 +423,11 @@ class Step( object ):
 
 		error = None
 		config = ConfigReader(config_file)
-		
 		does_not_have_sections = []
+		
 		for section in must_have:
-			if not config.hasSection( section ):
+			if len(section) > 0 and not config.hasSection( section ):
+				print "section {0} not found".format(section)
 				does_not_have_sections.append( section )
 		if does_not_have_sections:
 			error = "Error: Config file does not contain sections:- " + ", ".join( does_not_have_sections )
