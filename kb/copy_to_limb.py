@@ -8,7 +8,7 @@ class CopyToLimb( Step ):
 
 	def setup(self):
 		self.name = 'Copy to LIMB'
-		self.config_main_section = 'test'
+		self.config_main_section = 'copy_to_limb'
 		self.essential_config_sections = set( [] )
 		self.essential_commandlines = {
 			"process_id" : "number",

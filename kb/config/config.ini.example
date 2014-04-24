@@ -132,3 +132,8 @@ queue_to_databank = temp___databank_archiver
 [test]
 log = /dev/null
 
+[copy_to_limb]
+log = opt/digiverso/logs/step_copy_to_limb.log
+limb_transit = /tmp/transit
+limb_hotfolder = /tmp/hotfolder
+
