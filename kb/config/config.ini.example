@@ -26,8 +26,13 @@ log_email_subject = Goobi Dev Property Inserter Error
 debug = false
 log = /opt/digiverso/logs/step_move_invalid_files.log
 log_email_subject = Goobi Dev Remove Junk Files
-valid_file_exts = jpeg;jpg;tif;tiff
-folder_for_invalid_files = images/invalid_files/
+valid_file_exts = tif;tiff;jpg;jpeg;jpe;jif;jfif;jfi;jp2;j2k;jpf;jpx;jpm;mj2
+invalid_folder = invalid/
+; potential vals 0 || 1 || 2
+; 0 - all errors will cause script to stop
+; 1 - serious errors will cause script to stop
+; 2 - only critical errors will cause script to stop
+break_on_errors = 1
 
 [tiff_verify]
 debug = true
