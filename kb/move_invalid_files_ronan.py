@@ -167,5 +167,4 @@ class FileValidator( Step ) :
         return error   
         
 if __name__ == '__main__' :
-    config_path = os.getcwd() + os.sep + "config" + os.sep + "config.ini"
-    FileValidator( config_path ).begin()
+    FileValidator().begin()

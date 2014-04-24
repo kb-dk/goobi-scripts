@@ -69,10 +69,11 @@ class Step( object ):
 	def step(self,_): pass
 	
 		
-	def __init__( self, config_file ) :
+	def __init__( self ) :
 	
 		# Default names for essential settings
 		self.commandline_process_id = "process_id"
+		self.commandline_config_path = "config_path"
 		self.commandline_step_id = "step_id"
 		self.commandline_auto_report_problem_step_name = "auto_report_problem"
 		self.config_general_section = "general"
@@ -104,16 +105,23 @@ class Step( object ):
 		# Add process_id to default commandlines - we need it for logging to Goobi
 		if self.commandline_process_id not in self.essential_commandlines.keys() :
 			self.essential_commandlines[self.commandline_process_id] = "number"
+
+		# We need to make sure we have a full path to our config file
+		if self.commandline_config_path not in self.essential_commandlines.keys() :
+			self.essential_commandlines[self.commandline_config_path] = "file"
+
+		# Get command line parameters (want to pass process_id to log if we have it)		
+		#
+		self.command_line, error_command_line= self.getCommandLine( must_have=self.essential_commandlines )
+		
 		#
 		# Get configuration information
 		#
-		self.config, error = self.getConfig( config_file, must_have=self.essential_config_sections )
+		self.config, error = self.getConfig( self.command_line.config_path, must_have=self.essential_config_sections )
 		if error:
 			self.exit( None, error )
 		#
-		# Get command line parameters (want to pass process_id to log if we have it)
-		#
-		self.command_line, error_command_line= self.getCommandLine( must_have=self.essential_commandlines )
+
 		#
 		# Are we debugging?
 		#
