@@ -39,12 +39,12 @@ class FileValidator( Step ) :
         self.essential_config_sections = set( [] )
         self.essential_commandlines = {
             "process_id":"number", 
-            "source_path":"folder",
-            "image_path":"folder"
+            "image_path":"folder",
+            "root_path":"folder"
         }
 
     def step(self):
-        source_folder, sourceOk = tools.fix_path(self.command_line.source_path, True)
+        source_folder, sourceOk = tools.fix_path(self.command_line.image_path, True)
         dest_folder = self.getDestinationFolder()
         break_level = self.getBreakLevel()
         valid_exts = self.getValidExts()
@@ -63,12 +63,11 @@ class FileValidator( Step ) :
     # exit if we can't create the dir for some reason
     # (probably permissions)
     def getDestinationFolder(self):
+        invalid_root, rootOk = tools.fix_path(self.command_line.root_path, True)
         invalid_folder, folderOk = tools.fix_path(self.getConfigItem('invalid_folder'), True)
-        invalid_root, rootOk = tools.fix_path(self.command_line.image_path, True)
         invalid_destination, destOk = tools.fix_path(invalid_root + invalid_folder, True)
-        destination_exists, error_msg = tools.find_or_create_dir(invalid_destination)
+        destination_exists = tools.find_or_create_dir(invalid_destination)
         if not destination_exists: 
-            self.error(error_msg)
             self.error("could not create destination folder {0}".format(invalid_destination))
             exit(1)
         else: 
