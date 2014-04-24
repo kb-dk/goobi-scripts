@@ -87,8 +87,8 @@ class FileValidator( Step ) :
                 message = "CRITICAL - Subdirectory {0} found in source folder.".format(folder + f)
                 error_level= 2
                 break
-            elif self.getFileExt(f) not in valid_exts:
-                message = "WARNING - Invalid extension \"{0}\" found in source folder".format(self.getFileExt(f))
+            elif tools.getFileExt(f) not in valid_exts:
+                message = "WARNING - Invalid extension \"{0}\" found in source folder".format(tools.getFileExt(f))
                 error_level = 1
         
         return error_level, message
@@ -98,13 +98,10 @@ class FileValidator( Step ) :
         ext_str = self.getConfigItem('valid_file_exts')
         return ext_str.split(';')
 
-    def getFileExt(self, name):
-        return name.split('.')[-1]
-
     
     def moveInvalidFiles(self, source, dest, valid_exts):
         for f in os.listdir(source):
-            if self.getFileExt(f) not in valid_exts:
+            if tools.getFileExt(f) not in valid_exts:
                 self.info("moving file {0}".format(f))
                 tools.move_file(source + f, dest)
     

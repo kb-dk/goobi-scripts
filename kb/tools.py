@@ -81,6 +81,9 @@ def move_file(file_path,dest_folder,logger=None):
         if logger: logger.error(error)
         
     return error
+
+def getFileExt(name): 
+        return name.split('.')[-1]
     
 def get_delta_time(s):
     h, remainder = divmod(s, 3600)
