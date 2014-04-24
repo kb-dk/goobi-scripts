@@ -50,8 +50,7 @@ def find_or_create_dir(path):
             os.makedirs(path)
             return True
         except IOError as e:
-            print e
-            return False
+            return False, e.strerror
 
 
 def move_file(file_path,dest_folder,logger=None):

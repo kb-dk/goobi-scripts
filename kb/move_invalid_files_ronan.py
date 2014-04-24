@@ -43,6 +43,20 @@ class FileValidator( Step ) :
             "image_path":"folder"
         }
 
+    def step(self):
+        source_folder, sourceOk = tools.fix_path(self.command_line.source_path, True)
+        dest_folder = self.getDestinationFolder()
+        break_level = self.getBreakLevel()
+        valid_exts = self.getValidExts()
+        error_level, message = self.checkForErrors(source_folder, valid_exts)
+        
+        if error_level > break_level:
+            self.error(message)
+            self.error("Error level exceeds break level exiting...")
+            sys.exit(1)
+        else:
+            self.moveInvalidFiles(source_folder, dest_folder, valid_exts)
+
     # Build the destination folder for invalid files
     # based on the command line arg + the config path
     # if dir does not exist, create it
@@ -52,9 +66,10 @@ class FileValidator( Step ) :
         invalid_folder, folderOk = tools.fix_path(self.getConfigItem('invalid_folder'), True)
         invalid_root, rootOk = tools.fix_path(self.command_line.image_path, True)
         invalid_destination, destOk = tools.fix_path(invalid_root + invalid_folder, True)
-        destination_exists = tools.find_or_create_dir(invalid_destination)
+        destination_exists, error_msg = tools.find_or_create_dir(invalid_destination)
         if not destination_exists: 
-            print "could not create destination folder {0}".format(invalid_destination)
+            self.error(error_msg)
+            self.error("could not create destination folder {0}".format(invalid_destination))
             exit(1)
         else: 
             return invalid_destination
@@ -87,25 +102,11 @@ class FileValidator( Step ) :
     def getFileExt(self, name):
         return name.split('.')[-1]
 
-    def step(self):
-        source_folder, sourceOk = tools.fix_path(self.command_line.source_path, True)
-        dest_folder = self.getDestinationFolder()
-        break_level = self.getBreakLevel()
-        valid_exts = self.getValidExts()
-        error_level, message = self.checkForErrors(source_folder, valid_exts)
-        
-        if error_level > break_level:
-            print message
-            print "Error level exceeds break level exiting..." 
-            sys.exit(1)
-        else:
-            self.moveInvalidFiles(source_folder, dest_folder, valid_exts)
-
     
     def moveInvalidFiles(self, source, dest, valid_exts):
         for f in os.listdir(source):
             if self.getFileExt(f) not in valid_exts:
-                print "moving file {0}".format(f)
+                self.info("moving file {0}".format(f))
                 tools.move_file(source + f, dest)
     
     def step_jeppe(self):
