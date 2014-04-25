@@ -3,24 +3,25 @@
 # No spaces in keys!
 
 [general]
-
 # debug, log_max_bytes, log_backup_count and  log_email can be overwritten in the main section of a step
 debug = false
-
 log_max_bytes = 50000000
 log_backup_count = 4 
 #log_email = jeel@kb.dk
-#matthew.wilcoxson@bodleian.ox.ac.uk 
 
-# TODO log_folder = /opt/digiverso/logs
+[folder_structure_creator]
+debug=false
+log = /opt/digiverso/logs/folder_structure_creator.log
 
-mets_file_original_extension = .original.xml
-
-[property_inserter]
-debug = true
-
-log = /opt/digiverso/logs/step_property_inserter.log
-log_email_subject = Goobi Dev Property Inserter Error
+[process_folder_structure]
+doc_pdf_path = documents\pdf\
+doc_invalid_path = documents\invalid\
+img_master_path = images\master\
+img_inivalid_path = images\invalid\
+metadata_toc_path = metadata\toc\
+metadata_alto_path = metadata\alto\
+metadata_ojs_path = metadata\ojs\
+metadata_invalid_path = metadata\invalid\
 
 [list_arguments]
 debug = false
@@ -38,103 +39,14 @@ invalid_folder = invalid/
 ; 2 - only critical errors will cause script to stop
 break_on_errors = 1
 
-[tiff_verify]
-debug = true
-log = /opt/digiverso/logs/step_tiff_verify.log
-log_email_subject = Goobi Dev Tiff Verify Error
-
-[jpeg_create]
-debug = true
-
-log = /opt/digiverso/logs/step_jpeg_create.log
-log_email_subject = Goobi Dev JPEG Create Error
-
-[jpeg_verify]
-debug = true
-
-log = /opt/digiverso/logs/step_jpeg_verify.log
-log_email_subject = Goobi Dev JPEG Verify Error
-
-[jpeg2000_create]
-debug = true
-
-log = /opt/digiverso/logs/step_jpeg2000_create.log
-log_email_subject = Goobi Dev Jpeg2000 Create Error
-
-[jpeg2000_verify]
-debug = true
-
-log = /opt/digiverso/logs/step_jpeg2000_verify.log
-log_email_subject = Goobi Dev Jpeg2000 Verify Error
-
-[uuid_insert]
-debug = true
-
-log = /opt/digiverso/logs/step_uuid_inserter.log
-log_email_subject = Goobi Dev UUID insert Error
-
-
-[update_mets]
-debug = true
-
-log = /opt/digiverso/logs/step_update_mets.log
-log_email_subject = Goobi Dev Update Mets Error
-
-databank_url = https://databank.ora.ox.ac.uk
-
-[derivative_metadata]
-debug = true
-
-log = /opt/digiverso/logs/step_derivative_metadata.log
-log_email_subject = Goobi Dev Metadata Derivatives Error
-
-xsl_folder = /opt/digiverso/goobi/xslt/
-dc_stylesheet = goobi-to-dc-multi.xsl
-
 [step_tester]
 debug = true
-
 log = /opt/digiverso/logs/step_tester.log
 log_email_subject = Goobi Tester step
-
-[archiver]
-debug = true
-
-log = /opt/digiverso/logs/step_archiver.log
-log_email_subject = Goobi Dev Archive Error
-
-worker_log = /opt/digiverso/logs/worker_to_databank.log
 
 [goobi]
 host = 127.0.0.1:8080
 passcode = 
-
-[jhove]
-file= /opt/jhove/jhove
-conf= /opt/jhove/conf/jhove.conf
-
-[saxon]
-file = /opt/saxon/saxon.jar
-
-[databank]
-# Must update /etc/hosts to have 10.0.0.110 direct to databank.ora.ox.ac.uk to avoid SSL certifcate errors.
-host = databank.ora.ox.ac.uk
-#host = 10.0.0.110
-username = goobi
-# password generated on http://passphra.se/
-password =   
-silo = temp___Imaging
-
-[rabbitmq]
-host = 10.0.0.194 
-port = 5672
-virtual_host = goobi
-username = goobi
-password = 
-queue_to_databank = temp___databank_archiver
-
-[test]
-log = /dev/null
 
 [copy_to_limb]
 log = opt/digiverso/logs/step_copy_to_limb.log
