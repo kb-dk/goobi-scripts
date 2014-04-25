@@ -19,9 +19,12 @@ class CopyToLimb( Step ):
 		try:
 			files_not_copied  = True
 			source_dir = self.command_line.source
-			transit_dir = self.getConfigItem('limb_transit') + os.pathsep + os.path.basename(source_dir)
+			transit_dir = os.path.join(self.getConfigItem('limb_transit'),os.path.basename(source_dir))
 			hotfolder_dir = self.getConfigItem('limb_hotfolder')
 			sleep_interval = self.getConfigItem('sleep_interval')
+
+			print transit_dir
+			print hotfolder_dir
 									
 			self.info_message("source_dir "+source_dir)
 			os.makedirs(transit_dir)
