@@ -22,6 +22,10 @@ debug = true
 log = /opt/digiverso/logs/step_property_inserter.log
 log_email_subject = Goobi Dev Property Inserter Error
 
+[list_goobi_files]
+debug = false
+log = /opt/digiverso/logs/list_arguments.log
+
 [move_invalid_files]
 debug = false
 log = /opt/digiverso/logs/step_move_invalid_files.log

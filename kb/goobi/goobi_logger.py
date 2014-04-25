@@ -2,7 +2,9 @@
 
 import datetime
 import sys
+
 from goobi_communicate import GoobiCommunicate
+
 
 class GoobiLogger():
 	"""

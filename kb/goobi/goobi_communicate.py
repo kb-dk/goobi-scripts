@@ -4,6 +4,7 @@
 # close a step automatically: 'http://127.0.0.1/goobi/wi?command=closeStep&stepId='+stepId+'&token=Xasheax7ai'
 import urllib2
 
+
 class GoobiCommunicate() :
 	"""
 		Simplfy the communication between python and Goobi.
