@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import codecs
 import ConfigParser
+import codecs
+
 
 class ConfigSection:
 	""" Dummy class to create attributes in """

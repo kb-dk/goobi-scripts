@@ -1,5 +1,6 @@
 from goobi.goobi_step import Step
 
+
 class EmptyStep( Step ):
 
 	def setup(self):
