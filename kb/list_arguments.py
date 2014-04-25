@@ -12,8 +12,8 @@ class Step_Tester( Step ) :
 
     def setup(self):
     
-        self.name = "List Goobi arguments"
-        self.config_main_section = "list_goobi_files"
+        self.name = "Print CLI arguments"
+        self.config_main_section = "list_arguments"
     
     def step(self):
         print('Printing argument names and their values:')
