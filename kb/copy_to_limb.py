@@ -51,8 +51,7 @@ class CopyToLimb( Step ):
 					time.sleep(sleep_interval)				
 			shutil.move(transit_dir,hotfolder_dir)
 		except Exception as e:
-			logger.error(e.strerror)
-			self.info_message("An error happened")			
+			self.info_message("An error happened "+e.strerror)			
 		return None
 
 if __name__ == '__main__':	
