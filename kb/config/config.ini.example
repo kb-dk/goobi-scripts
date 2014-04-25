@@ -52,4 +52,6 @@ passcode =
 log = opt/digiverso/logs/step_copy_to_limb.log
 limb_transit = /tmp/transit
 limb_hotfolder = /tmp/hotfolder
+sleep_interval=600
+
 
