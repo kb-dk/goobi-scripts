@@ -21,7 +21,7 @@ class CopyToLimb( Step ):
 			source_dir = self.command_line.source
 			transit_dir = self.getConfigItem('limb_transit') + os.pathsep + os.path.basename(source_dir)
 			hotfolder_dir = self.getConfigItem('limb_hotfolder')
-			sleep_interval(self.getConfigItem('sleep_interval'))
+			sleep_interval = self.getConfigItem('sleep_interval')
 									
 			self.info_message("source_dir "+source_dir)
 			os.makedirs(transit_dir)
@@ -51,6 +51,7 @@ class CopyToLimb( Step ):
 					time.sleep(sleep_interval)				
 			shutil.move(transit_dir,hotfolder_dir)
 		except Exception as e:
+			print e
 			self.info_message("An error happened ")			
 		return None
 
