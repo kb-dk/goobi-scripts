@@ -8,7 +8,7 @@ import os
 
 from goobi.goobi_step import Step
 
-class Step_Tester( Step ) :
+class list_arguments( Step ) :
 
     def setup(self):
     
@@ -21,4 +21,4 @@ class Step_Tester( Step ) :
             print('%s = %s'%(key,value))
         print('Current working directory: '+os.getcwd())
 if __name__ == '__main__' :
-    Step_Tester().begin()
+    list_arguments().begin()

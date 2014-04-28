@@ -5,13 +5,18 @@
 [general]
 # debug, log_max_bytes, log_backup_count and  log_email can be overwritten in the main section of a step
 debug = false
+log_use_email = false
+log_use_goobi_gui_log = true
 log_max_bytes = 50000000
 log_backup_count = 4 
+log = /opt/digiverso/logs/goobi_scripts.log
 #log_email = jeel@kb.dk
 
 [folder_structure_creator]
 debug=false
 log = /opt/digiverso/logs/folder_structure_creator.log
+
+[create_process_folder_structure]
 
 [process_folder_structure]
 # http://diswiki.kb.dk/w/index.php/Udvikling_scripts_til_Goobi#Process_folder_structure

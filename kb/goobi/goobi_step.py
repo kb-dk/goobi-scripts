@@ -113,15 +113,12 @@ class Step( object ):
 		# Get command line parameters (want to pass process_id to log if we have it)		
 		#
 		self.command_line, error_command_line= self.getCommandLine( must_have=self.essential_commandlines )
-		
 		#
 		# Get configuration information
 		#
 		self.config, error = self.getConfig( self.command_line.config_path, must_have=self.essential_config_sections )
 		if error:
 			self.exit( None, error )
-		#
-
 		#
 		# Are we debugging?
 		#
@@ -132,10 +129,9 @@ class Step( object ):
 		if self.debug:
 			print(self.name + ": Debugging ON")
 		# Create out logger
-		self.glogger, error = self.getLoggingSystems( self.config, self.config_main_section, self.command_line, self.debug, self.name + "_logger" )
+		self.glogger, error = self.getLoggingSystems( self.config, self.config_main_section, self.command_line, self.debug, self.name + "_logger")
 		if error:
 			self.exit( self.glogger, error )
-		
 		#
 		# Check Commandline parameters
 		#
@@ -149,8 +145,6 @@ class Step( object ):
 			self.detach = ( self.command_line.detach.lower() == "true" )
 			
 		self.auto_report_problem = self.command_line.has( self.commandline_auto_report_problem_step_name )
-		
-		
 		#
 		# Pass message back to Goobi to say everything looks fine and start process.
 		#
@@ -553,21 +547,6 @@ class Step( object ):
 
 		return error
 		
-	def createLogging( self, just_file = False ):
-		return self.getLoggingSystems( self.config, self.config_main_section, self.command_line, self.debug, self.name + "_logger", just_file )
-
-	def recreateFileLogging(self) :
-		"""
-			Used post detach (fork) to recreate file handler
-		"""
-		#logger = s.glogger.getLogger()
-		#logger.removeHandler( s.glogger_handlers["rotating"] )
-		
-		#s.createLogging( True )
-		
-		
-		
-		
 	def getLogger( self, config, id, debug ) :
 
 		logger = logging.getLogger( id )
@@ -595,11 +574,14 @@ class Step( object ):
 		except ValueError:
 			log_backup_count = 4
 		
-		log_file = config.item( config_main_section, "log" )
+		log_file = None
+		if self.getConfigItem('log'):
+			log_file = self.getConfigItem('log')
+		else:
+			return 'Error: Unable to open log file at : ' + log_file
 		
 		try:
 			rotating_logger_handler = logging.handlers.RotatingFileHandler( log_file, maxBytes=log_max_bytes, backupCount=log_backup_count )
-			
 			# Add Process ID to the log
 			pid = "unknown"
 			if command_line.has( self.commandline_process_id ) :
@@ -650,41 +632,35 @@ class Step( object ):
 			
 		return glogger
 		
-	def getLoggingSystems( self, config, config_main_section, command_line, debug, id, just_file=False ):
+	def getLoggingSystems( self, config, config_main_section, command_line, debug, id):
 		"""
 			Creating file, email and goobi logging.
 			
 			just_file is so we can recreate the file logger after we detach the prcess, when we detach we need to close all the open files. The other loggers are unaffected.
 		"""
+		use_email = False
+		if self.getConfigItem('log_use_email'):
+			use_email = self.getConfigItem('log_use_email')
+		use_goobi_log = True
+		if self.getConfigItem('log_use_goobi_log'):
+			use_goobi_gui_log = self.getConfigItem('log_use_goobi_log')
 		#
 		# Create our base logger
-		#
 		logger = self.getLogger( config, id, debug )
-		
-		
-		if not just_file :
-		
-			#
-			# Email Logger
-			#
-			self.addEmailLog( config, config_main_section, logger )		
-		
 		#
-		# Create rotating file log
+		# Add e-mail log in configured
+		if use_email:
+			self.addEmailLog( config, config_main_section, logger )
 		#
+		# Add rotary file log if configured
 		error = self.addRotatingLog( config, config_main_section, command_line, logger, debug )
 		if error:
 			return logger, error # Logger will log the error to the email log as the file handler has failed
-
-		if not just_file:
-		
-			#
-			# Get Goobi Logger (if able)
-			#
+		#
+		# Add logging to process msg windows in goobi-gui if configured
+		if use_goobi_gui_log:
 			logger = self.getGoobiLogger( config, command_line, logger, debug )
-		
-		return logger, None
-	
+		return logger, None	
 	
 	def error_message( self, message ):
 		self.error( message )
