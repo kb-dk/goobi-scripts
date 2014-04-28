@@ -14,6 +14,7 @@ debug=false
 log = /opt/digiverso/logs/folder_structure_creator.log
 
 [process_folder_structure]
+# http://diswiki.kb.dk/w/index.php/Udvikling_scripts_til_Goobi#Process_folder_structure
 doc_pdf_path = documents\pdf\
 doc_invalid_path = documents\invalid\
 img_master_path = images\master\
@@ -22,6 +23,7 @@ metadata_toc_path = metadata\toc\
 metadata_alto_path = metadata\alto\
 metadata_ojs_path = metadata\ojs\
 metadata_invalid_path = metadata\invalid\
+metadata_goobi_file = metadata.xml
 
 [list_arguments]
 debug = false
