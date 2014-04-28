@@ -6,7 +6,7 @@ class ValidateLimbOutput( Step ):
 
 	def setup(self):
 		self.name = 'ValidateLimbOutput'
-		self.config_main_section = 'validate_limb_output'
+		self.config_main_section = 'limb_output'
 		self.essential_config_sections = set( [] )
 		self.essential_commandlines = {
 			'process_title' : 'string',

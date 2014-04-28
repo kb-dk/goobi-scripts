@@ -62,7 +62,7 @@ limb_hotfolder = /tmp/hotfolder
 sleep_interval=600
 
 
-[validate_limb_output]
+[limb_output]
 limb_output = /mnt/hgfs/limb-01/tidsskrift-dk/
 alto = ALTO
 toc = Toc
