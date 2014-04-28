@@ -641,7 +641,7 @@ class Step( object ):
 		use_email = False
 		if self.getConfigItem('log_use_email'):
 			use_email = self.getConfigItem('log_use_email')
-		use_goobi_log = True
+		use_goobi_gui_log = True
 		if self.getConfigItem('log_use_goobi_log'):
 			use_goobi_gui_log = self.getConfigItem('log_use_goobi_log')
 		#

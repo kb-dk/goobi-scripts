@@ -16,7 +16,7 @@ class create_process_folder_structure( Step ) :
         self.config_main_section = "create_process_folder_structure"
     
     def step(self):
-        
+        pass
         
 if __name__ == '__main__' :
     create_process_folder_structure().begin()
