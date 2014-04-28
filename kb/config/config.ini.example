@@ -66,6 +66,6 @@ sleep_interval=600
 limb_output = /mnt/hgfs/limb-01/tidsskrift-dk/
 alto = ALTO
 toc = Toc
-pdf = JP2K 1-30
+pdf = JP2K 1-20
 input_files = JP2000_lossless
 log = /opt/digiverso/logs/step_validate_limb_output.log
