@@ -21,13 +21,18 @@ class ValidateLimbOutput( Step ):
 		Require params process_title from command line
 		Other values taken from config.ini
 		'''
-		self.getVariables()
-		self.performValidations()
-		print self.limb_dir
-		print self.alto_dir
+		if self.getVariables():
+			if self.performValidations():
+				self.info_message("All validations performed successfully.")
+				sys.exit(0)
+			else: 
+				self.error_message("At least one validations failed - exiting...")
+		else:
+			self.error_message("Failed to set all variables successfully - exiting...")
+		
+		sys.exit(1)
 
-
-		return None	
+	
 
 	def getVariables(self):
 		'''
@@ -39,20 +44,18 @@ class ValidateLimbOutput( Step ):
 		alto = self.getConfigItem('alto')
 		toc = self.getConfigItem('toc')
 		pdf = self.getConfigItem('pdf')
-		originals = self.getConfigItem('input_files')
+		inputs = self.getConfigItem('input_files')
 
 		# join paths to create absolute paths
 		self.limb_dir = os.path.join(limb, process_title)
 		self.alto_dir = os.path.join(self.limb_dir, alto)
 		self.toc_dir = os.path.join(self.limb_dir, toc)
 		self.pdf_dir = os.path.join(self.limb_dir, pdf)
-		self.originals_dir = os.path.join(self.limb_dir, originals)
+		self.input_files_dir = os.path.join(self.limb_dir, inputs)
 
-		# exit if one of our directories is missing
-		if not tools.checkDirectoriesExist(self.limb_dir, self.alto_dir, \
-			self.toc_dir, self.pdf_dir, self.originals_dir):
-			print "path not found - exiting..."
-			sys.exit(1)
+		# return false if one of our directories is missing
+		return tools.checkDirectoriesExist(self.limb_dir, self.alto_dir, \
+			self.toc_dir, self.pdf_dir, self.input_files_dir)
 
 
 	def performValidations(self):
@@ -60,18 +63,50 @@ class ValidateLimbOutput( Step ):
 		1: validering af pdf (antal sider i pdf == antal input billeder)
 		2: validering af toc-fil (pt. er der en fil - validering ved parsing efterfoelgende)
 		3: validering af alto-filer (evt. "er der lige saa mange som input billeder" eller "er der filer")
-		4: en funktion kan give antallet af input billeder 
 		'''
 		if not self.tocExists(): 
-			print "toc not found - exiting..."
-			sys.exit(1)
+			self.error_message("TOC not found!")
+			return False
+		if not self.pageCountMatches():
+			self.error_message("pdf page count does not match input picture count!")
+			return False
+		if not self.altoFileCountMatches():
+			self.error_message("Number of alto files does not match number of input files.")
+			return False
 
-	# make sure a .toc file exists in toc directory
+		return True
+
 	def tocExists(self):
-		for file in os.listdir(self.toc_dir):
-			if file.endswith('.toc'): return True
-		
-		return False
+		'''
+		Ensure a .toc file exists in toc directory
+		return (string) filename
+		'''
+		self.info_message("Checking for toc in {0}".format(self.toc_dir))
+		toc = tools.getFirstFileWithExtension(self.toc_dir, '.toc')
+		return toc
+
+	
+	def pageCountMatches(self):
+		'''
+		Compare num pages in pdfinfo with pages in input 
+		picture directory. 
+		return boolean 
+		'''
+		self.info_message("Comparing page count with input files")
+		pdf = tools.getFirstFileWithExtension(self.pdf_dir, '.pdf')
+		pdfInfo = tools.pdfinfo(os.path.join(self.pdf_dir, pdf))
+		numPages = int(pdfInfo['Pages'])
+		numInputFiles = len(os.listdir(self.input_files_dir))
+
+		return numPages == numInputFiles
+
+	def altoFileCountMatches(self):
+		self.info_message("Comparing number of Alto files with input files")
+		numAlto = len(os.listdir(self.alto_dir))
+		numInputFiles = len(os.listdir(self.input_files_dir))
+
+		return numAlto == numInputFiles
+
 if __name__ == '__main__':
 	
 	ValidateLimbOutput().begin()
