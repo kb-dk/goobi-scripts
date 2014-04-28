@@ -16,9 +16,17 @@ class list_arguments( Step ) :
         self.config_main_section = "list_arguments"
     
     def step(self):
-        print('Printing argument names and their values:')
+        debug = self.getConfigItem('debug')
+        msg = 'Printing argument names and their values:'
+        if debug:
+            print(msg)
+        self.info(msg)
         for key,value in self.command_line._parameters.items():
-            print('%s = %s'%(key,value))
-        print('Current working directory: '+os.getcwd())
+            msg = '%s = %s'%(key,value)
+            if debug: print(msg)
+            self.info(msg)
+        msg = 'Current working directory: '+os.getcwd()
+        if debug: print(msg)
+        self.info(msg)
 if __name__ == '__main__' :
     list_arguments().begin()
