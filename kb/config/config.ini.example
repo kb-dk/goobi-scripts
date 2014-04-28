@@ -60,7 +60,7 @@ log = opt/digiverso/logs/step_copy_to_limb.log
 limb_transit = /tmp/transit
 limb_hotfolder = /tmp/hotfolder
 sleep_interval=600
-
+retries = 10
 
 [validate_limb_output]
 limb_output = /mnt/hgfs/limb-01/tidsskrift-dk/
