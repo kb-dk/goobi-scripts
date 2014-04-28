@@ -134,9 +134,11 @@ def create_folder(path):
             error = e.strerror
     return error
 
-# Given a variable number of directories
-# return false if any of them do not exist
 def checkDirectoriesExist(*args):
+    """
+    Given a variable number of directories
+    return false if any of them do not exist
+    """
     for dir in args:
         if not os.path.isdir(dir):
             print "{0} is not a valid directory.".format(dir)
