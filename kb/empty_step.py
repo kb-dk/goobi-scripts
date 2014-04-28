@@ -17,4 +17,4 @@ class EmptyStep( Step ):
 
 if __name__ == '__main__':
 	
-	EmptyStep( "config/config.ini" ).begin()
+	EmptyStep( ).begin()

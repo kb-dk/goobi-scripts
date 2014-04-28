@@ -54,4 +54,13 @@ passcode =
 log = opt/digiverso/logs/step_copy_to_limb.log
 limb_transit = /tmp/transit
 limb_hotfolder = /tmp/hotfolder
+sleep_interval=600
 
+
+[validate_limb_output]
+limb_output = /mnt/hgfs/limb-01/tidsskrift-dk/
+alto = ALTO
+toc = Toc
+pdf = JP2K 1-30
+input_files = JP2000_lossless
+log = /opt/digiverso/logs/step_validate_limb_output.log
