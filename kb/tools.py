@@ -7,7 +7,7 @@ Created on 26/03/2014
 '''
 
 
-import os
+import os, subprocess, csv, codecs
 import shutil
 
 
@@ -144,3 +144,103 @@ def checkDirectoriesExist(*args):
             print "{0} is not a valid directory.".format(dir)
             return False
     return True
+
+def getFirstFileWithExtension(dir, ext):
+    '''
+    Return the first file we can find in the given directory
+    with the given extension.
+    Useful when we don't know the file name
+    '''
+    for file in os.listdir(dir):
+        if file.endswith(ext): return file
+
+    return None
+
+def parseToc(toc):
+    '''
+    Given a full path to a LIMB toc file
+    return a lists of dictionaries
+    where each dictionary corresponds to 
+    a line in the toc
+    e.g. [{level: "1", author: "Annemarie Lund", title: "Arbejder fra Vibeke Roennows tegnestue", page: "5"}]
+    if there is no pipe character in the TOC title field, author will be blank
+    e.g. {'title': 'Front Matter', 'author': '', 'page': '1', 'level': '0'}
+    TODO: this method should be improved to handle Unicode properly
+    but since we only need page numbers for now, I'm putting it on the long finger
+    See https://docs.python.org/2/library/csv.html#csv-examples to get started
+    '''
+    data = []
+    with open(toc, 'r') as toc_csv:
+        reader = csv.reader(toc_csv, delimiter=',', quotechar='"')
+        iterreader = iter(reader) # skip the first line as this just contains header data
+        next(iterreader)
+        for row in iterreader:
+            try:
+                level = row[0]
+                if '|' in row[1]:
+                    author = row[1].split('|')[0]
+                    title = row[1].split('|')[1]
+                else: 
+                    author = ""
+                    title = row[1]
+                page = row[2]
+
+                data.append(dict(level=level, author=author,title=title, page=page))    
+            # if there's some problem with the input row, skip it
+            except IndexError:
+                print "ERROR - TOC row not parsed successfully {0}".format(",".join(row))
+    
+    return data        
+
+def pdfinfo(infile):
+    """
+    Wraps command line utility pdfinfo to extract the PDF meta information.
+    Returns metainfo in a dictionary.
+    sudo apt-get install poppler-utils
+     
+    This function parses the text output that looks like this:
+    Title: PUBLIC MEETING AGENDA
+    Author: Customer Support
+    Creator: Microsoft Word 2010
+    Producer: Microsoft Word 2010
+    CreationDate: Thu Dec 20 14:44:56 2012
+    ModDate: Thu Dec 20 14:44:56 2012
+    Tagged: yes
+    Pages: 2
+    Encrypted: no
+    Page size: 612 x 792 pts (letter)
+    File size: 104739 bytes
+    Optimized: no
+    PDF version: 1.5
+    """
+     
+    cmd = '/usr/bin/pdfinfo'
+    if not os.path.exists(cmd):
+        raise RuntimeError('System command not found: %s' % cmd)
+     
+    if not os.path.exists(infile):
+        raise RuntimeError('Provided input file not found: %s' % infile)
+
+    #if "check_output" not in dir( subprocess ):
+     #   implementCheckOutput()
+     
+    def _extract(row):
+        """Extracts the right hand value from a : delimited row"""
+        return row.split(':', 1)[1].strip()
+     
+    output = {}
+     
+    labels = ['Title', 'Author', 'Creator', 'Producer', 'CreationDate',
+    'ModDate', 'Tagged', 'Pages', 'Encrypted', 'Page size',
+    'File size', 'Optimized', 'PDF version']
+     
+    # cmd_output = subprocess.check_output([cmd, infile])
+    # the above line is default, but won't work on Python 2.6. The below is a workaround
+    cmd_output = subprocess.Popen([cmd, infile], stdout=subprocess.PIPE).communicate()[0]
+    
+    for line in cmd_output.splitlines():
+        for label in labels:
+            if label in line:
+                output[label] = _extract(line)
+ 
+    return output
