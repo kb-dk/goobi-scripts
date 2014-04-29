@@ -244,3 +244,14 @@ def pdfinfo(infile):
                 output[label] = _extract(line)
  
     return output
+
+def cutPdf(inputPdf, outputPdf, fromPage, toPage):
+    '''
+    Wrapper around pdftk - create outputPdf from the range
+    specified in from, to based on inputPdf
+    will return false if exit code is not 0 (i.e. an error code)
+    '''
+    page_range = "{0}-{1}".format(fromPage, toPage)
+    exit_code = subprocess.call(['pdftk', inputPdf, 'cat', page_range, 'output', outputPdf])
+    
+    return exit_code == 0 
