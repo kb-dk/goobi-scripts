@@ -155,7 +155,7 @@ class Step( object ):
 		update_message += ', REPORT-PROBLEM:' + ( "ON" if self.auto_report_problem else "OFF" ) # if unsuccessful
 		update_message += ', DEBUG:' + ( "ON" if self.debug else "OFF" ) + "."
 		
-		self.info_message( update_message )
+		self.debug_message( update_message )
 
 
 	def begin(self) :
@@ -182,9 +182,7 @@ class Step( object ):
 			raise
 		
 		if not error :
-		
-			self.info_message( 'Completed ' + self.name )
-
+			self.debug_message( 'Completed ' + self.name )
 			if self.auto_complete:
 				self.closeStep()
 
@@ -456,12 +454,12 @@ class Step( object ):
 		
 		return value
 
-	def debugging( self, config ) :
-		
+	def debugging( self, config = None ) :
+		if not config:
+			config = self.config
 		debug = self.getConfigItem( "debug", config )
 		if not debug:
 			debug = False
-		
 		return debug
 		
 	def getCommandLine( self, must_have ) :
@@ -642,9 +640,9 @@ class Step( object ):
 		if self.getConfigItem('log_use_email'):
 			use_email = self.getConfigItem('log_use_email')
 		use_goobi_gui_log = True
-		if self.getConfigItem('log_use_goobi_log'):
-			use_goobi_gui_log = self.getConfigItem('log_use_goobi_log')
-		#
+		if self.getConfigItem('log_use_gui_msg'):
+			use_goobi_gui_log = self.getConfigItem('log_use_gui_msg')
+	#
 		# Create our base logger
 		logger = self.getLogger( config, id, debug )
 		#
@@ -682,13 +680,13 @@ class Step( object ):
 		if self.glogger:
 			self.glogger.info( message )
 		self.debuggingPrint("Info: " + str(message) )
-		
+	
 	def debug_message( self, message ):
-		if self.glogger:
-			self.glogger.debug( message )
 		self.debuggingPrint("Debug: " + str(message) )
 		
 	def debuggingPrint( self, message ):
 		if self.debug:
+			if self.glogger:
+				self.glogger.debug( message )
 			print message
 		

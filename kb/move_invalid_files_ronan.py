@@ -66,9 +66,10 @@ class FileValidator( Step ) :
         invalid_root, rootOk = tools.fix_path(self.command_line.root_path, True)
         invalid_folder, folderOk = tools.fix_path(self.getConfigItem('invalid_folder'), True)
         invalid_destination, destOk = tools.fix_path(invalid_root + invalid_folder, True)
-        destination_exists = tools.find_or_create_dir(invalid_destination)
+        destination_exists,error = tools.find_or_create_dir(invalid_destination)
         if not destination_exists: 
-            self.error("could not create destination folder {0}".format(invalid_destination))
+            self.error(error)
+            #self.error("could not create destination folder {0}".format(invalid_destination))
             exit(1)
         else: 
             return invalid_destination
