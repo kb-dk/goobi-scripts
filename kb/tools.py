@@ -7,7 +7,7 @@ Created on 26/03/2014
 '''
 
 
-import os, subprocess
+import os, subprocess, csv, codecs
 import shutil
 
 
@@ -158,6 +158,42 @@ def getFirstFileWithExtension(dir, ext):
 
     return None
 
+def parseToc(toc):
+    '''
+    Given a full path to a LIMB toc file
+    return a lists of dictionaries
+    where each dictionary corresponds to 
+    a line in the toc
+    e.g. [{level: "1", author: "Annemarie Lund", title: "Arbejder fra Vibeke Roennows tegnestue", page: "5"}]
+    if there is no pipe character in the TOC title field, author will be blank
+    e.g. {'title': 'Front Matter', 'author': '', 'page': '1', 'level': '0'}
+    TODO: this method should be improved to handle Unicode properly
+    but since we only need page numbers for now, I'm putting it on the long finger
+    See https://docs.python.org/2/library/csv.html#csv-examples to get started
+    '''
+    data = []
+    with open(toc, 'r') as toc_csv:
+        reader = csv.reader(toc_csv, delimiter=',', quotechar='"')
+        iterreader = iter(reader) # skip the first line as this just contains header data
+        next(iterreader)
+        for row in iterreader:
+            try:
+                level = row[0]
+                if '|' in row[1]:
+                    author = row[1].split('|')[0]
+                    title = row[1].split('|')[1]
+                else: 
+                    author = ""
+                    title = row[1]
+                page = row[2]
+
+                data.append(dict(level=level, author=author,title=title, page=page))    
+            # if there's some problem with the input row, skip it
+            except IndexError:
+                print "ERROR - TOC row not parsed successfully {0}".format(",".join(row))
+    
+    return data        
+
 def pdfinfo(infile):
     """
     Wraps command line utility pdfinfo to extract the PDF meta information.
@@ -210,3 +246,14 @@ def pdfinfo(infile):
                 output[label] = _extract(line)
  
     return output
+
+def cutPdf(inputPdf, outputPdf, fromPage, toPage):
+    '''
+    Wrapper around pdftk - create outputPdf from the range
+    specified in from, to based on inputPdf
+    will return false if exit code is not 0 (i.e. an error code)
+    '''
+    page_range = "{0}-{1}".format(fromPage, toPage)
+    exit_code = subprocess.call(['pdftk', inputPdf, 'cat', page_range, 'output', outputPdf])
+    
+    return exit_code == 0 
