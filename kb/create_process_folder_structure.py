@@ -19,6 +19,9 @@ class create_process_folder_structure( Step ) :
         self.folder_structure_section = 'process_folder_structure'
         self.essential_config_sections.update([self.folder_structure_section, 
                                                self.folder_structure_section] )
+        self.essential_commandlines = {
+            "process_root_path":"folder"
+        }
         
     
     def step(self):

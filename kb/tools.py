@@ -80,6 +80,7 @@ def move_file(file_path,dest_folder,logger=None):
     except Exception as e:
         error = 'An error occured when copying '+file_path+' to '+dest_folder+\
             '. Error msg:'+e.strerror
+        print error
         if logger: logger.error(error)
         
     return error
