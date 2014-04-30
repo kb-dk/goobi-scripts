@@ -26,13 +26,14 @@ doc_pdf_path = documents/pdf/
 doc_invalid_path = documents/invalid/
 img_master_path = images/master/
 img_invalid_path = images/invalid/
-metadata_toc_path = metadata/toc/
+metadata_toc_path = metadata/toc
 metadata_alto_path = metadata/alto/
 metadata_ojs_path = metadata/ojs/
 metadata_invalid_path = metadata/invalid/
 
 [process_files]
 metadata_goobi_file = meta.xml
+metadata_goobi_anchor_file = meta_anchor.xml
 
 [list_arguments]
 debug = false
@@ -72,3 +73,9 @@ toc = Toc
 pdf = JP2K 1-20
 input_files = JP2000_lossless
 log = /opt/digiverso/logs/step_validate_limb_output.log
+
+[ojs_xml]
+log = /opt/digiverso/logs/step_create_ojs_xml.log
+metadata_goobi_anchor_file = meta_anchor.xml
+toc_path = metadata/toc
+anchor_required_fields = TitleDocMainShort;DocLanguage;PublicationYear
