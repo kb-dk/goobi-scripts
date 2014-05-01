@@ -6,7 +6,7 @@
 # debug, log_max_bytes, log_backup_count and  log_email can be overwritten in the main section of a step
 debug = false
 log_use_email = false
-log_use_goobi_gui_log = true
+log_use_gui_msg= true
 log_max_bytes = 50000000
 log_backup_count = 4 
 log = /opt/digiverso/logs/goobi_scripts.log
@@ -17,18 +17,23 @@ debug=false
 log = /opt/digiverso/logs/folder_structure_creator.log
 
 [create_process_folder_structure]
+log_use_goobi_gui_log = true
+debug=false
 
 [process_folder_structure]
 # http://diswiki.kb.dk/w/index.php/Udvikling_scripts_til_Goobi#Process_folder_structure
-doc_pdf_path = documents\pdf\
-doc_invalid_path = documents\invalid\
-img_master_path = images\master\
-img_inivalid_path = images\invalid\
-metadata_toc_path = metadata\toc\
-metadata_alto_path = metadata\alto\
-metadata_ojs_path = metadata\ojs\
-metadata_invalid_path = metadata\invalid\
-metadata_goobi_file = metadata.xml
+doc_pdf_path = documents/pdf/
+doc_invalid_path = documents/invalid/
+img_master_path = images/master/
+img_invalid_path = images/invalid/
+metadata_toc_path = metadata/toc
+metadata_alto_path = metadata/alto/
+metadata_ojs_path = metadata/ojs/
+metadata_invalid_path = metadata/invalid/
+
+[process_files]
+metadata_goobi_file = meta.xml
+metadata_goobi_anchor_file = meta_anchor.xml
 
 [list_arguments]
 debug = false
@@ -39,7 +44,6 @@ debug = false
 log = /opt/digiverso/logs/step_move_invalid_files.log
 log_email_subject = Goobi Dev Remove Junk Files
 valid_file_exts = tif;tiff;jpg;jpeg;jpe;jif;jfif;jfi;jp2;j2k;jpf;jpx;jpm;mj2
-invalid_folder = invalid/
 ; potential vals 0 || 1 || 2
 ; 0 - all errors will cause script to stop
 ; 1 - serious errors will cause script to stop
@@ -53,7 +57,7 @@ log_email_subject = Goobi Tester step
 
 [goobi]
 host = 127.0.0.1:8080
-passcode = 
+passcode = test
 
 [copy_to_limb]
 log = opt/digiverso/logs/step_copy_to_limb.log
@@ -69,3 +73,9 @@ toc = Toc
 pdf = JP2K 1-20
 input_files = JP2000_lossless
 log = /opt/digiverso/logs/step_validate_limb_output.log
+
+[ojs_xml]
+log = /opt/digiverso/logs/step_create_ojs_xml.log
+metadata_goobi_anchor_file = meta_anchor.xml
+toc_path = metadata/toc
+anchor_required_fields = TitleDocMainShort;DocLanguage;PublicationYear

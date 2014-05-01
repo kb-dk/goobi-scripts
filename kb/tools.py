@@ -38,23 +38,25 @@ def fix_path(p, check_p = False, logger=None):
         return p,None
 
 
-# Given a folder path, check to see 
-# if folder exists or create it
-# return true if successful
-# false if folder could not be created
 def find_or_create_dir(path):
+    '''
+    Given a folder path, check to see 
+    if folder exists or create it
+    return true if successful
+    false if folder could not be created
+    '''
     if os.path.exists(path) and os.path.isdir(path):
-        return True
+        return True, None
     else:
         try:
             os.makedirs(path)
-            return True
+            return True, None
         except IOError as e:
             return False, e.strerror
 
-
 def move_file(file_path,dest_folder,logger=None):
-    '''Moves a file from file_path to dest_folder.
+    '''
+    Moves a file from file_path to dest_folder.
     Checks paths and logs errors.
     '''
     error = check_file(file_path)
@@ -78,6 +80,7 @@ def move_file(file_path,dest_folder,logger=None):
     except Exception as e:
         error = 'An error occured when copying '+file_path+' to '+dest_folder+\
             '. Error msg:'+e.strerror
+        print error
         if logger: logger.error(error)
         
     return error
@@ -144,6 +147,15 @@ def checkDirectoriesExist(*args):
             print "{0} is not a valid directory.".format(dir)
             return False
     return True
+
+def ensureFilesExist(*args):
+    '''
+    Given a variable number of file paths
+    raise an error if any of them do not exist
+    '''
+    for file in args:
+        if not os.path.isfile(file):
+            raise IOError(1, "File {0} could not be found".format(file))
 
 def getFirstFileWithExtension(dir, ext):
     '''
@@ -245,6 +257,7 @@ def pdfinfo(infile):
  
     return output
 
+
 def copy_files(source,dest,transit,delete_original,wait_interval,max_retries):
     	"""
 		Copies all file (non recursive) from 'source' directory to 'dest'.
@@ -294,4 +307,16 @@ def copy_files(source,dest,transit,delete_original,wait_interval,max_retries):
 		return'Not all files copied'
     
 	return None
+
+
+def cutPdf(inputPdf, outputPdf, fromPage, toPage):
+    '''
+    Wrapper around pdftk - create outputPdf from the range
+    specified in from, to based on inputPdf
+    will return false if exit code is not 0 (i.e. an error code)
+    '''
+    page_range = "{0}-{1}".format(fromPage, toPage)
+    exit_code = subprocess.call(['pdftk', inputPdf, 'cat', page_range, 'output', outputPdf])
+    
+    return exit_code == 0 
 

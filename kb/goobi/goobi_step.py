@@ -118,7 +118,7 @@ class Step( object ):
 		#
 		self.config, error = self.getConfig( self.command_line.config_path, must_have=self.essential_config_sections )
 		if error:
-			self.exit( None, error )
+			self.exit( error )
 		#
 		# Are we debugging?
 		#
@@ -131,12 +131,12 @@ class Step( object ):
 		# Create out logger
 		self.glogger, error = self.getLoggingSystems( self.config, self.config_main_section, self.command_line, self.debug, self.name + "_logger")
 		if error:
-			self.exit( self.glogger, error )
+			self.exit( error,self.glogger )
 		#
 		# Check Commandline parameters
 		#
 		if error_command_line:
-			self.exit( self.glogger, error_command_line )
+			self.exit( error_command_line,self.glogger )
 			
 		if self.command_line.has( "auto_complete" ) :
 			self.auto_complete = ( self.command_line.auto_complete.lower() == "true" )
@@ -155,7 +155,7 @@ class Step( object ):
 		update_message += ', REPORT-PROBLEM:' + ( "ON" if self.auto_report_problem else "OFF" ) # if unsuccessful
 		update_message += ', DEBUG:' + ( "ON" if self.debug else "OFF" ) + "."
 		
-		self.info_message( update_message )
+		self.debug_message( update_message )
 
 
 	def begin(self) :
@@ -182,9 +182,7 @@ class Step( object ):
 			raise
 		
 		if not error :
-		
-			self.info_message( 'Completed ' + self.name )
-
+			self.debug_message( 'Completed ' + self.name )
 			if self.auto_complete:
 				self.closeStep()
 
@@ -408,17 +406,17 @@ class Step( object ):
 			
 
 	def exit( self, message,log=None ) :
+		# TODO: make this method a nice exit
 		''' Nice exit '''
-
-		print "Exit being called with args: "
-		print "Message is {0}".format(str( message))
-		print "Log is {0}".format(str(log))
-
-		if log.__class__.__name__  == 'Logger':
+		
+		if not log:
+			print "Exit being called with args: "
+			print "Message is {0}".format(str( message))
+			print "Log is {0}".format(str(log))
+		elif log.__class__.__name__  == 'Logger':
 			log.error( message )
 		else:
 			self.glogger.error(message)
-
 		sys.exit(1)
 		
 	def getConfig( self, config_file, must_have ) :
@@ -456,12 +454,12 @@ class Step( object ):
 		
 		return value
 
-	def debugging( self, config ) :
-		
+	def debugging( self, config = None ) :
+		if not config:
+			config = self.config
 		debug = self.getConfigItem( "debug", config )
 		if not debug:
 			debug = False
-		
 		return debug
 		
 	def getCommandLine( self, must_have ) :
@@ -642,9 +640,9 @@ class Step( object ):
 		if self.getConfigItem('log_use_email'):
 			use_email = self.getConfigItem('log_use_email')
 		use_goobi_gui_log = True
-		if self.getConfigItem('log_use_goobi_log'):
-			use_goobi_gui_log = self.getConfigItem('log_use_goobi_log')
-		#
+		if self.getConfigItem('log_use_gui_msg'):
+			use_goobi_gui_log = self.getConfigItem('log_use_gui_msg')
+	#
 		# Create our base logger
 		logger = self.getLogger( config, id, debug )
 		#
@@ -682,13 +680,13 @@ class Step( object ):
 		if self.glogger:
 			self.glogger.info( message )
 		self.debuggingPrint("Info: " + str(message) )
-		
+	
 	def debug_message( self, message ):
-		if self.glogger:
-			self.glogger.debug( message )
 		self.debuggingPrint("Debug: " + str(message) )
 		
 	def debuggingPrint( self, message ):
 		if self.debug:
+			if self.glogger:
+				self.glogger.debug( message )
 			print message
 		

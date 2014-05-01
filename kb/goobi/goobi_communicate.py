@@ -36,7 +36,6 @@ class GoobiCommunicate() :
 			'type' : level,
 			'value' : message
 		}
-	
 		return self._send( "addToProcessLog", additional )
 	
 	def closeStep( self, step_id=None, process_id=None ) :
