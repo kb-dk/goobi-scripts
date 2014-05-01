@@ -2,7 +2,7 @@ from goobi.goobi_step import Step
 from xml.dom import minidom
 from errors import DataError
 
-import tools
+from tools import tools
 import os
 
 class CreateOJSXML( Step ):
