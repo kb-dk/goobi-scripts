@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8
 from goobi.goobi_step import Step
 from xml.dom import minidom
 from errors import DataError

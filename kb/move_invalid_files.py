@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8
 '''
 Created on 26/03/2014
 
@@ -124,7 +125,7 @@ class FileValidator( Step ) :
                     error_level= 2
                     break
                 elif tools.getFileExt(f) not in valid_exts:
-                    #TODO: æøå gives error, decode/encode
+                    #TODO: ï¿½ï¿½ï¿½ gives error, decode/encode
                     #UnicodeEncodeError: 'ascii' codec can't encode character u'\xe6' in position 34: ordinal not in range(128)
                     err_file_msg = '{0} is not a valid file and will be removed.'.format(f)
                     self.debug_message(err_file_msg)

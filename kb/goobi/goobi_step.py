@@ -1,5 +1,5 @@
-﻿# -*- coding: utf-8 -*-
-
+﻿#!/usr/bin/python
+# -*- coding: utf-8
 import sys, os, os.path, re, traceback, datetime, subprocess
 import logging, logging.handlers
 from tools import tools
