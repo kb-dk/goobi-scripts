@@ -139,6 +139,16 @@ def checkDirectoriesExist(*args):
             return False
     return True
 
+
+def ensureFilesExist(*args):
+    '''
+    Given a variable number of file paths
+    raise an error if any of them do not exist
+    '''
+    for file in args:
+        if not os.path.isfile(file):
+            raise IOError(1, "File {0} could not be found".format(file))
+
 def getFirstFileWithExtension(dir, ext):
     '''
     Return the first file we can find in the given directory
