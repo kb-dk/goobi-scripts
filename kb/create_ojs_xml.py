@@ -91,8 +91,7 @@ class CreateOJSXML( Step ):
 		output_name = os.path.join(self.ojs_metadata_dir, self.command_line.process_title + '.xml')
 		output = open(output_name, 'w')
 		output.write(doc.toxml('utf-8'))
-
-		#print doc.toprettyxml()
+		
 
 	def createSectionXML(self, doc, anchor_data):
 		section = doc.createElement('section')
@@ -108,7 +107,6 @@ class CreateOJSXML( Step ):
 		return section
 
 		
-
 	def createArticleXML(self, doc, article, date_published, index):
 		'''
 		Given an article dict, create the OJS XML
@@ -119,13 +117,16 @@ class CreateOJSXML( Step ):
 		page_range = "{0}-{1}".format(article['start_page'], article['end_page'])
 		pages_tag = self.createXMLTextTag(doc, 'pages', page_range) # TODO fix this to use range
 		published_tag = self.createXMLTextTag(doc, 'date_published', date_published) 
-		author_tag = self.createAuthorXML(doc, article['author'])
 		galley_tag = self.createGalleyXML(doc, index)
 		
-
 		article_tag.appendChild(title_tag)
 		article_tag.appendChild(pages_tag)
-		article_tag.appendChild(author_tag)
+
+		# don't add an author tag if we don't have one (e.g. Front Matter)
+		if article['author']: 
+			author_tag = self.createAuthorXML(doc, article['author'])
+			article_tag.appendChild(author_tag)
+
 		article_tag.appendChild(galley_tag)
 
 		return article_tag
