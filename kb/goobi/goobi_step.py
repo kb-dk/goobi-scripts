@@ -252,12 +252,10 @@ class Step( object ):
     def exit( self, message,log=None ) :
         # TODO: make this method a nice exit
         ''' Nice exit '''
-        
-        if not log:
-            print "Exit being called with args: "
-            print "Message is {0}".format(str( message))
-            print "Log is {0}".format(str(log))
-        elif log.__class__.__name__  == 'Logger':
+        print "Exit being called with args: "
+        print "Message is {0}".format(str( message))
+        print "Log is {0}".format(str(log))
+        if log.__class__.__name__  == 'Logger':
             log.error( message )
         else:
             self.glogger.error(message)
