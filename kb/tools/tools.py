@@ -169,8 +169,8 @@ def getFirstFileWithExtension(dir, ext):
     '''
     for file in os.listdir(dir):
         if file.endswith(ext): return file
-
-    return None
+    # if file not found    
+    raise IOError(1, "No file with ext {0} found in dir {1}".format(ext, dir))
 
 def parseToc(toc):
     '''
