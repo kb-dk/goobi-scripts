@@ -50,6 +50,10 @@ class CommandLine() :
 	def get( self, name ):
 		if self.has( name ) :
 			return self._parameters[name]
+		else:
+			error = 'Argument {0] not given through command line'
+			error = error.format(name)
+			raise KeyError(error)
 		return None
 		
 	def set( self, name, value ):

@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-
+#!/usr/bin/python
+# -*- coding: utf-8
 import ConfigParser
 import codecs
 
@@ -51,7 +51,6 @@ class ConfigReader:
 		item = None
 		if self.hasItem( section_name, item_name ):
 			item = vars( vars(self)[section_name] )[item_name]
-			
 		return item
 		
 if __name__ == '__main__' :

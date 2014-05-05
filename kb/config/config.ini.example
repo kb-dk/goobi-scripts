@@ -17,7 +17,7 @@ debug=false
 log = /opt/digiverso/logs/folder_structure_creator.log
 
 [create_process_folder_structure]
-log_use_goobi_gui_log = true
+log_use_gui_msg = true
 debug=false
 
 [process_folder_structure]
@@ -26,7 +26,7 @@ doc_pdf_path = documents/pdf/
 doc_invalid_path = documents/invalid/
 img_master_path = images/master/
 img_invalid_path = images/invalid/
-metadata_toc_path = metadata/toc
+metadata_toc_path = metadata/toc/
 metadata_alto_path = metadata/alto/
 metadata_ojs_path = metadata/ojs/
 metadata_invalid_path = metadata/invalid/
@@ -48,7 +48,10 @@ valid_file_exts = tif;tiff;jpg;jpeg;jpe;jif;jfif;jfi;jp2;j2k;jpf;jpx;jpm;mj2
 ; 0 - all errors will cause script to stop
 ; 1 - serious errors will cause script to stop
 ; 2 - only critical errors will cause script to stop
-break_on_errors = 1
+break_on_errors = 0
+err_msg_no_files_added = No files have been added to process or files have not been placed in correct folder
+err_msg_invalid_files = Invalid files have been added to process. These have been moved to invalid folder. Please confirm.
+err_msg_contains_folders = One or more folders have been added to process folder. This is not allowed. The folder(s) has been moved to invalid folder.
 
 [step_tester]
 debug = true

@@ -1,6 +1,8 @@
+#!/usr/bin/python
+# -*- coding: utf-8
 from goobi.goobi_step import Step
 
-import tools
+from tools import tools
 import os, sys
 class ValidateLimbOutput( Step ):
 

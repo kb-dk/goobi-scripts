@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8
 '''
 Created on 28/04/2014
 
@@ -6,8 +7,7 @@ Created on 28/04/2014
 '''
 import os
 import sys
-import tools
-
+from tools import tools
 from goobi.goobi_step import Step
 
 class create_process_folder_structure( Step ) :
@@ -25,22 +25,15 @@ class create_process_folder_structure( Step ) :
         
     
     def step(self):
-        folder_structure = self.config.config.items(
-                                self.folder_structure_section)
+        
+        folder_structure = self.getConfigSection(self.folder_structure_section)
         process_root_path = self.command_line.process_root_path
-        error = tools.check_folder(process_root_path)
-        if error:
-            self.error(error)
-            sys.exit(1)
-        for name,rel_path in folder_structure:
+        tools.check_folder(process_root_path)
+        for name,rel_path in folder_structure.items():
             path = os.path.join(process_root_path,rel_path)
             if not os.path.exists(path):
-                created,error = tools.find_or_create_dir(path)
-                if not created:
-                    self.error(error)
-                    return error
-                else:
-                    self.debug_message('Created {0}'.format(path))
+                tools.find_or_create_dir(path)
+                self.debug_message('Created {0}'.format(path))
             else:
                 self.debug_message('{0} already exists as {1}.'.format(name,path))
     

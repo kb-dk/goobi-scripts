@@ -42,31 +42,23 @@ def find_or_create_dir(path):
     '''
     Given a folder path, check to see 
     if folder exists or create it
-    return true if successful
-    false if folder could not be created
+    Raises exception in case of error
     '''
-    if os.path.exists(path) and os.path.isdir(path):
-        return True, None
-    else:
-        try:
-            os.makedirs(path)
-            return True, None
-        except IOError as e:
-            return False, e.strerror
+    if os.path.exists(path):
+        if not os.path.isdir(path):
+            error = '{0} exists but is not a valid directory.'.format(path)
+            raise IOError(error)
+    elif not os.path.exists(path):
+        os.makedirs(path)
 
 def move_file(file_path,dest_folder,logger=None):
     '''
     Moves a file from file_path to dest_folder.
     Checks paths and logs errors.
     '''
-    error = check_file(file_path)
-    if error: 
-        if logger: logger.error(error)
-        return error
-    error = check_folder(dest_folder)
-    if error:
-        if logger: logger.error(error)
-        return error
+    # E.g. add try-catch
+    check_file(file_path)
+    check_folder(dest_folder)
     try:
         '''
         shutil.move doc:
@@ -75,15 +67,16 @@ def move_file(file_path,dest_folder,logger=None):
         removed."
         '''
         shutil.move(file_path, dest_folder)
-        msg = 'File '+file_path+'moved corretly to '+dest_folder
-        if logger: logger.info(msg)
+        msg = 'File '+file_path+' moved corretly to '+dest_folder
+        if logger: logger.debug(msg)
     except Exception as e:
+        #TODO: an error will occur if file already exist in dest. Fix this
+        #Error msg: Destination path ... already exists
         error = 'An error occured when copying '+file_path+' to '+dest_folder+\
-            '. Error msg:'+e.strerror
-        print error
+            '. Error msg: '+str(e)
         if logger: logger.error(error)
-        
-    return error
+        raise Exception(error)
+    return True
 
 def getFileExt(name): 
         return name.split('.')[-1]
@@ -100,31 +93,29 @@ def get_delta_time(s):
     # result = 339 h, 15 min, 58 sec and 258 ms
 
 def check_file(file_path) :
-    error = None
+    '''
+    Checks a file_path. Returns True if it exist, else raises error.
+    '''
     if not file_path:
-        error = 'Argument "file_path" not set.' 
+        raise NameError('Argument "file_path" not set.') 
     elif not os.path.exists( file_path ) :
-        error = 'File "' + file_path + '" does not exist.'
+        raise IOError('File "' + file_path + '" does not exist.')
     else:
         if not os.path.isfile( file_path ) :
-            error = 'File "' + file_path + '" is not a file_path.'
+            raise IOError('File "' + file_path + '" is not a file_path.')
         else:
-            try:
-                with open( file_path ) : pass
-            except IOError:
-                error = 'File "' + file_path + '" exists but unable to open it.'
-    return error
+            with open( file_path ) : pass
+    return True
 
 def check_folder(folder):
-    error = None
     if not folder:
-        error = 'Argument "folder" not set.'
+        raise NameError('Argument "folder" not set.')
     elif not os.path.exists( folder ) :
-        error = 'Folder "' + folder + '" does not exist.'
+        raise IOError('Folder "' + folder + '" does not exist.')
     else:
         if not os.path.isdir( folder ) :
-            error = 'Folder "' + folder + '" is not a folder.'
-    return error
+            raise IOError('Folder "' + folder + '" is not a folder.')
+    return True
 
 def create_folder(path):
     error = None
@@ -148,6 +139,19 @@ def checkDirectoriesExist(*args):
             return False
     return True
 
+
+def ensureDirsExist(*args):
+    '''
+    Given a variable number of directory paths
+    raise an error if any of them do not exist
+    TODO: phase out use of checkDirectoriesExist
+    in favour of this method
+    '''
+    for dir in args:
+        if not os.path.isdir(dir):
+            raise IOError(1, "{0} is not a valid dictionary.".format(dir))
+
+
 def ensureFilesExist(*args):
     '''
     Given a variable number of file paths
@@ -165,8 +169,8 @@ def getFirstFileWithExtension(dir, ext):
     '''
     for file in os.listdir(dir):
         if file.endswith(ext): return file
-
-    return None
+    # if file not found    
+    raise IOError(1, "No file with ext {0} found in dir {1}".format(ext, dir))
 
 def parseToc(toc):
     '''
@@ -184,25 +188,66 @@ def parseToc(toc):
     data = []
     with open(toc, 'r') as toc_csv:
         reader = csv.reader(toc_csv, delimiter=',', quotechar='"')
-        iterreader = iter(reader) # skip the first line as this just contains header data
+        # skip the first line as this just contains header data
+        iterreader = iter(reader) 
         next(iterreader)
         for row in iterreader:
+            for i, val in enumerate(row):
+                row[i] = val.decode('utf-8')
             try:
                 level = row[0]
+                # Skip the Body entry - it doesn't contain anything
+                if row[1] == 'Body': continue 
                 if '|' in row[1]:
-                    author = row[1].split('|')[0]
-                    title = row[1].split('|')[1]
+                    author = row[1].split('|')[0].strip()
+                    title = row[1].split('|')[1].strip()
                 else: 
                     author = ""
                     title = row[1]
-                page = row[2]
+                start_page = row[2]
 
-                data.append(dict(level=level, author=author,title=title, page=page))    
+                data.append(dict(level=level, author=author,title=title, start_page=start_page))    
             # if there's some problem with the input row, skip it
             except IndexError:
                 print "ERROR - TOC row not parsed successfully {0}".format(",".join(row))
-    
-    return data        
+
+    return data
+
+def enrichToc(toc_data, pdfinfo, overlapping_articles=False):
+    '''
+    Use data from toc and pdfinfo to add end_page
+    info for Toc articles
+    returns dict with new end_page field
+    '''
+    for index, article in enumerate(toc_data):
+        # we need to figure out how to get the end page for the article
+        start_page = int(article['start_page'])
+        if index != len(toc_data) - 1: # if this is not the last article
+            next_item = toc_data[index + 1]
+            if overlapping_articles: 
+                # last page is the start of the next items page
+                end_page = int(next_item['start_page']) 
+            else:
+                # when we're not doing overlapping pages
+                # last page is the page before the next item's start page 
+                # unless that page is less than current page
+                if int(next_item['start_page'])-1 >= start_page:
+                    end_page = int(next_item['start_page']) -1
+                else:
+                    end_page = start_page
+        # if this is the last article - we need to take until the pdf's end page
+        # as given by pdfinfo
+        else:
+            end_page = int(pdfinfo['Pages'])
+        toc_data[index]['end_page'] = end_page
+    return toc_data
+
+def getArticleName(pdf_name, index):
+    '''
+    Generate article name for OJS articles
+    in format <pdf_name>_<index>
+    '''
+    return "{0}_{1}.pdf".format(pdf_name.replace('.pdf', ''), index)
 
 def pdfinfo(infile):
     """
@@ -318,5 +363,23 @@ def cutPdf(inputPdf, outputPdf, fromPage, toPage):
     page_range = "{0}-{1}".format(fromPage, toPage)
     exit_code = subprocess.call(['pdftk', inputPdf, 'cat', page_range, 'output', outputPdf])
     
-    return exit_code == 0 
+    return exit_code == 0
+
+def convertLangToLocale(code):
+    '''
+    TODO - Clarify this with Jeppe
+    Need to map between lang codes supplied
+    by Goobi (ISO 639-1?) e.g. da
+    and the locale codes that OJS needs, e.g. da_DK
+    For now we'll just use a placeholder
+    '''
+    try:
+        return {
+            'da': 'da_DK',
+            'en': 'en_US'
+        }[code]
+    except: 
+        return ''
+
+
 
