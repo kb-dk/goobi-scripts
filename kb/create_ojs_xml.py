@@ -5,7 +5,7 @@ from xml.dom import minidom
 from errors import DataError
 
 from tools import tools
-import os, time
+import os, time, sys
 
 class CreateOJSXML( Step ):
 
@@ -16,7 +16,8 @@ class CreateOJSXML( Step ):
 		self.essential_commandlines = {
 			'process_id' : 'number',
 			'process_title' : 'string',
-			'process_path' : 'folder'
+			'process_path' : 'folder',
+			'overlapping_articles' : 'string'
 		}
 
 	def step(self):
@@ -32,18 +33,32 @@ class CreateOJSXML( Step ):
 		Ensure we have the variables necessary to execute the script
 		Tools will throw an Exception otherwise
 		'''
-		# we need the path to the xml and the toc
-		# TODO: This data shouldn't live in the ojs_xml config section
-		# it's being saved here while we're waiting on better config 
-		# get methods
 		process_path = self.command_line.process_path
-		anchor_name = self.getConfigItem('metadata_goobi_anchor_file')
+		anchor_name = self.getConfigItem('metadata_goobi_anchor_file', None, 'process_files')
 		self.anchor_file = os.path.join(process_path, anchor_name)
-		toc_path = self.getConfigItem('toc_path')
+		toc_path = self.getConfigItem('metadata_toc_path', None, 'process_folder_structure')
 		abs_toc_path = os.path.join(process_path, toc_path)
 		toc_name = tools.getFirstFileWithExtension(abs_toc_path, '.toc')
 		self.toc_file = os.path.join(abs_toc_path, toc_name)
-		tools.ensureFilesExist(self.anchor_file, self.toc_file)
+		self.ojs_root = self.getConfigItem('ojs_root')
+		ojs_metadata_dir = self.getConfigItem('metadata_ojs_path', None, 'process_folder_structure')
+		self.ojs_metadata_dir = os.path.join(process_path, ojs_metadata_dir)
+
+		pdf_path = self.getConfigItem('doc_pdf_path', None, 'process_folder_structure')
+		abs_pdf_path = os.path.join(process_path, pdf_path)
+		self.pdf_name = tools.getFirstFileWithExtension(abs_pdf_path, '.pdf')
+		self.pdf_file = os.path.join(abs_pdf_path, self.pdf_name)
+
+		tools.ensureFilesExist(self.anchor_file, self.toc_file, self.pdf_file)
+		tools.ensureDirsExist(self.ojs_metadata_dir)
+
+		# parse boolean from command line
+		if self.command_line.overlapping_articles.lower() == 'true':
+			self.overlapping_articles = True
+		elif self.command_line.overlapping_articles.lower() == 'false':
+			self.overlapping_articles = False
+		else:
+			raise Exception
 
 		# we also need the required anchor fields
 		fields = self.getConfigItem('anchor_required_fields')
@@ -55,20 +70,27 @@ class CreateOJSXML( Step ):
 		Use this to construct the OJS XML
 		'''
 		anchor_data = self.getAnchorFileData()
+		# this is the dir where files will be uploaded to
+		self.ojs_dir = os.path.join(self.ojs_root, anchor_data['TitleDocMainShort'], self.command_line.process_title)
 		toc_data = tools.parseToc(self.toc_file)
+		pdfinfo = tools.pdfinfo(self.pdf_file)
+		toc_data = tools.enrichToc(toc_data, pdfinfo, self.command_line.overlapping_articles)
 		impl = minidom.getDOMImplementation()
 		doc = impl.createDocument(None, "issue", None)
 		doc = self.createHeadMaterial(doc, anchor_data)
 		section = self.createSectionXML(doc, anchor_data)
 		date_published = "{0}-01-01".format(anchor_data['PublicationYear'])
 				
-		for article in toc_data:
-			article_xml = self.createArticleXML(doc, article, date_published)
+		for index, article in enumerate(toc_data):
+			article_xml = self.createArticleXML(doc, article, date_published, index)
 			section.appendChild(article_xml) 
 	
 		doc.documentElement.appendChild(section)
+		output_name = os.path.join(self.ojs_metadata_dir, self.command_line.process_title + '.xml')
+		output = open(output_name, 'w')
+		output.write(doc.toxml('utf-8'))
 
-		print doc.toprettyxml()
+		#print doc.toprettyxml()
 
 	def createSectionXML(self, doc, anchor_data):
 		section = doc.createElement('section')
@@ -85,23 +107,43 @@ class CreateOJSXML( Step ):
 
 		
 
-	def createArticleXML(self, doc, article, date_published):
+	def createArticleXML(self, doc, article, date_published, index):
 		'''
 		Given an article dict, create the OJS XML
 		corresponding to this data
 		'''
 		article_tag = doc.createElement('article')
 		title_tag = self.createXMLTextTag(doc, 'title', article['title'])
-		pages_tag = self.createXMLTextTag(doc, 'pages', article['page']) # TODO fix this to use range
+		page_range = "{0}-{1}".format(article['start_page'], article['end_page'])
+		pages_tag = self.createXMLTextTag(doc, 'pages', page_range) # TODO fix this to use range
 		published_tag = self.createXMLTextTag(doc, 'date_published', date_published) 
 		author_tag = self.createAuthorXML(doc, article['author'])
+		galley_tag = self.createGalleyXML(doc, index)
 		
 
 		article_tag.appendChild(title_tag)
 		article_tag.appendChild(pages_tag)
 		article_tag.appendChild(author_tag)
+		article_tag.appendChild(galley_tag)
 
 		return article_tag
+
+	def createGalleyXML(self, doc, index):
+		galley_tag = doc.createElement('galley')
+		label_tag = self.createXMLTextTag(doc, 'label', 'PDF')
+		file_tag = doc.createElement('file')
+		link_tag = doc.createElement('href')
+		link_tag.setAttribute('mime_type', 'application/pdf')
+		article_name = tools.getArticleName(self.pdf_name, index)
+		article_link = os.path.join(self.ojs_dir, article_name)
+		link_tag.setAttribute('src', article_link)
+
+		galley_tag.appendChild(label_tag)
+		file_tag.appendChild(link_tag)
+		galley_tag.appendChild(file_tag)
+
+		return galley_tag
+
 
 	def createAuthorXML(self, doc, name_str):
 		''' 
