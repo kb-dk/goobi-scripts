@@ -20,6 +20,7 @@ class CopyToLimb( Step ):
 		}
 
 	def step(self):
+		error = None
 		try:
 			files_not_copied  = True
 			source_dir = self.command_line.source
@@ -30,7 +31,7 @@ class CopyToLimb( Step ):
 									
 			self.info_message("source_dir "+source_dir)
 						
-			error = tools.copy_files(source_dir,hotfolder_dir,transit_dir,False,sleep_interval,retries,self)
+			error = tools.copy_files(source_dir,hotfolder_dir,transit_dir,False,sleep_interval,retries)
 		except Exception as e:
 			self.error_message("An error happened %s" %e)	
 			traceback.format_exc()

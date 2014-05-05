@@ -7,7 +7,7 @@ Created on 26/03/2014
 '''
 
 
-import os, subprocess, csv, codecs
+import os, subprocess, csv, codecs, time
 import shutil
 
 
@@ -314,8 +314,9 @@ def copy_files(source,dest,transit,delete_original,wait_interval,max_retries):
 	if transit: 		
 		dest_dir = transit
 
-    	src_files = [[l,False] for l in os.listdir(source_dir)]	
+    	src_files = [[l,False] for l in os.listdir(source)]	
 	attempts = 0;		
+	files_not_copied = True
 	while files_not_copied and (attempts<max_retries):
 		print("Copying files")
 		attempts += 1
@@ -333,16 +334,18 @@ def copy_files(source,dest,transit,delete_original,wait_interval,max_retries):
 	    				full_file_name = os.path.join(source, src_file[0])
 	    				if (os.path.isfile(full_file_name)):
 						print("Copying file "+src_file[0])					   			
-						shutil.copy2(full_file_name, transit_dir)
+						shutil.copy2(full_file_name, dest_dir)
 						src_file[1] = True
 						if delete_original: shutil.delete(full_file_name)
 					else:
 						print(full_file_name+" is not a file ... skipping it")
 		except Exception as e:
+			print "Error copying file"
+			print e
 			files_not_copied = True
-		if files_not_copied and (retries>0):
+		if files_not_copied and (attempts>0):
 			print("Not all files copied. Waiting to retry ...")
-			time.sleep(sleep_interval)	
+			time.sleep(wait_interval)	
 	
 	if (transit):
 		print("move from transit dir to dest dir")
