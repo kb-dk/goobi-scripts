@@ -140,6 +140,18 @@ def checkDirectoriesExist(*args):
     return True
 
 
+def ensureDirsExist(*args):
+    '''
+    Given a variable number of directory paths
+    raise an error if any of them do not exist
+    TODO: phase out use of checkDirectoriesExist
+    in favour of this method
+    '''
+    for dir in args:
+        if not os.path.isdir(dir):
+            raise IOError(1, "{0} is not a valid dictionary.".format(dir))
+
+
 def ensureFilesExist(*args):
     '''
     Given a variable number of file paths
@@ -184,20 +196,58 @@ def parseToc(toc):
                 row[i] = val.decode('utf-8')
             try:
                 level = row[0]
+                # Skip the Body entry - it doesn't contain anything
+                if row[1] == 'Body': continue 
                 if '|' in row[1]:
                     author = row[1].split('|')[0].strip()
                     title = row[1].split('|')[1].strip()
                 else: 
                     author = ""
                     title = row[1]
-                page = row[2]
+                start_page = row[2]
 
-                data.append(dict(level=level, author=author,title=title, page=page))    
+                data.append(dict(level=level, author=author,title=title, start_page=start_page))    
             # if there's some problem with the input row, skip it
             except IndexError:
                 print "ERROR - TOC row not parsed successfully {0}".format(",".join(row))
-    
+
     return data
+
+def enrichToc(toc_data, pdfinfo, overlapping_articles=False):
+    '''
+    Use data from toc and pdfinfo to add end_page
+    info for Toc articles
+    returns dict with new end_page field
+    '''
+    for index, article in enumerate(toc_data):
+        # we need to figure out how to get the end page for the article
+        start_page = int(article['start_page'])
+        if index != len(toc_data) - 1: # if this is not the last article
+            next_item = toc_data[index + 1]
+            if overlapping_articles: 
+                # last page is the start of the next items page
+                end_page = int(next_item['start_page']) 
+            else:
+                # when we're not doing overlapping pages
+                # last page is the page before the next item's start page 
+                # unless that page is less than current page
+                if int(next_item['start_page'])-1 >= start_page:
+                    end_page = int(next_item['start_page']) -1
+                else:
+                    end_page = start_page
+        # if this is the last article - we need to take until the pdf's end page
+        # as given by pdfinfo
+        else:
+            end_page = int(pdfinfo['Pages'])
+        toc_data[index]['end_page'] = end_page
+    return toc_data
+
+def getArticleName(pdf_name, index):
+    '''
+    Generate article name for OJS articles
+    in format <pdf_name>_<index>
+    '''
+    return "{0}_{1}.pdf".format(pdf_name.replace('.pdf', ''), index)
 
 def pdfinfo(infile):
     """
