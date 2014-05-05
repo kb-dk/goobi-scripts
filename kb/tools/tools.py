@@ -176,14 +176,17 @@ def parseToc(toc):
     data = []
     with open(toc, 'r') as toc_csv:
         reader = csv.reader(toc_csv, delimiter=',', quotechar='"')
-        iterreader = iter(reader) # skip the first line as this just contains header data
+        # skip the first line as this just contains header data
+        iterreader = iter(reader) 
         next(iterreader)
         for row in iterreader:
+            for i, val in enumerate(row):
+                row[i] = val.decode('utf-8')
             try:
                 level = row[0]
                 if '|' in row[1]:
-                    author = row[1].split('|')[0]
-                    title = row[1].split('|')[1]
+                    author = row[1].split('|')[0].strip()
+                    title = row[1].split('|')[1].strip()
                 else: 
                     author = ""
                     title = row[1]
@@ -194,7 +197,7 @@ def parseToc(toc):
             except IndexError:
                 print "ERROR - TOC row not parsed successfully {0}".format(",".join(row))
     
-    return data        
+    return data
 
 def pdfinfo(infile):
     """
@@ -258,4 +261,23 @@ def cutPdf(inputPdf, outputPdf, fromPage, toPage):
     page_range = "{0}-{1}".format(fromPage, toPage)
     exit_code = subprocess.call(['pdftk', inputPdf, 'cat', page_range, 'output', outputPdf])
     
-    return exit_code == 0 
+    return exit_code == 0
+
+def convertLangToLocale(code):
+    '''
+    TODO - Clarify this with Jeppe
+    Need to map between lang codes supplied
+    by Goobi (ISO 639-1?) e.g. da
+    and the locale codes that OJS needs, e.g. da_DK
+    For now we'll just use a placeholder
+    '''
+    try:
+        return {
+            'da': 'da_DK',
+            'en': 'en_US'
+        }[code]
+    except: 
+        return ''
+
+
+
