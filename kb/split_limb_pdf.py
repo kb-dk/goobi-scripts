@@ -55,6 +55,9 @@ class SplitPdf( Step ):
 		self.limb_dir = os.path.join(limb, process_title)
 		self.toc_dir = os.path.join(self.limb_dir, toc)
 		self.pdf_dir = os.path.join(self.limb_dir, pdf)
+		self.pdf_name = tools.getFirstFileWithExtension(self.pdf_dir, '.pdf')
+		self.pdf_path = os.path.join(self.pdf_dir, self.pdf_name)
+		self.pdfinfo = tools.pdfinfo(self.pdf_path)
 
 		# return false if one of our directories is missing
 		return tools.checkDirectoriesExist(self.limb_dir, self.toc_dir, self.pdf_dir)
@@ -62,45 +65,20 @@ class SplitPdf( Step ):
 	def getToc(self):
 		toc = tools.getFirstFileWithExtension(self.toc_dir, '.toc')
 		self.toc_data = tools.parseToc(os.path.join(self.toc_dir, toc))
+		self.toc_data = tools.enrichToc(self.toc_data, self.pdfinfo, self.overlapping_articles)
 
 	def dividePdf(self):
 		''' 
 		Cut up the volume into articles pdfs based on the data in the LIMB toc
 		'''
-		pdf_name = tools.getFirstFileWithExtension(self.pdf_dir, '.pdf')
-		pdf_path = os.path.join(self.pdf_dir, pdf_name)
-		pdfinfo = tools.pdfinfo(pdf_path)
-		counter = 0
-		for article in self.toc_data:
-			if article['title'] == 'Body': continue # skip the body entry as it doesn't contain anything
-			counter += 1
-			start_page = int(article['page'])
-			index = self.toc_data.index(article)
 
-			# we need to figure out how to get the end page for the article
-			if index != len(self.toc_data) - 1: # if this is not the last article
-				next_item = self.toc_data[index + 1]
-				if self.overlapping_articles: 
-					# last page is the start of the next items page
-					end_page = int(next_item['page']) 
-				else:
-					# when we're not doing overlapping pages
-					# last page is the page before the next item's start page 
-					# unless that page is less than current page
-					if int(next_item['page'])-1 >= start_page:
-						end_page = int(next_item['page']) -1
-					else:
-						end_page = start_page
-			# if this is the last article - we need to take until the pdf's end page
-			# as given by pdfinfo
-			else:
-				end_page = int(pdfinfo['Pages'])
-			# output name is <volumename>_<article number>.pdf
-			output_name = "{0}_{1}.pdf".format(pdf_path.replace('.pdf', ''), counter)
-			self.info_message("creating file {0}".format(output_name))
+		for index, article in enumerate(self.toc_data):
+			output_name = tools.getArticleName(self.pdf_name, index)
+			output_path = os.path.join(self.pdf_dir, output_name)
+			self.info_message("creating file {0}".format(output_path))
 
 			# if our call to pdftk fails, get out quickly
-			if not tools.cutPdf(pdf_path,  output_name, start_page, end_page):
+			if not tools.cutPdf(self.pdf_path,  output_path, article['start_page'], article['end_page']):
 				self.error_message("PDF division failed! Exiting...")
 				sys.exit(1)
 
