@@ -15,6 +15,16 @@ class EmptyStep( Step ):
 	def step(self):
 		return None
 
+	def getVariables(self):
+		'''
+		This script pulls in all the variables
+		from the command line and the config file 
+		that are necessary for its running.
+		Errors in variables will lead to an 
+		Exception being thrown.
+		'''
+		return None
+
 if __name__ == '__main__':
 	
 	EmptyStep( ).begin()
