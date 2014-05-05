@@ -7,7 +7,7 @@ Created on 26/03/2014
 '''
 
 
-import os, subprocess, csv, codecs
+import os, subprocess, csv, codecs, time
 import shutil
 
 
@@ -301,6 +301,61 @@ def pdfinfo(infile):
                 output[label] = _extract(line)
  
     return output
+
+
+def copy_files(source,dest,transit,delete_original,wait_interval,max_retries):
+    	"""
+		Copies all file (non recursive) from 'source' directory to 'dest'.
+		if 'trasit' directory is given then the files are first copied to this directory, which is then moved to 'dest' dir
+		if 'delete_originat' is True, then the original files are deleted.
+    	"""
+	
+	dest_dir = dest
+	if transit: 		
+		dest_dir = transit
+
+    	src_files = [[l,False] for l in os.listdir(source)]	
+	attempts = 0;		
+	files_not_copied = True
+	while files_not_copied and (attempts<max_retries):
+		print("Copying files")
+		attempts += 1
+		files_not_copied = False
+		try: 
+			"""
+			create destination dir, if it does not exists
+			"""
+			if not os.path.exists(dest_dir):
+				os.makedirs(dest_dir)
+
+			for src_file in src_files:
+				print("starting copy")
+				if (not src_file[1]):
+	    				full_file_name = os.path.join(source, src_file[0])
+	    				if (os.path.isfile(full_file_name)):
+						print("Copying file "+src_file[0])					   			
+						shutil.copy2(full_file_name, dest_dir)
+						src_file[1] = True
+						if delete_original: shutil.delete(full_file_name)
+					else:
+						print(full_file_name+" is not a file ... skipping it")
+		except Exception as e:
+			print "Error copying file"
+			print e
+			files_not_copied = True
+		if files_not_copied and (attempts>0):
+			print("Not all files copied. Waiting to retry ...")
+			time.sleep(wait_interval)	
+	
+	if (transit):
+		print("move from transit dir to dest dir")
+		shutil.move(dest_dir,dest)		
+
+	if (files_not_copied):
+		return'Not all files copied'
+    
+	return None
+
 
 def cutPdf(inputPdf, outputPdf, fromPage, toPage):
     '''
