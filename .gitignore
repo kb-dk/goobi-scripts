@@ -1,3 +1,4 @@
 kb/config/config.ini
 .project
 .pydevproject
+*.pyc
