@@ -2,10 +2,10 @@
 # -*- coding: utf-8
 from goobi.goobi_step import Step
 from xml.dom import minidom
-from errors import DataError
+from tools.errors import DataError
 
 from tools import tools
-import os, time, sys
+import os, time
 
 class CreateOJSXML( Step ):
 
@@ -24,6 +24,8 @@ class CreateOJSXML( Step ):
 		try:
 			self.getVariables()
 			self.createXML()
+		except OSError as e:
+			self.error_message(e.strerror + " " + e.filename)
 		except (DataError, IOError) as e:
 			self.error_message(e.strerror)
 		return None
