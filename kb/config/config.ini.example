@@ -76,6 +76,8 @@ toc = Toc
 pdf = JP2K 1-20
 input_files = JP2000_lossless
 log = /opt/digiverso/logs/step_validate_limb_output.log
+retry_num = 5
+retry_wait = 300
 
 [ojs_xml]
 log = /opt/digiverso/logs/step_create_ojs_xml.log
