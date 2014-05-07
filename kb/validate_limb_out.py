@@ -82,6 +82,9 @@ class ValidateLimbOutput( Step ):
 		'''
 		Ensure a .toc file exists in toc directory
 		return (string) filename
+		TODO: A similar method has been created in the generic 
+		tools.limb module - callers to this method should use that instead
+		and this method should be removed
 		'''
 		self.info_message("Checking for toc in {0}".format(self.toc_dir))
 		toc = tools.getFirstFileWithExtension(self.toc_dir, '.toc')
@@ -103,6 +106,11 @@ class ValidateLimbOutput( Step ):
 		return numPages == numInputFiles
 
 	def altoFileCountMatches(self):
+		'''
+		TODO: A similar method has been created in the generic 
+		tools.limb module - callers to this method should use that instead
+		and this method should be removed.
+		'''
 		self.info_message("Comparing number of Alto files with input files")
 		numAlto = len(os.listdir(self.alto_dir))
 		numInputFiles = len(os.listdir(self.input_files_dir))
