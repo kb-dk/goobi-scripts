@@ -51,7 +51,7 @@ class CommandLine() :
 		if self.has( name ) :
 			return self._parameters[name]
 		else:
-			error = 'Argument {0] not given through command line'
+			error = 'Argument {0} not given through command line'
 			error = error.format(name)
 			raise KeyError(error)
 		return None
