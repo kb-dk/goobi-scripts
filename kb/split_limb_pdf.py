@@ -9,7 +9,7 @@ class SplitPdf( Step ):
 	def setup(self):
 		self.name = 'Pdf splitter'
 		self.config_main_section = 'limb_output'
-		self.essential_config_sections = set( [] )
+		self.essential_config_sections = set( ['limb_output', 'process_folder_structure'] )
 		self.essential_commandlines = {
 			'process_title' : 'string',
 			'process_path' : 'folder',
@@ -50,6 +50,8 @@ class SplitPdf( Step ):
 		limb = self.getConfigItem('limb_output')
 		toc = self.getConfigItem('toc')
 		pdf = self.getConfigItem('pdf')
+		pdf_output = self.getConfigItem('doc_pdf_path', None, 'process_folder_structure')
+		self.pdf_output_dir = os.path.join(self.command_line.process_path, pdf_output)
 
 		# join paths to create absolute paths
 		self.limb_dir = os.path.join(limb, process_title)
@@ -60,7 +62,7 @@ class SplitPdf( Step ):
 		self.pdfinfo = tools.pdfinfo(self.pdf_path)
 
 		# return false if one of our directories is missing
-		return tools.checkDirectoriesExist(self.limb_dir, self.toc_dir, self.pdf_dir)
+		return tools.checkDirectoriesExist(self.limb_dir, self.toc_dir, self.pdf_dir, self.pdf_output_dir)
 	
 	def getToc(self):
 		toc = tools.getFirstFileWithExtension(self.toc_dir, '.toc')
@@ -71,14 +73,11 @@ class SplitPdf( Step ):
 		''' 
 		Cut up the volume into articles pdfs based on the data in the LIMB toc
 		TODO: shouldn't use sys.exit, should throw an Exception
-		TODO: at present this will output to the same directory it finds the files in
-		i.e. the LIMB output subdir. This is wrong. 
-		It should output to the goobi process pdf subdir.
 		'''
 
 		for index, article in enumerate(self.toc_data):
 			output_name = tools.getArticleName(self.pdf_name, index)
-			output_path = os.path.join(self.pdf_dir, output_name)
+			output_path = os.path.join(self.pdf_output_dir, output_name)
 			self.info_message("creating file {0}".format(output_path))
 
 			# if our call to pdftk fails, get out quickly
