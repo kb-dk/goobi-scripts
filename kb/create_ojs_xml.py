@@ -11,8 +11,8 @@ class CreateOJSXML( Step ):
 
 	def setup(self):
 		self.name = 'Create OJS XML'
-		self.config_main_section = 'ojs_xml'
-		self.essential_config_sections = set( ['ojs_xml', 'process_folder_structure', 'process_files'] )
+		self.config_main_section = 'ojs'
+		self.essential_config_sections = set( ['ojs', 'process_folder_structure', 'process_files'] )
 		self.essential_commandlines = {
 			'process_id' : 'number',
 			'process_title' : 'string',

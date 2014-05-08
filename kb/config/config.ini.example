@@ -79,8 +79,8 @@ log = /opt/digiverso/logs/step_validate_limb_output.log
 retry_num = 5
 retry_wait = 300
 
-[ojs_xml]
-log = /opt/digiverso/logs/step_create_ojs_xml.log
+[ojs]
+log = /opt/digiverso/logs/step_create_ojs.log
 metadata_goobi_anchor_file = meta_anchor.xml
 toc_path = metadata/toc
 anchor_required_fields = TitleDocMainShort;DocLanguage;PublicationYear
