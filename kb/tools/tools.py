@@ -303,7 +303,7 @@ def pdfinfo(infile):
     return output
 
 
-def copy_files(source,dest,transit,delete_original,wait_interval,max_retries):
+def copy_files(source,dest,transit=False,delete_original=False,wait_interval=60,max_retries=5):
     	"""
 		Copies all file (non recursive) from 'source' directory to 'dest'.
 		if 'trasit' directory is given then the files are first copied to this directory, which is then moved to 'dest' dir
