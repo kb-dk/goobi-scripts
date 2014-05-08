@@ -70,6 +70,10 @@ class SplitPdf( Step ):
 	def dividePdf(self):
 		''' 
 		Cut up the volume into articles pdfs based on the data in the LIMB toc
+		TODO: shouldn't use sys.exit, should throw an Exception
+		TODO: at present this will output to the same directory it finds the files in
+		i.e. the LIMB output subdir. This is wrong. 
+		It should output to the goobi process pdf subdir.
 		'''
 
 		for index, article in enumerate(self.toc_data):
