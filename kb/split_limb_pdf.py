@@ -2,7 +2,7 @@
 # -*- coding: utf-8
 from goobi.goobi_step import Step
 
-from tools import tools
+from tools import tools as tools
 import os, sys
 class SplitPdf( Step ):
 
@@ -24,10 +24,12 @@ class SplitPdf( Step ):
 		3. cut up pdf file
 		4. profit!
 		'''
-		self.getVariables()
-		self.getToc()
-		self.dividePdf()
-		self.profit()
+		try:
+			self.getVariables()
+			self.getToc()
+			self.dividePdf()
+		except IOError as e:
+			return "Execution halted due to error {0}".format(e.strerror)
 
 		return None
 
@@ -62,7 +64,7 @@ class SplitPdf( Step ):
 		self.pdfinfo = tools.pdfinfo(self.pdf_path)
 
 		# return false if one of our directories is missing
-		return tools.checkDirectoriesExist(self.limb_dir, self.toc_dir, self.pdf_dir, self.pdf_output_dir)
+		tools.ensureDirsExist(self.limb_dir, self.toc_dir, self.pdf_dir, self.pdf_output_dir)
 	
 	def getToc(self):
 		toc = tools.getFirstFileWithExtension(self.toc_dir, '.toc')
