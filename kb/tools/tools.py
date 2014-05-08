@@ -149,7 +149,7 @@ def ensureDirsExist(*args):
     '''
     for dir in args:
         if not os.path.isdir(dir):
-            raise IOError(1, "{0} is not a valid dictionary.".format(dir))
+            raise IOError(1, "{0} is not a valid directory.".format(dir))
 
 
 def ensureFilesExist(*args):
