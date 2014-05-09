@@ -12,7 +12,7 @@ import subprocess
 import csv
 import time
 import shutil
-from tools import errors
+import errors
 
 
 def fix_path(p, check_p = False, logger=None):
@@ -430,4 +430,12 @@ def convertLangToLocale(code):
         return ''
 
 
-
+def parseTitle(title):
+    '''
+    Given a title, return the first 10 characters
+    Used when journal titles determine path names,
+    e.g. OJS import.
+    TODO: Make sure all references to journal titles
+    use this method.
+    '''
+    return title[0:10]
