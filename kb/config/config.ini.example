@@ -81,6 +81,11 @@ retry_wait = 300
 
 [ojs]
 log = /opt/digiverso/logs/step_create_ojs.log
-metadata_goobi_anchor_file = meta_anchor.xml
-toc_path = metadata/toc
-anchor_required_fields = TitleDocMainShort;DocLanguage;PublicationYear
+anchor_required_fields = TitleDocMainShort;DocLanguage;PublicationYear;Volume
+ojs_root = http://strid.kb.dk/ojs/tidsskrift-dk
+ojs_mount = 
+ojs_server = strid.kb.dk
+ojs_server_user = 
+ojs_app_user = 
+upload_dir = /var/www/html/tidsskrift-dk/{0}/{1}/
+tool_path = /var/www/html/ojs/tools/importExport.php
