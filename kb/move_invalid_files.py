@@ -27,7 +27,6 @@ Created on 26/03/2014
 '''
 from tools import tools
 import os
-import sys
 from goobi.goobi_step import Step
 
 
@@ -36,7 +35,6 @@ class FileValidator( Step ) :
     def setup(self):
     
         self.name = "Move invalid files"
-        
         self.config_main_section = "move_invalid_files"
         self.essential_config_sections = set( [] )
         self.folder_structure_section = 'process_folder_structure'
