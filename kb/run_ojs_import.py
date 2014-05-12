@@ -65,12 +65,12 @@ class RunOJSImport( Step ):
 
 	def runImport(self):
 		'''
-		subprocess.call(['ssh', 'romc-admin@strid.kb.dk', 
-			'sudo', 'php', '/var/www/html/ojs/tools/importExport.php', 
-			'NativeImportExportPlugin', 'import', '/var/www/html/tidsskrift-dk/sample_ojs2.xml', 
-			'landskab', 'romc'])
 		Using the supplied variables - call the script on the OJS server through ssh
-		throw a CalledProcessError if the script failed
+		throws a CalledProcessError if the script failed.
+
+		NOTE - this script depends on the Goobi user (tomcat_user) being able to 
+		ssh into the OJS server without password authentication, i.e. through a 
+		public/private key setup. See the wiki for more details.
 		'''
 		login = "{0}@{1}".format(self.ojs_server_user, self.ojs_server)
 		subprocess.check_call(['ssh', login, 'sudo', 'php', self.tool_path, 
