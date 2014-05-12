@@ -3,6 +3,7 @@
 from goobi.goobi_step import Step
 
 from tools import tools
+from tools.errors import DataError
 import os, sys
 class ValidateLimbOutput( Step ):
 
@@ -12,7 +13,8 @@ class ValidateLimbOutput( Step ):
 		self.essential_config_sections = set( [] )
 		self.essential_commandlines = {
 			'process_title' : 'string',
-			'process_path' : 'folder'
+			'auto_report_problem' : 'string',
+			'step_id' : 'string'
 		}
 
 
@@ -22,19 +24,18 @@ class ValidateLimbOutput( Step ):
 		to see if it matches certain criteria
 		Require params process_title from command line
 		Other values taken from config.ini
+		In the case of errors a message will be returned
+		and sent to the previous step.
 		'''
-		if self.getVariables():
-			if self.performValidations():
-				self.info_message("All validations performed successfully.")
-				sys.exit(0)
-			else: 
-				self.error_message("At least one validations failed - exiting...")
-		else:
-			self.error_message("Failed to set all variables successfully - exiting...")
-		
-		sys.exit(1)
+		try:
+			self.getVariables()
+			self.performValidations()
+			return None
+		except IOError as e:
+			return "IOError - directory not found {0}".format(e.strerror)	
+		except DataError as e: 
+			return "Validation error - {0}.".format(e.strerror)
 
-	
 
 	def getVariables(self):
 		'''
@@ -55,8 +56,8 @@ class ValidateLimbOutput( Step ):
 		self.pdf_dir = os.path.join(self.limb_dir, pdf)
 		self.input_files_dir = os.path.join(self.limb_dir, inputs)
 
-		# return false if one of our directories is missing
-		return tools.checkDirectoriesExist(self.limb_dir, self.alto_dir, \
+		# throw Error if one of our directories is missing
+		tools.ensureDirsExist(self.limb_dir, self.alto_dir, \
 			self.toc_dir, self.pdf_dir, self.input_files_dir)
 
 
@@ -65,18 +66,18 @@ class ValidateLimbOutput( Step ):
 		1: validering af pdf (antal sider i pdf == antal input billeder)
 		2: validering af toc-fil (pt. er der en fil - validering ved parsing efterfoelgende)
 		3: validering af alto-filer (evt. "er der lige saa mange som input billeder" eller "er der filer")
+
+		Throw DataError if any validation fails
 		'''
 		if not self.tocExists(): 
-			self.error_message("TOC not found!")
-			return False
+			raise DataError("TOC not found!")
 		if not self.pageCountMatches():
-			self.error_message("pdf page count does not match input picture count!")
-			return False
+			raise DataError("PDF page count does not match input picture count!")
 		if not self.altoFileCountMatches():
-			self.error_message("Number of alto files does not match number of input files.")
-			return False
+			raise DataError("Number of alto files does not match number of input files.")
 
-		return True
+		self.info_message("All validations performed successfully.")
+		
 
 	def tocExists(self):
 		'''
