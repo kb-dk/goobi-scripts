@@ -64,8 +64,8 @@ passcode = test
 
 [copy_to_limb]
 log = /opt/digiverso/logs/step_copy_to_limb.log
-limb_transit = /tmp/transit
-limb_hotfolder = /tmp/hotfolder
+limb_transit = /mnt/limb-01/InputFolder/transit/
+limb_hotfolder = /mnt/limb-01/InputFolder/tidsskrift-dk-color/
 sleep_interval=600
 retries = 10
 
