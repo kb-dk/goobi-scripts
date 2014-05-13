@@ -70,10 +70,10 @@ sleep_interval=600
 retries = 10
 
 [limb_output]
-limb_output = /mnt/hgfs/limb-01/tidsskrift-dk/
-alto = ALTO
-toc = Toc
-pdf = JP2K 1-20
+limb_output = /mnt/limb-01/OutputFolder/goobi-output-test/
+alto = alto
+toc = toc
+pdf = pdf
 input_files = JP2000_lossless
 log = /opt/digiverso/logs/step_validate_limb_output.log
 retry_num = 5
