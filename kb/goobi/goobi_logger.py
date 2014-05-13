@@ -71,9 +71,9 @@ class GoobiLogger():
                                                    level=level,
                                                    message=message )
         
-        goobi_message = self.log_format.format(process_id=self.process_id,
-                                               level=level,
-                                               message=message )
+        goobi_message = self.goobi_log_format.format(process_id=self.process_id,
+                                                     level=level,
+                                                     message=message )
         
         if self.debugging_on:
             print formatted_message
