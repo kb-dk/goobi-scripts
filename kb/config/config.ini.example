@@ -63,19 +63,20 @@ host = 127.0.0.1:8080
 passcode = test
 
 [copy_to_limb]
+debug = true
 log = /opt/digiverso/logs/step_copy_to_limb.log
-limb_transit = /mnt/limb-01/InputFolder/transit/
-limb_hotfolder = /mnt/limb-01/InputFolder/tidsskrift-dk-color/
+limb_transit = /mnt/limb-01/InputFolder/goobi-transit/
+limb_hotfolder = /mnt/limb-01/InputFolder/goobi-test/
 sleep_interval=600
 retries = 10
 
 [limb_output]
+debug = true
+log = /opt/digiverso/logs/step_validate_limb_output.log
 limb_output = /mnt/limb-01/OutputFolder/goobi-output-test/
 alto = alto
 toc = toc
 pdf = pdf
-input_files = JP2000_lossless
-log = /opt/digiverso/logs/step_validate_limb_output.log
 retry_num = 5
 retry_wait = 300
 
