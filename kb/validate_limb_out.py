@@ -4,6 +4,7 @@ from goobi.goobi_step import Step
 
 from tools import tools
 from tools.errors import DataError
+import tools.limb as limb_tools
 import os, sys
 class ValidateLimbOutput( Step ):
 
@@ -32,7 +33,7 @@ class ValidateLimbOutput( Step ):
 			self.performValidations()
 			return None
 		except IOError as e:
-			return "IOError - directory not found {0}".format(e.strerror)	
+			return "IOError - {0}".format(e.strerror)	
 		except DataError as e: 
 			return "Validation error - {0}.".format(e.strerror)
 
@@ -69,29 +70,16 @@ class ValidateLimbOutput( Step ):
 
 		Throw DataError if any validation fails
 		'''
-		if not self.tocExists(): 
+		if not limb_tools.tocExists(self.toc_dir): 
 			raise DataError("TOC not found!")
 		if not self.pageCountMatches():
 			raise DataError("PDF page count does not match input picture count!")
-		if not self.altoFileCountMatches():
+		if not limb_tools.altoFileCountMatches(self.alto_dir, self.input_files_dir):
 			raise DataError("Number of alto files does not match number of input files.")
 
 		self.info_message("All validations performed successfully.")
 		
 
-	def tocExists(self):
-		'''
-		Ensure a .toc file exists in toc directory
-		return (string) filename
-		TODO: A similar method has been created in the generic 
-		tools.limb module - callers to this method should use that instead
-		and this method should be removed
-		'''
-		self.info_message("Checking for toc in {0}".format(self.toc_dir))
-		toc = tools.getFirstFileWithExtension(self.toc_dir, '.toc')
-		return toc
-
-	
 	def pageCountMatches(self):
 		'''
 		Compare num pages in pdfinfo with pages in input 
@@ -105,18 +93,6 @@ class ValidateLimbOutput( Step ):
 		numInputFiles = len(os.listdir(self.input_files_dir))
 
 		return numPages == numInputFiles
-
-	def altoFileCountMatches(self):
-		'''
-		TODO: A similar method has been created in the generic 
-		tools.limb module - callers to this method should use that instead
-		and this method should be removed.
-		'''
-		self.info_message("Comparing number of Alto files with input files")
-		numAlto = len(os.listdir(self.alto_dir))
-		numInputFiles = len(os.listdir(self.input_files_dir))
-
-		return numAlto == numInputFiles
 
 if __name__ == '__main__':
 	
