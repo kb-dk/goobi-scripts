@@ -63,7 +63,7 @@ host = 127.0.0.1:8080
 passcode = test
 
 [copy_to_limb]
-log = opt/digiverso/logs/step_copy_to_limb.log
+log = /opt/digiverso/logs/step_copy_to_limb.log
 limb_transit = /tmp/transit
 limb_hotfolder = /tmp/hotfolder
 sleep_interval=600

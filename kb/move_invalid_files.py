@@ -65,42 +65,25 @@ class FileValidator( Step ) :
         Get all required vars from command line + config
         and confirm their existence.
         '''
-        self.root_path = self.command_line.process_root_path
         self.break_level = self.getBreakLevel()
         self.err_msg_no_files_added = self.getConfigItem('err_msg_no_files_added')
         self.err_msg_invalid_files = self.getConfigItem('err_msg_invalid_files')
         self.err_msg_contains_folders = self.getConfigItem('err_msg_contains_folders')
-        self.image_path = self.getImageFolder()
-        self.invalid_path = self.getInvalidFolder()
-        self.valid_exts = self.getValidExts()
-                
-    def getInvalidFolder(self):
-        '''
-        Build the destination folder for invalid files
-        based on the command line arg + the config path
-        if dir does not exist, create it
-        exit if we can't create the dir for some reason
-        (probably permissions)
-        '''
+        self.valid_exts = self.getConfigItem('valid_file_exts').split(';')
         
         rel_invalid_path = self.getConfigItem('img_invalid_path',
-                                              None,
-                                              self.folder_structure_section)
-        invalid_path = os.path.join(self.root_path,rel_invalid_path)
-        tools.find_or_create_dir(invalid_path)
-        return invalid_path
-    
-    def getImageFolder(self):
-        '''
-        Build the image folder for based on the command line arg 
-        + the config path. Errors are raise from called functions.
-        '''
+                                                   None,
+                                                   self.folder_structure_section)
+        self.invalid_path = os.path.join(self.command_line.process_root_path,
+                                         rel_invalid_path)
+        tools.find_or_create_dir(self.invalid_path)
+        
         rel_image_path = self.getConfigItem('img_master_path',
                                             None,
                                             self.folder_structure_section) 
-        image_path = os.path.join(self.root_path,rel_image_path)
-        return image_path
-
+        self.image_path = os.path.join(self.command_line.process_root_path,
+                                       rel_image_path)
+    
     def getBreakLevel(self):
         '''Our break level is used to figure out what errors to tolerate'''
         return int(self.getConfigItem('break_on_errors'))
@@ -131,11 +114,6 @@ class FileValidator( Step ) :
                     #('WARNING - Invalid extension {0} found in source folder').format(tools.getFileExt(f))
                     error_level = 1
         return error_level, message
-    
-    def getValidExts(self):
-        '''return array of valid file extensions'''
-        ext_str = self.getConfigItem('valid_file_exts')
-        return ext_str.split(';')
     
     def moveInvalidFiles(self, source_root, dest, valid_exts):
         for f in os.listdir(source_root):

@@ -123,8 +123,8 @@ class Step( object ):
             self.essential_commandlines[self.cli_process_id_arg] = "number"
 
         # We need to make sure we have a full path to our config file
-        if self.cli_config_path_arg not in self.essential_commandlines.keys() :
-            self.essential_commandlines[self.cli_config_path_arg] = "file"
+        #if self.cli_config_path_arg not in self.essential_commandlines.keys() :
+        #    self.essential_commandlines[self.cli_config_path_arg] = "file"
 
         #
         # Get command line parameters (want to pass process_id to log if we have it)        
@@ -132,8 +132,15 @@ class Step( object ):
             self.getCommandLine( must_have=self.essential_commandlines )
         #
         # Get configuration information
+        # YES. I know this is ugly!
+        #TODO: A better way to give config.ini-path to goobi_step from Goobi
+        self.config_path = ''
+        if not self.command_line.has(self.cli_config_path_arg):
+            self.config_path = '/opt/digiverso/goobi/scripts/kb/config/config.ini'
+        else:
+            self.config_path = self.command_line.config_path 
         self.config, error = \
-            self.getConfig( self.command_line.config_path,
+            self.getConfig( self.config_path,
                             must_have=self.essential_config_sections )
         if error:
             self.exit( error )

@@ -10,10 +10,13 @@ class CopyToLimb( Step ):
     def setup(self):
         self.name = 'Copy to LIMB'
         self.config_main_section = 'copy_to_limb'
-        self.essential_config_sections = set( [] )
+        self.folder_structure_section = 'process_folder_structure'
+        self.essential_config_sections.update([self.folder_structure_section, 
+                                               self.folder_structure_section] )
         self.essential_commandlines = {
             "process_id" : "number",
-            "source" : "folder",
+            "process_root_path" : "folder",
+            "process_title" : "string"
         }
 
     def getVariables(self):
@@ -21,11 +24,15 @@ class CopyToLimb( Step ):
         Get all required vars from command line + config
         and confirm their existence.
         '''
-        self.files_not_copied  = True
-        self.source_dir = self.command_line.source
+        rel_master_image_path = self.getConfigItem('img_master_path',
+                                                   None,
+                                                   self.folder_structure_section) 
+        self.source_dir = os.path.join(self.command_line.process_root_path,
+                                       rel_master_image_path)
         self.transit_dir = os.path.join(self.getConfigItem('limb_transit'),
-                                   os.path.basename(self.source_dir))
-        self.hotfolder_dir = self.getConfigItem('limb_hotfolder')
+                                   self.command_line.process_title)
+        self.hotfolder_dir = os.path.join(self.getConfigItem('limb_hotfolder'),
+                                          self.command_line.process_title)
         self.sleep_interval = int(self.getConfigItem('sleep_interval'))
         self.retries = int(self.getConfigItem('retries'))
 
@@ -34,20 +41,18 @@ class CopyToLimb( Step ):
         self.getVariables()
         self.info_message("source_dir "+self.source_dir)
         try:
-            tools.copy_files(self.source_dir,
-                             self.hotfolder_dir,
-                             self.transit_dir,
+            tools.copy_files(source = self.source_dir,
+                             dest = self.hotfolder_dir,
+                             transit = self.transit_dir,
                              delete_original = False,
-                             self.sleep_interval,
-                             self.retries,
-                             self.glogger)
+                             wait_interval = self.sleep_interval,
+                             max_retries = self.retries,
+                             logger = self.glogger,
+                             debug = True)
         except errors.TransferError as e:
-            if e.typeerror == 1:
-                error = e.strerror
-            elif e.typeerror == 2:
-                error = e.strerror
-            else:
-                error = 'Unknown error type'
+            error = e.strerror
+        except errors.TransferTimedOut as e:
+            error = e.strerror
         return error
 
 if __name__ == '__main__':    
