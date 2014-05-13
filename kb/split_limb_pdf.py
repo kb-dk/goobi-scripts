@@ -3,7 +3,8 @@
 from goobi.goobi_step import Step
 
 from tools import tools as tools
-import os, sys
+import os
+
 class SplitPdf( Step ):
 
     def setup(self):

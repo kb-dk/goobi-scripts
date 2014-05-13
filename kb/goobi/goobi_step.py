@@ -112,7 +112,9 @@ class Step( object ):
         self.auto_complete = False
         self.detach = False
         
+        
         self.setup()
+        
         
         # Create list of config setions we want. Always assume Goobi is needed.
         self.essential_config_sections.update( ["goobi",
@@ -125,7 +127,7 @@ class Step( object ):
         # We need to make sure we have a full path to our config file
         #if self.cli_config_path_arg not in self.essential_commandlines.keys() :
         #    self.essential_commandlines[self.cli_config_path_arg] = "file"
-
+        
         #
         # Get command line parameters (want to pass process_id to log if we have it)        
         self.command_line, error_command_line = \
@@ -144,6 +146,9 @@ class Step( object ):
                             must_have=self.essential_config_sections )
         if error:
             self.exit( error )
+        
+        if self.command_line.has(self.step_name):
+            self.name = self.command_line.get(self.step_name)
         #
         # Are we debugging?
         self.debug = self.debugging( self.config )
@@ -154,11 +159,12 @@ class Step( object ):
         if self.debug:
             print(self.name + ": Debugging ON")
         # Create out logger
+        logger_name = self.name.replace(' ','').lower()
         self.glogger, error = self.getLoggingSystems(self.config,
                                                      self.config_main_section,
                                                      self.command_line,
                                                      self.debug,
-                                                     self.name + "_logger")
+                                                     logger_name + "_logger")
         if error:
             self.exit( error,self.glogger )
         #
@@ -214,7 +220,7 @@ class Step( object ):
             if self.auto_complete:
                 self.closeStep()
         else:
-            error = ('Failed {0}.  Error message: "{1}"')
+            error = ('{0} failed.  Error message: "{1}"')
             error = error.format(self.name, error)
             self.debug_message(error)
             self.reportToStep( error )
