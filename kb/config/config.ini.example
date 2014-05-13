@@ -67,7 +67,7 @@ debug = true
 log = /opt/digiverso/logs/step_copy_to_limb.log
 limb_transit = /mnt/limb-01/InputFolder/goobi-transit/
 limb_hotfolder = /mnt/limb-01/InputFolder/goobi-test/
-sleep_interval=600
+sleep_interval=10
 retries = 10
 
 [limb_output]
@@ -78,7 +78,7 @@ alto = alto
 toc = toc
 pdf = pdf
 retry_num = 5
-retry_wait = 300
+retry_wait = 10
 
 [ojs]
 log = /opt/digiverso/logs/step_create_ojs.log

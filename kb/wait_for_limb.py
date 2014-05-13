@@ -62,7 +62,8 @@ class WaitForLimb( Step ):
             while retry_counter < self.retry_num:
                 
                 if self.limbIsReady():
-                    self.info_message("LIMB output is ready - exiting.")
+                    msg = ('LIMB output is ready - exiting.')
+                    self.debug_message(msg)
                     return None # this is the only successful exit possible
                 else:
                     # if they haven't arrived, sit and wait for a while

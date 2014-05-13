@@ -286,7 +286,7 @@ def pdfinfo(infile):
         raise RuntimeError('Provided input file not found: %s' % infile)
 
     #if "check_output" not in dir( subprocess ):
-     #   implementCheckOutput()
+    #   implementCheckOutput()
      
     def _extract(row):
         """Extracts the right hand value from a : delimited row"""
@@ -301,7 +301,6 @@ def pdfinfo(infile):
     # cmd_output = subprocess.check_output([cmd, infile])
     # the above line is default, but won't work on Python 2.6. The below is a workaround
     cmd_output = subprocess.Popen([cmd, infile], stdout=subprocess.PIPE).communicate()[0]
-    
     for line in cmd_output.splitlines():
         for label in labels:
             if label in line:
