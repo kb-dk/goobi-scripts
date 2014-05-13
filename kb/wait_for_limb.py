@@ -30,16 +30,20 @@ class WaitForLimb( Step ):
 			while retry_counter < self.retry_num:
 				if self.limbIsReady():
 					self.info_message("LIMB output is ready - exiting.")
-					return None
+					return None # this is the only successful exit possible
 				else:
 					# if they haven't arrived, sit and wait for a while
 					self.info_message("LIMB output not ready - sleeping for {0} seconds...".format(self.retry_wait))
 					retry_counter += 1
 					time.sleep(self.retry_wait)			
 		except IOError as e:
-			print e.strerror
+			# if we get an IO error we need to crash
+			return "Error reading from directory {0}".format(e.strerror)
+		except ValueError as e:
+			# caused by conversion of non-numeric strings in config to nums
+			return "Invalid config data supplied"
 		# if we've gotten this far, we've timed out and need to go back to the previous step
-		self.reportToStep("Timed out waiting for LIMB output.")
+		return "Timed out waiting for LIMB output."
 
 	def limbIsReady(self):
 		'''

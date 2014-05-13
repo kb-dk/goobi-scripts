@@ -441,3 +441,14 @@ def convertLangToLocale(code):
     except: 
         return ''
 
+
+
+def parseTitle(title):
+    '''
+    Given a title, return the first 10 characters
+    Used when journal titles determine path names,
+    e.g. OJS import.
+    TODO: Make sure all references to journal titles
+    use this method.
+    '''
+    return title[0:10]
