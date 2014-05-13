@@ -93,6 +93,7 @@ def get_delta_time(s):
     m, remainder = divmod(remainder, 60)
     s, ms = divmod(remainder, 1)
     ms = round(ms,3)*1000
+    # TODO: only print what is not 0
     return '%s h, %s min, %s sec and %s ms' % (int(h), int(m), int(s), int(ms))
     # Example
     # s = 1221358.258

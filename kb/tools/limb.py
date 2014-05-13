@@ -6,7 +6,10 @@ def tocExists(toc_dir):
 	Ensure a .toc file exists in toc directory
 	Return filename or None
 	'''
-	toc = tools.getFirstFileWithExtension(toc_dir, '.toc')
+	try:
+		toc = tools.getFirstFileWithExtension(toc_dir, '.toc')
+	except IOError:
+		return False
 	return toc
 
 def altoFileCountMatches(alto_dir, input_files_dir):

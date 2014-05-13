@@ -39,7 +39,9 @@ class CopyToLimb( Step ):
     def step(self):
         error = None
         self.getVariables()
-        self.info_message("source_dir "+self.source_dir)
+        msg = ('Copying files from {0} to {1} via transit {2}.')
+        msg = msg.format(self.source_dir, self.hotfolder_dir, self.transit_dir)
+        self.debug_message(msg)
         try:
             tools.copy_files(source = self.source_dir,
                              dest = self.hotfolder_dir,
