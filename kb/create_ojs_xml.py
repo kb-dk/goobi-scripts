@@ -2,7 +2,7 @@
 # -*- coding: utf-8
 from goobi.goobi_step import Step
 from xml.dom import minidom
-from tools.errors import DataError
+from tools.errors import DataError, InputError
 
 from tools import tools
 import os, time
@@ -17,7 +17,9 @@ class CreateOJSXML( Step ):
 			'process_id' : 'number',
 			'process_title' : 'string',
 			'process_path' : 'folder',
-			'overlapping_articles' : 'string'
+			'overlapping_articles' : 'string',
+			'auto_report_problem' : 'string',
+			'step_id' : 'number'
 		}
 
 	def step(self):
@@ -25,9 +27,10 @@ class CreateOJSXML( Step ):
 			self.getVariables()
 			self.createXML()
 		except OSError as e:
-			self.error_message(e.strerror + " " + e.filename)
-		except (DataError, IOError) as e:
-			self.error_message(e.strerror)
+			return e.strerror + " " + e.filename
+		except (DataError, IOError, InputError) as e:
+			return e.strerror
+		# if we got here everything is fine
 		return None
 
 	def getVariables(self):
@@ -60,7 +63,7 @@ class CreateOJSXML( Step ):
 		elif self.command_line.overlapping_articles.lower() == 'false':
 			self.overlapping_articles = False
 		else:
-			raise Exception
+			raise InputError("overlapping_articles parameter was not a valid boolean")
 
 		# we also need the required anchor fields
 		fields = self.getConfigItem('anchor_required_fields')

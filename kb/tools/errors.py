@@ -21,6 +21,13 @@ class TransferTimedOut(Exception):
 		'''
 		Raised when transfer of data has timed out
 		msg: the error message
+		'''
+		self.typeerror = msg
 
+class InputError(Exception):
+	def __init__(self, msg):
+		'''
+		Raised when an invalid argument has been passed
+		in from command line.
 		'''
 		self.strerror = msg
