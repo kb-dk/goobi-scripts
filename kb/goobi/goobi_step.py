@@ -463,7 +463,7 @@ class Step( object ):
             if command_line.has( self.cli_process_id_arg ) :
                 pid = str( command_line.get(self.cli_process_id_arg) )
             
-            rotating_logger_handler.setFormatter( logging.Formatter( "[ProcID " + pid + '] %(asctime)s (%(levelname)s)   %(message)s') )
+            rotating_logger_handler.setFormatter( logging.Formatter( "[PID " + pid + '] %(asctime)s (%(levelname)s)   %(message)s') )
             
             if debug :
                 rotating_logger_handler.setLevel( logging.DEBUG )

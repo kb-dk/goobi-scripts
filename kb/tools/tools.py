@@ -362,7 +362,7 @@ def copy_files(source,dest,transit=None,delete_original=False,wait_interval=60,
                         src_files.remove(src_file)
                         if logger and debug: 
                             msg = ("{0} is not a file ... skipping it")
-                            msg.format(full_file_name)
+                            msg = msg.format(full_file_name)
                             logger.debug(msg)
                 if (i%50)==0 and logger and debug: 
                     files_left = len([e for e in src_files if not e[1]])
@@ -389,20 +389,22 @@ def copy_files(source,dest,transit=None,delete_original=False,wait_interval=60,
         files_copied = len([e for e in src_files if e[1]])
         files_total = len(src_files)
         if (attempts >= max_retries):
-            err_msg = ('Transfer of files between {0} and {1} timed out. '
+            error = ('Transfer of files between {0} and {1} timed out. '
                        '{2} out of {3} files copied. {4} missing.')
-            err_msg.format(source,dest_dir,files_copied,files_total,files_left)
-            raise errors.TransferTimedOut(err_msg)
+            error = error.format(source,dest_dir,
+                                 files_copied,files_total,files_left)
+            raise errors.TransferTimedOut(error)
         else:
-            err_msg = ('Not all files copied between {0} and {1}. '
+            error = ('Not all files copied between {0} and {1}. '
                        '{2} out of {3} files copied. {4} missing.')
-            err_msg.format(source,dest_dir,files_copied,files_total,files_left)
-            raise errors.TransferError(err_msg)
+            error = error.format(source,dest_dir,
+                                 files_copied,files_total,files_left)
+            raise errors.TransferError(error)
     if transit:
         if logger and debug:
             msg = ('Moving the folder {0} (in transit folder) to final '
                    'destination folder {1}')
-            msg.format(dest_dir,dest)
+            msg = msg.format(dest_dir,dest)
             logger.debug(msg)
         shutil.move(dest_dir,dest)
     if delete_original: 
@@ -411,7 +413,7 @@ def copy_files(source,dest,transit=None,delete_original=False,wait_interval=60,
             logger.debug(msg)
         shutil.rmtree(source)
     msg = ('All files have been copied from {0} to {1}.')
-    msg.format(source,dest_dir)
+    msg = msg.format(source,dest_dir)
     logger.debug(msg) 
 
 def cutPdf(inputPdf, outputPdf, fromPage, toPage):
