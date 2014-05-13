@@ -220,9 +220,15 @@ class Step( object ):
             if self.auto_complete:
                 self.closeStep()
         else:
-            error = ('{0} failed.  Error message: "{1}"')
-            error = error.format(self.name, error)
-            self.debug_message(error)
+            err_msg = ('{0} failed. Error message: "{0}"')
+            error = err_msg.format(self.name,error)
+            if self.auto_report_problem:
+                err_msg = ('Error occured in {0}. Sending task back to {1}')
+                err_msg = err_msg.format(self.name,
+                                         self.auto_report_problem) 
+            else:
+                err_msg= error
+            self.error_message(err_msg)
             self.reportToStep( error )
         return (error == None)
     
