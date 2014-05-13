@@ -75,8 +75,8 @@ class GoobiLogger():
                                                      level=level,
                                                      message=message )
         
-        if self.debugging_on:
-            print formatted_message
+        #if self.debugging_on:
+        #    print formatted_message
         
         if level == 'warning':
             level = 'info'
@@ -86,10 +86,12 @@ class GoobiLogger():
         # Push the error out to stderr, this will cause Goobi to pause the step if the script is an automatic one.
         if level == 'error' :
             sys.stderr.write( "stderr: " + formatted_message + "\n" )
-            
-        return self.com.addToProcessLog(level,
-                                        goobi_message,
-                                        self.process_id )
+        
+        if not (level == 'debug') or \
+                (level == 'debug' and self.debugging_on):
+            return self.com.addToProcessLog(level,
+                                            goobi_message,
+                                            self.process_id )
 
         
     def _pyLog( self, level, message ):

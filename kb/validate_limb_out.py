@@ -5,7 +5,7 @@ from goobi.goobi_step import Step
 from tools import tools
 from tools.errors import DataError
 import tools.limb as limb_tools
-import os, sys
+import os
 class ValidateLimbOutput( Step ):
 
     def setup(self):
@@ -81,8 +81,7 @@ class ValidateLimbOutput( Step ):
             raise DataError("PDF page count does not match input picture count!")
         if not limb_tools.altoFileCountMatches(self.alto_dir, self.input_files_dir):
             raise DataError("Number of alto files does not match number of input files.")
-
-        self.info_message("All validations performed successfully.")
+        #self.info_message("All validations performed successfully.")
         
 
     def pageCountMatches(self):
