@@ -13,7 +13,9 @@ class MoveToGoobi( Step ):
         self.essential_commandlines = {
             "process_id" : "number",
             "process_path" : "folder",
-            "process_title" : "string"
+            "process_title" : "string",
+            'auto_report_problem' : 'string',
+            'step_id' : 'number'
         }
 
     def step(self):
