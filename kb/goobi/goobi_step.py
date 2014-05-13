@@ -210,12 +210,13 @@ class Step( object ):
                 self.error_message( 'Exception occured in ' + self.name  )
             raise
         if not error :
-            self.debug_message( 'Completed ' + self.name )
+            self.info_message( 'Completed ' + self.name )
             if self.auto_complete:
                 self.closeStep()
         else:
-            self.error_message( 'Failed ' + self.name + '.  Error message: "'
-                                 + error +'"')
+            error = ('Failed {0}.  Error message: "{1}"')
+            error = error.format(self.name, error)
+            self.debug_message(error)
             self.reportToStep( error )
         return (error == None)
     

@@ -34,7 +34,7 @@ class SplitPdf( Step ):
         except IOError as e:
             #"Execution halted due to error {0}".format()
             error = e.strerror
-        error = 'Split PDF-file to Articles PDF-files failed: '+error
+        error = '"Split PDF-file" failed: '+error
         return error
 
     def getVariables(self):

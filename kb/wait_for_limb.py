@@ -18,34 +18,6 @@ class WaitForLimb( Step ):
             'step_id' : 'number'
         }
     
-    def getVariables(self):
-        '''
-        We need the limb_output folder,
-        the location of the toc file
-        Throws error if any directories are missing
-        or if our retry vals are not numbers
-        '''
-        process_title = self.command_line.process_title
-        limb = self.getConfigItem('limb_output')
-        alto = self.getConfigItem('alto')
-        toc = self.getConfigItem('toc')
-        pdf = self.getConfigItem('pdf')
-        
-        # join paths to create absolute paths
-        self.limb_dir = os.path.join(limb, process_title)
-        self.alto_dir = os.path.join(self.limb_dir, alto)
-        self.toc_dir = os.path.join(self.limb_dir, toc)
-        self.pdf_dir = os.path.join(self.limb_dir, pdf)
-        
-        # Get path for input-files in process folder
-        process_path = self.command_line.process_root_path
-        input_files = self.getConfigItem('img_master_path',
-                                         section= self.folder_structure_section) 
-        self.input_files = os.path.join(process_path,input_files)
-        
-        # Get retry number and retry-wait time
-        self.retry_num = int(self.getConfigItem('retry_num'))
-        self.retry_wait = int(self.getConfigItem('retry_wait'))
 
         
     def step(self):
@@ -85,6 +57,35 @@ class WaitForLimb( Step ):
         # if we've gotten this far, we've timed out and need to go back to the previous step
         return "Timed out waiting for LIMB output."
 
+    def getVariables(self):
+        '''
+        We need the limb_output folder,
+        the location of the toc file
+        Throws error if any directories are missing
+        or if our retry vals are not numbers
+        '''
+        process_title = self.command_line.process_title
+        limb = self.getConfigItem('limb_output')
+        alto = self.getConfigItem('alto')
+        toc = self.getConfigItem('toc')
+        pdf = self.getConfigItem('pdf')
+        
+        # join paths to create absolute paths
+        self.limb_dir = os.path.join(limb, process_title)
+        self.alto_dir = os.path.join(self.limb_dir, alto)
+        self.toc_dir = os.path.join(self.limb_dir, toc)
+        self.pdf_dir = os.path.join(self.limb_dir, pdf)
+        
+        # Get path for input-files in process folder
+        process_path = self.command_line.process_root_path
+        input_files = self.getConfigItem('img_master_path',
+                                         section= self.folder_structure_section) 
+        self.input_files = os.path.join(process_path,input_files)
+        
+        # Get retry number and retry-wait time
+        self.retry_num = int(self.getConfigItem('retry_num'))
+        self.retry_wait = int(self.getConfigItem('retry_wait'))
+        
     def limbIsReady(self):
         '''
         Check to see if LIMB is finished
