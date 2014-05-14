@@ -55,6 +55,8 @@ class CopyToLimb( Step ):
             error = e.strerror
         except errors.TransferTimedOut as e:
             error = e.strerror
+        except Exception as e:
+            error = str(e)
         return error
 
 if __name__ == '__main__':    
