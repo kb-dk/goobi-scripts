@@ -16,7 +16,7 @@ class ValidateLimbOutput( Step ):
                                                self.folder_structure_section] )
         self.essential_commandlines = {
             'process_title' : 'string',
-            'process_root_path' : 'folder',
+            'process_path' : 'folder',
             'auto_report_problem' : 'string',
             'step_id' : 'string'
         }
@@ -37,17 +37,17 @@ class ValidateLimbOutput( Step ):
         self.limb_dir = os.path.join(limb, process_title)
         self.alto_dir = os.path.join(self.limb_dir, alto)
         self.toc_dir = os.path.join(self.limb_dir, toc)
-        self.pdf_dir = os.path.join(self.limb_dir, pdf)
+        self.pdf_input_dir = os.path.join(self.limb_dir, pdf)
         
         # Get path for input-files in process folder
-        process_path = self.command_line.process_root_path
+        process_path = self.command_line.process_path
         input_files = self.getConfigItem('img_master_path',
                                          section= self.folder_structure_section) 
         self.input_files_dir = os.path.join(process_path,input_files)
         
         # throw Error if one of our directories is missing
         tools.ensureDirsExist(self.limb_dir, self.alto_dir, \
-            self.toc_dir, self.pdf_dir, self.input_files_dir)
+            self.toc_dir, self.pdf_input_dir, self.input_files_dir)
     
     def step(self):
         '''
@@ -92,8 +92,8 @@ class ValidateLimbOutput( Step ):
         '''
         msg = ('Comparing page count with input files')
         self.debug_message(msg)
-        pdf = tools.getFirstFileWithExtension(self.pdf_dir, '.pdf')
-        pdfInfo = tools.pdfinfo(os.path.join(self.pdf_dir, pdf))
+        pdf = tools.getFirstFileWithExtension(self.pdf_input_dir, '.pdf')
+        pdfInfo = tools.pdfinfo(os.path.join(self.pdf_input_dir, pdf))
         numPages = int(pdfInfo['Pages'])
         numInputFiles = len(os.listdir(self.input_files_dir))
         return numPages == numInputFiles

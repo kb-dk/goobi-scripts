@@ -46,7 +46,7 @@ class UploadToOJS( Step ):
 		ojs_metadata_dir = self.getConfigItem('metadata_ojs_path', None, 'process_folder_structure')
 		self.ojs_metadata_dir = os.path.join(self.command_line.process_path, ojs_metadata_dir)
 		pdf_path = self.getConfigItem('doc_pdf_path', None, 'process_folder_structure')
-		self.pdf_dir = os.path.join(self.command_line.process_path, pdf_path)
+		self.pdf_input_dir = os.path.join(self.command_line.process_path, pdf_path)
 		anchor_name = self.getConfigItem('metadata_goobi_anchor_file', None, 'process_files')
 		anchor_data = goobi_tools.getAnchorFileData(\
 			os.path.join(self.command_line.process_path, anchor_name), ['TitleDocMainShort'])
@@ -57,11 +57,11 @@ class UploadToOJS( Step ):
 		self.ojs_dest_dir = os.path.join(ojs_journal_folder, self.command_line.process_title)
 		tools.find_or_create_dir(self.ojs_dest_dir)
 
-		tools.ensureDirsExist(self.ojs_metadata_dir, self.pdf_dir, self.ojs_dest_dir)
+		tools.ensureDirsExist(self.ojs_metadata_dir, self.pdf_input_dir, self.ojs_dest_dir)
 
 
 	def transferPDFs(self):
-		tools.copy_files(self.pdf_dir, self.ojs_dest_dir)
+		tools.copy_files(self.pdf_input_dir, self.ojs_dest_dir)
 
 
 	def transferXML(self):

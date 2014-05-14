@@ -31,3 +31,10 @@ class InputError(Exception):
 		in from command line.
 		'''
 		self.strerror = msg
+		
+class PdftkError(Exception):
+	def __init__(self, msg):
+		'''
+		Raised when pdftk fails to split a pdf file.
+		'''
+		self.strerror = msg

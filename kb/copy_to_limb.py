@@ -15,7 +15,7 @@ class CopyToLimb( Step ):
                                                self.folder_structure_section] )
         self.essential_commandlines = {
             "process_id" : "number",
-            "process_root_path" : "folder",
+            "process_path" : "folder",
             "process_title" : "string"
         }
 
@@ -27,7 +27,7 @@ class CopyToLimb( Step ):
         rel_master_image_path = self.getConfigItem('img_master_path',
                                                    None,
                                                    self.folder_structure_section) 
-        self.source_dir = os.path.join(self.command_line.process_root_path,
+        self.source_dir = os.path.join(self.command_line.process_path,
                                        rel_master_image_path)
         self.transit_dir = os.path.join(self.getConfigItem('limb_transit'),
                                    self.command_line.process_title)

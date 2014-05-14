@@ -425,7 +425,10 @@ def cutPdf(inputPdf, outputPdf, fromPage, toPage):
     '''
     page_range = "{0}-{1}".format(fromPage, toPage)
     exit_code = subprocess.call(['pdftk', inputPdf, 'cat', page_range, 'output', outputPdf])
-    
+    if exit_code > 0:
+        error = 'PDFTk error code: {0}'
+        error = error.format(exit_code)
+        raise errors.PdftkError(error)
     return exit_code == 0
 
 def convertLangToLocale(code):

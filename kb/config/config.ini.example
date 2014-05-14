@@ -23,6 +23,7 @@ debug=false
 [process_folder_structure]
 # http://diswiki.kb.dk/w/index.php/Udvikling_scripts_til_Goobi#Process_folder_structure
 doc_pdf_path = documents/pdf/
+doc_limbpdf_path = documents/limbpdf/
 doc_invalid_path = documents/invalid/
 img_master_path = images/master/
 img_invalid_path = images/invalid/
@@ -79,6 +80,11 @@ toc = toc
 pdf = pdf
 retry_num = 5
 retry_wait = 10
+
+[split_pdf_file]
+;debug = true
+log = /opt/digiverso/logs/step_split_pdf_file.log
+
 
 [ojs]
 log = /opt/digiverso/logs/step_create_ojs.log

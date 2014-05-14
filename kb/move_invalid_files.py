@@ -41,7 +41,7 @@ class FileValidator( Step ) :
         self.essential_config_sections.update([self.folder_structure_section, 
                                                self.folder_structure_section] )
         self.essential_commandlines = {
-            "process_root_path":"folder"
+            "process_path":"folder"
         }
 
     def step(self):
@@ -72,16 +72,16 @@ class FileValidator( Step ) :
         self.valid_exts = self.getConfigItem('valid_file_exts').split(';')
         
         rel_invalid_path = self.getConfigItem('img_invalid_path',
-                                                   None,
-                                                   self.folder_structure_section)
-        self.invalid_path = os.path.join(self.command_line.process_root_path,
+                                               None,
+                                               self.folder_structure_section)
+        self.invalid_path = os.path.join(self.command_line.process_path,
                                          rel_invalid_path)
         tools.find_or_create_dir(self.invalid_path)
         
         rel_image_path = self.getConfigItem('img_master_path',
                                             None,
                                             self.folder_structure_section) 
-        self.image_path = os.path.join(self.command_line.process_root_path,
+        self.image_path = os.path.join(self.command_line.process_path,
                                        rel_image_path)
     
     def getBreakLevel(self):

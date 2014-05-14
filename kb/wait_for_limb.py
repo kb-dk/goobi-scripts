@@ -13,7 +13,7 @@ class WaitForLimb( Step ):
                                                self.folder_structure_section] )
         self.essential_commandlines = {
             'process_id' : 'number',
-            'process_root_path' : 'folder',
+            'process_path' : 'folder',
             'auto_report_problem' : 'string',
             'step_id' : 'number'
         }
@@ -74,10 +74,10 @@ class WaitForLimb( Step ):
         self.limb_dir = os.path.join(limb, process_title)
         self.alto_dir = os.path.join(self.limb_dir, alto)
         self.toc_dir = os.path.join(self.limb_dir, toc)
-        self.pdf_dir = os.path.join(self.limb_dir, pdf)
+        self.pdf_input_dir = os.path.join(self.limb_dir, pdf)
         
         # Get path for input-files in process folder
-        process_path = self.command_line.process_root_path
+        process_path = self.command_line.process_path
         input_files = self.getConfigItem('img_master_path',
                                          section= self.folder_structure_section) 
         self.input_files = os.path.join(process_path,input_files)
@@ -94,7 +94,7 @@ class WaitForLimb( Step ):
         try: 
             # raises error if one of our directories is missing
             tools.ensureDirsExist(self.limb_dir, self.alto_dir, \
-                self.toc_dir, self.pdf_dir, self.input_files)
+                self.toc_dir, self.pdf_input_dir, self.input_files)
         except IOError as e:
             msg = ('One of the output folder from LIMB is not yet created.'
                    ' Waiting for LIMB to be ready. Error: {0}')
