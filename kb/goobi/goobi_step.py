@@ -91,6 +91,7 @@ class Step( object ):
         self.cli_auto_report_problem_arg = "auto_report_problem"
         self.cli_detach_arg = "detach"
         self.cli_debug_arg = "debug"
+        self.cli_step_name_arg = 'step_name'
         
         self.config_general_section = "general"
         
@@ -147,8 +148,8 @@ class Step( object ):
         if error:
             self.exit( error )
         
-        if self.command_line.has(self.step_name):
-            self.name = self.command_line.get(self.step_name)
+        if self.command_line.has(self.cli_step_name_arg):
+            self.name = self.command_line.get(self.cli_step_name_arg)
         #
         # Are we debugging?
         self.debug = self.debugging( self.config )
