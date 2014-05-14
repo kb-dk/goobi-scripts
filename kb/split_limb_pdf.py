@@ -10,7 +10,9 @@ class SplitPdf( Step ):
 
     def setup(self):
         self.config_main_section = 'split_pdf_file'
-        self.essential_config_sections = set( ['process_folder_structure'] )
+        self.folder_structure_section = 'process_folder_structure'
+        self.essential_config_sections.update([self.folder_structure_section, 
+                                               self.folder_structure_section] )
         self.essential_commandlines = {
             'process_path' : 'folder',
             'overlapping_articles' : 'string'
