@@ -221,16 +221,16 @@ class Step( object ):
             if self.auto_complete:
                 self.closeStep()
         else:
-            err_msg = ('{0} failed. Error message: "{0}"')
-            error = err_msg.format(self.name,error)
             if self.auto_report_problem:
-                err_msg = ('Error occured in {0}. Sending task back to {1}')
-                err_msg = err_msg.format(self.name,
-                                         self.auto_report_problem) 
+                error_msg = ('Error occured in {0}. Sending task back to {1}')
+                error_msg = error_msg.format(self.name,
+                                             self.auto_report_problem) 
+                self.error_message(error_msg)
+                self.reportToStep( error )
             else:
-                err_msg= error
-            self.error_message(err_msg)
-            self.reportToStep( error )
+                error_msg = ('{0} failed. Error message: "{0}"')
+                error_msg = error_msg.format(self.name,error)
+                self.error_message(error_msg)
         return (error == None)
     
     def reportToStep( self, message ):

@@ -88,7 +88,6 @@ class SplitPdf( Step ):
     def dividePdf(self):
         ''' 
         Cut up the volume into articles pdfs based on the data in the LIMB toc
-        TODO: shouldn't use sys.exit, should throw an Exception
         '''
 
         for index, article in enumerate(self.toc_data):

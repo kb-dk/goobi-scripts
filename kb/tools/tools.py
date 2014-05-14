@@ -212,12 +212,13 @@ def parseToc(toc):
                     author = ""
                     title = row[1]
                 start_page = row[2]
-
-                data.append(dict(level=level, author=author,title=title, start_page=start_page))    
+                data.append(dict(level=level, author=author,
+                                 title=title, start_page=start_page))
             # if there's some problem with the input row, skip it
             except IndexError:
-                print "ERROR - TOC row not parsed successfully {0}".format(",".join(row))
-
+                error = ('TOC row not parsed successfully {0}')
+                error = error.format(",".join(row))
+                raise ValueError(error)
     return data
 
 def enrichToc(toc_data, pdfinfo, overlapping_articles=False):
