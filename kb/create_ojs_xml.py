@@ -66,8 +66,10 @@ class CreateOJSXML( Step ):
 			raise InputError("overlapping_articles parameter was not a valid boolean")
 
 		# we also need the required anchor fields
-		fields = self.getConfigItem('anchor_required_fields')
-		self.anchor_required_fields = fields.split(';')
+		req_fields = self.getConfigItem('anchor_required_fields')
+		self.anchor_required_fields = req_fields.split(';')
+		opt_fields = self.getConfigItem('anchor_optional_fields')
+		self.anchor_optional_fields = opt_fields.split(';')
 
 	def createXML(self):
 		'''
@@ -75,6 +77,7 @@ class CreateOJSXML( Step ):
 		Use this to construct the OJS XML
 		'''
 		anchor_data = self.getAnchorFileData()
+
 		# this is the dir where files will be uploaded to
 		self.ojs_dir = os.path.join(self.ojs_root, anchor_data['TitleDocMainShort'], self.command_line.process_title)
 		
@@ -227,21 +230,26 @@ class CreateOJSXML( Step ):
 
 		top.setAttribute('current', 'false')
 		top.setAttribute('published', 'true')
-		title_tag = self.createXMLTextTag(doc, 'title', anchor_data['TitleDocMainShort'])
-		year_tag = self.createXMLTextTag(doc, 'year', anchor_data['PublicationYear'])
-		volume_tag = self.createXMLTextTag(doc, 'volume', anchor_data['VolumeNumber'])
-		number_tag = self.createXMLTextTag(doc, 'number', anchor_data['IssueNumber'])
-		access_tag = self.createXMLTextTag(doc, 'access_date', time.strftime("%Y-%m-%d"))
 		
+		title_tag = self.createXMLTextTag(doc, 'title', anchor_data['TitleDocMainShort'])
+		top.appendChild(title_tag)
+		
+		year_tag = self.createXMLTextTag(doc, 'year', anchor_data['PublicationYear'])
+		top.appendChild(year_tag)
+		
+		volume_tag = self.createXMLTextTag(doc, 'volume', anchor_data['VolumeNumber'])
+		top.appendChild(volume_tag)
+
+		if 'IssueNumber' in anchor_data:
+			number_tag = self.createXMLTextTag(doc, 'number', anchor_data['IssueNumber'])
+			top.appendChild(number_tag)
+
+		access_tag = self.createXMLTextTag(doc, 'access_date', time.strftime("%Y-%m-%d"))
+		top.appendChild(access_tag)
+
 		# we just say that it's the first of the year - we don't know the real date
 		date_published = "{0}-01-01".format(anchor_data['PublicationYear'])
 		date_tag = self.createXMLTextTag(doc, 'date_published', date_published)
-
-		top.appendChild(title_tag)
-		top.appendChild(year_tag)
-		top.appendChild(volume_tag)
-		top.appendChild(number_tag)
-		top.appendChild(access_tag)
 		top.appendChild(date_tag)
 
 		return doc
@@ -270,7 +278,7 @@ class CreateOJSXML( Step ):
 		data = dict()
 		for elem in metadata:
 			name = elem.getAttribute('name')
-			if name in self.anchor_required_fields:
+			if name in self.anchor_required_fields or name in self.anchor_optional_fields:
 				data[name] = elem.firstChild.nodeValue
 		
 		for item in self.anchor_required_fields:
