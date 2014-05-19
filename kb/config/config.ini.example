@@ -88,7 +88,8 @@ log = /opt/digiverso/logs/step_split_pdf_file.log
 
 [ojs]
 log = /opt/digiverso/logs/step_create_ojs.log
-anchor_required_fields = TitleDocMainShort;DocLanguage;PublicationYear;Volume
+anchor_required_fields = TitleDocMainShort;DocLanguage;PublicationYear;VolumeNumber
+anchor_optional_fields = IssueNumber
 ojs_root = http://strid.kb.dk/ojs/tidsskrift-dk
 ;ojs_mount = /mnt/tidsskrift-dk
 ojs_mount = /tmp/mnt/tidsskrift-dk
