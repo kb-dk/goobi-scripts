@@ -80,28 +80,49 @@ class CreateOJSXML( Step ):
 		toc_data = tools.parseToc(self.toc_file)
 		pdfinfo = tools.pdfinfo(self.pdf_file)
 		toc_data = tools.enrichToc(toc_data, pdfinfo, self.command_line.overlapping_articles)
+		
 		impl = minidom.getDOMImplementation()
 		doc = impl.createDocument(None, "issue", None)
 		doc = self.createHeadMaterial(doc, anchor_data)
-		section = self.createSectionXML(doc, anchor_data)
+		
+		front_section = self.createFrontSectionXML(doc, anchor_data)
+		article_section = self.createArticleSectionXML(doc, anchor_data)
+		back_section = self.createBackSectionXML(doc, anchor_data)
 		date_published = "{0}-01-01".format(anchor_data['PublicationYear'])
-				
+		# for every article in the toc file, add it as an article within the section tag
+		# 3 potential cases here:
+		#   1 - article is front matter in which case, create special front matter section
+		# 	2 - article is normal article, in which case, add to article section
+		# 	3 - article is back matter, in which cases, add to back matter section 		
 		for index, article in enumerate(toc_data):
-			article_xml = self.createArticleXML(doc, article, date_published, index)
-			section.appendChild(article_xml) 
+			if article['title'] == 'Front Matter':
+				article['title'] = 'Indledning'
+				article_xml = self.createArticleXML(doc, article, date_published, index)
+				front_section.appendChild(article_xml)
+				print 'Front Matter'
+			elif article['title'] == 'Back Matter':
+				article['title'] = 'Diverse'
+				article_xml = self.createArticleXML(doc, article, date_published, index)
+				back_section.appendChild(article_xml)
+			else:
+				article_xml = self.createArticleXML(doc, article, date_published, index)
+				article_section.appendChild(article_xml) 
 	
-		doc.documentElement.appendChild(section)
+		doc.documentElement.appendChild(front_section)
+		doc.documentElement.appendChild(article_section)
+		doc.documentElement.appendChild(back_section)
+
+		# save the xml content to the correct file
 		output_name = os.path.join(self.ojs_metadata_dir, self.command_line.process_title + '.xml')
 		output = open(output_name, 'w')
+		print doc.toprettyxml()
 		output.write(doc.toxml('utf-8'))
 		
 
-	def createSectionXML(self, doc, anchor_data):
+	def createSectionXML(self, doc, anchor_data, title, abbrev):
 		section = doc.createElement('section')
-		section_title = "{0} {1} - {2}".format(anchor_data['TitleDocMainShort'], \
-			anchor_data['PublicationYear'], anchor_data['Volume'])
-		section_title_tag = self.createXMLTextTag(doc, 'title', section_title)
-		abbrev_tag = self.createXMLTextTag(doc, 'abbrev', 'ART')
+		section_title_tag = self.createXMLTextTag(doc, 'title', title)
+		abbrev_tag = self.createXMLTextTag(doc, 'abbrev', abbrev)
 		locale = tools.convertLangToLocale(anchor_data['DocLanguage'])
 		abbrev_tag.setAttribute('locale', locale)
 		section.appendChild(section_title_tag)
@@ -109,6 +130,15 @@ class CreateOJSXML( Step ):
 		
 		return section
 
+	def createFrontSectionXML(self, doc, anchor_data):
+		return self.createSectionXML(doc, anchor_data, 'Indledning', 'IND')
+		
+
+	def createArticleSectionXML(self, doc, anchor_data):
+		return self.createSectionXML(doc, anchor_data, 'Artikler', 'ART')
+
+	def createBackSectionXML(self, doc, anchor_data):
+		return self.createSectionXML(doc, anchor_data, 'Diverse', 'DIV')		
 		
 	def createArticleXML(self, doc, article, date_published, index):
 		'''
@@ -204,8 +234,6 @@ class CreateOJSXML( Step ):
 		top.appendChild(volume_tag)
 		top.appendChild(access_tag)
 		top.appendChild(date_tag)
-
-
 
 		return doc
 
