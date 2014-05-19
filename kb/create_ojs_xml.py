@@ -77,8 +77,9 @@ class CreateOJSXML( Step ):
 		anchor_data = self.getAnchorFileData()
 		# this is the dir where files will be uploaded to
 		self.ojs_dir = os.path.join(self.ojs_root, anchor_data['TitleDocMainShort'], self.command_line.process_title)
-		toc_data = tools.parseToc(self.toc_file)
+		
 		pdfinfo = tools.pdfinfo(self.pdf_file)
+		toc_data = tools.parseToc(self.toc_file)
 		toc_data = tools.enrichToc(toc_data, pdfinfo, self.command_line.overlapping_articles)
 		
 		impl = minidom.getDOMImplementation()
@@ -228,7 +229,8 @@ class CreateOJSXML( Step ):
 		top.setAttribute('published', 'true')
 		title_tag = self.createXMLTextTag(doc, 'title', anchor_data['TitleDocMainShort'])
 		year_tag = self.createXMLTextTag(doc, 'year', anchor_data['PublicationYear'])
-		volume_tag = self.createXMLTextTag(doc, 'volume', anchor_data['Volume'])
+		volume_tag = self.createXMLTextTag(doc, 'volume', anchor_data['VolumeNumber'])
+		number_tag = self.createXMLTextTag(doc, 'number', anchor_data['IssueNumber'])
 		access_tag = self.createXMLTextTag(doc, 'access_date', time.strftime("%Y-%m-%d"))
 		
 		# we just say that it's the first of the year - we don't know the real date
@@ -238,6 +240,7 @@ class CreateOJSXML( Step ):
 		top.appendChild(title_tag)
 		top.appendChild(year_tag)
 		top.appendChild(volume_tag)
+		top.appendChild(number_tag)
 		top.appendChild(access_tag)
 		top.appendChild(date_tag)
 
