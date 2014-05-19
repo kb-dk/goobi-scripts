@@ -72,11 +72,26 @@ class UploadToOJS( Step ):
                               self.ojs_dest_dir)
 
     def transferPDFs(self):
-        tools.copy_files(self.pdf_input_dir, self.ojs_dest_dir)
+        tools.copy_files(source = self.pdf_input_dir,
+                         dest = self.ojs_dest_dir,
+                         transit=None,
+                         delete_original=False,
+                         wait_interval=60,
+                         max_retries=5,
+                         logger=self.glogger,
+                         debug=True
+                         )
 
 
     def transferXML(self):
-        tools.copy_files(self.ojs_metadata_dir, self.ojs_dest_dir)
+        tools.copy_files(source = self.ojs_metadata_dir,
+                         dest = self.ojs_dest_dir,
+                         transit=None,
+                         delete_original=False,
+                         wait_interval=60,
+                         max_retries=5,
+                         logger=self.glogger,
+                         debug=True)
 
 if __name__ == '__main__':
     
