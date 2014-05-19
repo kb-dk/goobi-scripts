@@ -89,9 +89,9 @@ class CreateOJSXML( Step ):
 		article_section = self.createArticleSectionXML(doc, anchor_data)
 		back_section = self.createBackSectionXML(doc, anchor_data)
 		date_published = "{0}-01-01".format(anchor_data['PublicationYear'])
-		# for every article in the toc file, add it as an article within the section tag
+		
 		# 3 potential cases here:
-		#   1 - article is front matter in which case, create special front matter section
+		#   1 - article is front matter, in which case, add to front matter section
 		# 	2 - article is normal article, in which case, add to article section
 		# 	3 - article is back matter, in which cases, add to back matter section 		
 		for index, article in enumerate(toc_data):
@@ -99,7 +99,6 @@ class CreateOJSXML( Step ):
 				article['title'] = 'Indledning'
 				article_xml = self.createArticleXML(doc, article, date_published, index)
 				front_section.appendChild(article_xml)
-				print 'Front Matter'
 			elif article['title'] == 'Back Matter':
 				article['title'] = 'Diverse'
 				article_xml = self.createArticleXML(doc, article, date_published, index)
@@ -115,7 +114,7 @@ class CreateOJSXML( Step ):
 		# save the xml content to the correct file
 		output_name = os.path.join(self.ojs_metadata_dir, self.command_line.process_title + '.xml')
 		output = open(output_name, 'w')
-		print doc.toprettyxml()
+		
 		output.write(doc.toxml('utf-8'))
 		
 
