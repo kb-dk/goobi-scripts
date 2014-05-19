@@ -197,11 +197,11 @@ class CreateOJSXML( Step ):
 		
 		if len(name[1:-1]) > 0:
 			middlename = ' '.join(name[1:-1])
+			middlename_tag = self.createXMLTextTag(doc, 'middlename', middlename)
 		else:
-			middlename = '<![CDATA[ ]]>'
+			middlename_tag = self.createEmptyElement(doc, 'middlename')
 		
-		middlename_tag = self.createXMLTextTag(doc, 'middlename', middlename)
-		email_tag = self.createXMLTextTag(doc, 'email', '<![CDATA[ ]]>')
+		email_tag = self.createEmptyElement(doc, 'email')
 
 		author_tag.appendChild(firstname_tag)
 		author_tag.appendChild(middlename_tag)
@@ -210,6 +210,13 @@ class CreateOJSXML( Step ):
 
 		return author_tag
 
+
+	def createEmptyElement(self, doc, name):
+		tag = doc.createElement(name)
+		cdata = doc.createCDATASection(' ')
+		tag.appendChild(cdata)
+
+		return tag
 
 	def createHeadMaterial(self, doc, anchor_data):
 		'''
