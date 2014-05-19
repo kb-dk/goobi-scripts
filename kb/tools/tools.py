@@ -413,9 +413,10 @@ def copy_files(source,dest,transit=None,delete_original=False,wait_interval=60,
             msg = ('Deleting source files in {0}.'.format(source))
             logger.debug(msg)
         shutil.rmtree(source)
-    msg = ('All files have been copied from {0} to {1}.')
-    msg = msg.format(source,dest_dir)
-    logger.debug(msg) 
+    if logger and debug:
+        msg = ('All files have been copied from {0} to {1}.')
+        msg = msg.format(source,dest_dir)
+        logger.debug(msg) 
 
 def cutPdf(inputPdf, outputPdf, fromPage, toPage):
     '''
