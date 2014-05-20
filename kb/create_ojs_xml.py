@@ -49,11 +49,12 @@ class CreateOJSXML( Step ):
 		ojs_metadata_dir = self.getConfigItem('metadata_ojs_path', None, 'process_folder_structure')
 		self.ojs_metadata_dir = os.path.join(process_path, ojs_metadata_dir)
 
-		pdf_path = self.getConfigItem('doc_pdf_path', None, 'process_folder_structure')
+		pdf_path = self.getConfigItem('doc_limbpdf_path', None, 'process_folder_structure')
 		abs_pdf_path = os.path.join(process_path, pdf_path)
 		self.pdf_name = tools.getFirstFileWithExtension(abs_pdf_path, '.pdf')
 		self.pdf_file = os.path.join(abs_pdf_path, self.pdf_name)
-
+		# TODO: check files in 'doc_pdf_path' instead of 'doc_limbpdf_path'
+		# 'doc_limbpdf_path' contains the splitted pdf-files
 		tools.ensureFilesExist(self.anchor_file, self.toc_file, self.pdf_file)
 		tools.ensureDirsExist(self.ojs_metadata_dir)
 
