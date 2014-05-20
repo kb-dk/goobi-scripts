@@ -119,8 +119,8 @@ class GoobiCommunicate() :
             
         url += self.url_token.format( token=self.token )
         
-        if self.debugging:
-            print "Debug: GoobiCommunicate() URL:", url
+        if self.debugging and additional and 'value' in additional:
+            print additional['value']
         
         # TODO: Tidy this up. Need to catch exceptions properly and ensure 
         # request is closed (although python handles that too)
