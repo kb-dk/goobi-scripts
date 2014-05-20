@@ -48,7 +48,6 @@ class UploadToOJS( Step ):
         the current process dir, the pdf dir,
         and the ojs xml dir.
         '''
-        subprocess.call('whoami')
         ojs_mount = self.getConfigItem('ojs_mount')
         ojs_metadata_dir = self.getConfigItem('metadata_ojs_path',
                                               section= self.folder_structure_section)
