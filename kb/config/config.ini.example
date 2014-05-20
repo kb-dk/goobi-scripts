@@ -66,20 +66,20 @@ passcode = test
 [copy_to_limb]
 ;debug = true
 log = /opt/digiverso/logs/step_copy_to_limb.log
-limb_transit = /mnt/limb-01/InputFolder/goobi-transit/
-limb_hotfolder = /mnt/limb-01/InputFolder/goobi-test/
-sleep_interval=10
+limb_transit = /mnt/limb-01/InputFolder/tidsskrift-dk-transit/
+limb_hotfolder = /mnt/limb-01/InputFolder/tidsskrift-dk-color/
+sleep_interval=30
 retries = 10
 
 [limb_output]
 ;debug = true
 log = /opt/digiverso/logs/step_validate_limb_output.log
-limb_output = /mnt/limb-01/OutputFolder/goobi-output-test/
+limb_output = /mnt/limb-01/OutputFolder/tidsskrift-dk/
 alto = alto
 toc = toc
 pdf = pdf
-retry_num = 5
-retry_wait = 10
+retry_num = 12
+retry_wait = 300
 
 [split_pdf_file]
 ;debug = true
