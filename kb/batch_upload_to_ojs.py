@@ -43,7 +43,7 @@ def uploadFiles(args):
 	'''
 	print 'python upload_to_ojs.py {0}'.format(args)
 	os.system('python upload_to_ojs.py {0}'.format(args))
-	sys.exit(0)
+	
 
 def runImportScript(args):
 	'''
