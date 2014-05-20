@@ -3,6 +3,7 @@ import os
 import tools.tools as tools
 import tools.goobi as goobi_tools
 from tools.errors import DataError
+import subprocess
 
 
 class UploadToOJS( Step ):
@@ -47,6 +48,7 @@ class UploadToOJS( Step ):
         the current process dir, the pdf dir,
         and the ojs xml dir.
         '''
+        subprocess.call('whoami')
         ojs_mount = self.getConfigItem('ojs_mount')
         ojs_metadata_dir = self.getConfigItem('metadata_ojs_path',
                                               section= self.folder_structure_section)
@@ -60,7 +62,7 @@ class UploadToOJS( Step ):
                                           section= self.process_files_section)
         anchor_data = goobi_tools.getAnchorFileData(os.path.join(self.command_line.process_path, anchor_name),
                                                     ['TitleDocMainShort'])
-        volume_title = anchor_data['TitleDocMainShort']
+        volume_title = tools.parseTitle(anchor_data['TitleDocMainShort'])
 
         ojs_journal_folder = os.path.join(ojs_mount, volume_title)
         tools.find_or_create_dir(ojs_journal_folder)
