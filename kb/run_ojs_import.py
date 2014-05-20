@@ -9,7 +9,6 @@ from tools.errors import DataError
 class RunOJSImport( Step ):
 
 	def setup(self):
-		self.name = 'Run OJS Import'
 		self.config_main_section = 'ojs'
 		self.essential_config_sections = set( ['ojs'] )
 		self.essential_commandlines = {

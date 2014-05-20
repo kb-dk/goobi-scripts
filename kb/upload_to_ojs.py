@@ -31,6 +31,7 @@ class UploadToOJS( Step ):
             self.transferPDFs()
             self.transferXML()
         except (DataError, OSError) as e:
+            print(e)
             return "Execution halted due to error {0}".format(e.strerror)
 
         return None
@@ -78,8 +79,7 @@ class UploadToOJS( Step ):
                          delete_original=False,
                          wait_interval=60,
                          max_retries=5,
-                         logger=self.glogger,
-                         debug=True
+                         logger=self.glogger
                          )
 
 
@@ -90,8 +90,8 @@ class UploadToOJS( Step ):
                          delete_original=False,
                          wait_interval=60,
                          max_retries=5,
-                         logger=self.glogger,
-                         debug=True)
+                         logger=self.glogger
+                         )
 
 if __name__ == '__main__':
     

@@ -255,6 +255,7 @@ def getArticleName(pdf_name, index):
     Generate article name for OJS articles
     in format <pdf_name>_<index>
     '''
+    index = str(index).zfill(4) # Add leading zeros to index
     return "{0}_{1}.pdf".format(pdf_name.replace('.pdf', ''), index)
 
 def pdfinfo(infile):
@@ -309,9 +310,8 @@ def pdfinfo(infile):
  
     return output
 
-
 def copy_files(source,dest,transit=None,delete_original=False,wait_interval=60,
-               max_retries=5,logger=None,debug=False):
+               max_retries=5,logger=None):
     """
     Copies all file (non recursive) from 'source' directory to 'dest'.
     if 'trasit' directory is given then the files are first copied to this directory, which is then moved to 'dest' dir
@@ -333,7 +333,7 @@ def copy_files(source,dest,transit=None,delete_original=False,wait_interval=60,
     files_not_copied = True
     while files_not_copied and (attempts<max_retries):
         attempts += 1
-        if logger and debug: 
+        if logger: 
             msg = 'Copying files from {0} to {1}'
             msg = msg.format(source,dest_dir)
             logger.debug(msg)
@@ -344,7 +344,7 @@ def copy_files(source,dest,transit=None,delete_original=False,wait_interval=60,
             i = 0
             for src_file in src_files:
                 i += 1
-                if logger and debug and False: 
+                if logger and False: 
                     files_left = len([e for e in src_files if not e[1]])
                     msg = 'Initiating copy of files. {0} files left'
                     msg = msg.format(files_left)
@@ -353,7 +353,7 @@ def copy_files(source,dest,transit=None,delete_original=False,wait_interval=60,
                 if (not file_copied):
                     full_file_name = os.path.join(source, src_file[0])
                     if (os.path.isfile(full_file_name)):
-                        if logger and debug and False: 
+                        if logger and False: 
                             msg = "Copying file {0}".format(src_file[0])
                             logger.debug(msg)
                         shutil.copy2(full_file_name, dest_dir)
@@ -361,23 +361,23 @@ def copy_files(source,dest,transit=None,delete_original=False,wait_interval=60,
                     else:
                         #Remove elem so it doesn't count as a not yet copied file.
                         src_files.remove(src_file)
-                        if logger and debug: 
+                        if logger: 
                             msg = ("{0} is not a file ... skipping it")
                             msg = msg.format(full_file_name)
                             logger.debug(msg)
-                if (i%50)==0 and logger and debug: 
+                if (i%50)==0 and logger: 
                     files_left = len([e for e in src_files if not e[1]])
                     msg = 'Initiating copy of files. {0} files left'
                     msg = msg.format(files_left)
                     logger.debug(msg)
         except Exception as e:
-            if logger and debug:
+            if logger:
                 msg = '"Error copying file"'
                 logger.debug(msg)
                 logger.debug(e)
         files_not_copied = len([e for e in src_files if not e[1]]) > 0
         if files_not_copied:
-            if logger and debug:
+            if logger:
                 retry_in = wait_interval
                 files_left = len([e for e in src_files if not e[1]])
                 msg = ('Not all files copied. {0} files left. Retrying in {1} '
@@ -402,18 +402,18 @@ def copy_files(source,dest,transit=None,delete_original=False,wait_interval=60,
                                  files_copied,files_total,files_left)
             raise errors.TransferError(error)
     if transit:
-        if logger and debug:
+        if logger:
             msg = ('Moving the folder {0} (in transit folder) to final '
                    'destination folder {1}')
             msg = msg.format(dest_dir,dest)
             logger.debug(msg)
         shutil.move(dest_dir,dest)
     if delete_original: 
-        if logger and debug:
+        if logger:
             msg = ('Deleting source files in {0}.'.format(source))
             logger.debug(msg)
         shutil.rmtree(source)
-    if logger and debug:
+    if logger:
         msg = ('All files have been copied from {0} to {1}.')
         msg = msg.format(source,dest_dir)
         logger.debug(msg) 

@@ -49,8 +49,7 @@ class CopyToLimb( Step ):
                              delete_original = False,
                              wait_interval = self.sleep_interval,
                              max_retries = self.retries,
-                             logger = self.glogger,
-                             debug = True)
+                             logger = self.glogger)
         except errors.TransferError as e:
             error = e.strerror
         except errors.TransferTimedOut as e:

@@ -72,7 +72,6 @@ class MoveToGoobi( Step ):
                          delete_original = True,
                          wait_interval = self.sleep_interval,
                          max_retries = self.retries,
-                         logger = self.glogger,
-                         debug = True)
+                         logger = self.glogger)
 if __name__ == '__main__':    
     MoveToGoobi().begin()
