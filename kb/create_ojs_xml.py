@@ -79,7 +79,9 @@ class CreateOJSXML( Step ):
 		anchor_data = self.getAnchorFileData()
 
 		# this is the dir where files will be uploaded to
-		self.ojs_dir = os.path.join(self.ojs_root, anchor_data['TitleDocMainShort'], self.command_line.process_title)
+		
+		journal_title_path = tools.parseTitle(anchor_data['TitleDocMainShort'])
+		self.ojs_dir = os.path.join(self.ojs_root,journal_title_path, self.command_line.process_title)
 		
 		pdfinfo = tools.pdfinfo(self.pdf_file)
 		toc_data = tools.parseToc(self.toc_file)
