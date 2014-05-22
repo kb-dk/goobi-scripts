@@ -87,6 +87,16 @@ class TOC(object):
 				end_page = int(pdfinfo['Pages'])
 			article.end_page = end_page
 
+
+	def getFrontSection(self):
+		return self.__getSection('Front Matter')
+
+	def getBodySection(self):
+		return self.__getSection('Body')
+
+	def getBackSection(self):
+		return self.__getSection('Back Matter')			
+
 	def prettyPrint(self):
 		for s in self.sections:
 			print "==========================="
@@ -108,6 +118,12 @@ class TOC(object):
 			for a in s.articles:
 				all_articles.append(a)
 		return all_articles
+
+	
+	def __getSection(self, name):
+		for s in self.sections:
+			if s.title == name: return s
+		return None
 
 
 
