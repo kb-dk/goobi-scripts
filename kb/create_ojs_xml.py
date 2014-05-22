@@ -5,6 +5,7 @@ from xml.dom import minidom
 from tools.errors import DataError, InputError
 
 from tools import tools
+from tools.toc import TOC
 import os, time
 
 class CreateOJSXML( Step ):
@@ -85,8 +86,8 @@ class CreateOJSXML( Step ):
 		self.ojs_dir = os.path.join(self.ojs_root,journal_title_path, self.command_line.process_title)
 		
 		pdfinfo = tools.pdfinfo(self.pdf_file)
-		toc_data = tools.parseToc(self.toc_file)
-		toc_data = tools.enrichToc(toc_data, pdfinfo, self.command_line.overlapping_articles)
+		toc_data = TOC(self.toc_file)
+		toc_data.addEndPageInfo(pdfinfo, self.overlapping_articles)
 		
 		impl = minidom.getDOMImplementation()
 		doc = impl.createDocument(None, "issue", None)
@@ -96,26 +97,21 @@ class CreateOJSXML( Step ):
 		article_section = self.createArticleSectionXML(doc, anchor_data)
 		back_section = self.createBackSectionXML(doc, anchor_data)
 		date_published = "{0}-01-01".format(anchor_data['PublicationYear'])
-		
-		# 3 potential cases here:
-		#   1 - article is front matter, in which case, add to front matter section
-		# 	2 - article is normal article, in which case, add to article section
-		# 	3 - article is back matter, in which cases, add to back matter section 		
-		for index, article in enumerate(toc_data):
-			if article['title'] == 'Front Matter':
-				article['title'] = 'Indledning'
-				article_xml = self.createArticleXML(doc, article, date_published, index)
-				front_section.appendChild(article_xml)
-			elif article['title'] == 'Back Matter':
-				article['title'] = 'Diverse'
-				article_xml = self.createArticleXML(doc, article, date_published, index)
-				back_section.appendChild(article_xml)
-			else:
-				article_xml = self.createArticleXML(doc, article, date_published, index)
-				article_section.appendChild(article_xml) 
-	
+
+
+		front_section = self.createArticlesForSection(\
+			toc_data.getFrontSection().articles, front_section, doc, date_published, 'f')
+
 		doc.documentElement.appendChild(front_section)
+		
+		article_section = self.createArticlesForSection(\
+			toc_data.getBodySection().articles, article_section, doc, date_published, 'a')
+
 		doc.documentElement.appendChild(article_section)
+		
+		back_section = self.createArticlesForSection(\
+			toc_data.getBackSection().articles, article_section, doc, date_published, 'b')
+
 		doc.documentElement.appendChild(back_section)
 
 		# save the xml content to the correct file
@@ -123,7 +119,14 @@ class CreateOJSXML( Step ):
 		output = open(output_name, 'w')
 		
 		output.write(doc.toxml('utf-8'))
-		
+	
+	def createArticlesForSection(self, articles, section_tag, doc, date, key):
+		for index, art in enumerate(articles):
+			suffix = "{0}_{1}".format(key, index)
+			art = self.__translateArticleTitles(art)
+			article = self.createArticleXML(doc, art, date, suffix)
+			section_tag.appendChild(article)
+		return section_tag	
 
 	def createSectionXML(self, doc, anchor_data, title, abbrev):
 		section = doc.createElement('section')
@@ -152,8 +155,8 @@ class CreateOJSXML( Step ):
 		corresponding to this data
 		'''
 		article_tag = doc.createElement('article')
-		title_tag = self.createXMLTextTag(doc, 'title', article['title'])
-		page_range = "{0}-{1}".format(article['start_page'], article['end_page'])
+		title_tag = self.createXMLTextTag(doc, 'title', article.title)
+		page_range = "{0}-{1}".format(article.start_page, article.end_page)
 		pages_tag = self.createXMLTextTag(doc, 'pages', page_range) # TODO fix this to use range
 		published_tag = self.createXMLTextTag(doc, 'date_published', date_published) 
 		galley_tag = self.createGalleyXML(doc, index)
@@ -163,8 +166,8 @@ class CreateOJSXML( Step ):
 		article_tag.appendChild(pages_tag)
 
 		# don't add an author tag if we don't have one (e.g. Front Matter)
-		if article['author']: 
-			author_tag = self.createAuthorXML(doc, article['author'])
+		if article.author: 
+			author_tag = self.createAuthorXML(doc, article.author)
 			article_tag.appendChild(author_tag)
 
 		article_tag.appendChild(galley_tag)
@@ -293,6 +296,12 @@ class CreateOJSXML( Step ):
 
 		return data
 	
+	def __translateArticleTitles(self, article):
+		if article.title == 'Front Matter': article.title = 'Indledning'
+		elif article.title == 'Back Matter': article.title = 'Diverse'
+
+		return article
+
 if __name__ == '__main__':
 	
 	CreateOJSXML( ).begin()
