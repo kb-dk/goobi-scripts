@@ -158,6 +158,7 @@ class CreateOJSXML( Step ):
 		published_tag = self.createXMLTextTag(doc, 'date_published', date_published) 
 		galley_tag = self.createGalleyXML(doc, index)
 		
+		article_tag.appendChild(published_tag)
 		article_tag.appendChild(title_tag)
 		article_tag.appendChild(pages_tag)
 
