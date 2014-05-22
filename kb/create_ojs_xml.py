@@ -234,6 +234,9 @@ class CreateOJSXML( Step ):
 		top.setAttribute('current', 'false')
 		top.setAttribute('published', 'true')
 		
+		top.setAttribute('identification', 'num_vol_year')
+		
+		
 		title_tag = self.createXMLTextTag(doc, 'title', anchor_data['TitleDocMainShort'])
 		top.appendChild(title_tag)
 		
@@ -243,9 +246,8 @@ class CreateOJSXML( Step ):
 		volume_tag = self.createXMLTextTag(doc, 'volume', anchor_data['VolumeNumber'])
 		top.appendChild(volume_tag)
 
-		if 'IssueNumber' in anchor_data:
-			number_tag = self.createXMLTextTag(doc, 'number', anchor_data['IssueNumber'])
-			top.appendChild(number_tag)
+		number_tag = self.createXMLTextTag(doc, 'number', anchor_data['IssueNumber'])
+		top.appendChild(number_tag)
 
 		access_tag = self.createXMLTextTag(doc, 'access_date', time.strftime("%Y-%m-%d"))
 		top.appendChild(access_tag)
