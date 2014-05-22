@@ -58,18 +58,57 @@ class TOC(object):
 	def addSection(self, section):
 		self.sections.append(section)
 
+	def addEndPageInfo(self, pdfinfo, overlapping_articles=False):
+		'''
+		Use data from toc and pdfinfo to add end_page
+		info for Toc articles
+		returns dict with new end_page field
+		'''
+		all_articles = self.__allArticles()
+		for index, article in enumerate(all_articles):
+			# we need to figure out how to get the end page for the article
+			start_page = article.start_page
+			if index != len(all_articles) - 1: # if this is not the last article
+				next_item = all_articles[index + 1]
+				if overlapping_articles: 
+					# last page is the start of the next items page
+					end_page = next_item.start_page
+				else:
+					# when we're not doing overlapping pages
+					# last page is the page before the next item's start page 
+					# unless that page is less than current page
+					if next_item.start_page-1 >= start_page:
+						end_page = next_item.start_page -1
+					else:
+						end_page = start_page
+			# if this is the last article - we need to take until the pdf's end page
+			# as given by pdfinfo
+			else:
+				end_page = int(pdfinfo['Pages'])
+			article.end_page = end_page
+
 	def prettyPrint(self):
 		for s in self.sections:
 			print "==========================="
 			print "Section: {0}".format(s.title)
+			print "==========================="
 			for a in s.articles:
-				print u"Title: {0} | Author: {1} | Start Page {2}".format(a.title, a.author, a.start_page) 
+				print u"Title: {0} | Author: {1} | StartPage: {2} | EndPage {3}"\
+				.format(a.title[0:5], a.author, a.start_page, a.end_page) 
 
 	def __decodeRow(self, row):	
 		decoded_row = []
 		for i, val in enumerate(row):
 			decoded_row.insert(i, val.decode('utf-8').replace('"', ''))
 		return decoded_row
+
+	def __allArticles(self):
+		all_articles = []
+		for s in self.sections:
+			for a in s.articles:
+				all_articles.append(a)
+		return all_articles
+
 
 
 class TOCSection(object):
