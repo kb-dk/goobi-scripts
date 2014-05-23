@@ -33,7 +33,8 @@ class TOC(object):
 					raise ValueError(error)
 			# As we exit the loop we will have one more section we need to save
 			if sect: self.addSection(sect)
-			self.correctSections() 
+			self.correctSections()
+			self.addArticleNumbers() 
 	
 	def correctSections(self):
 		'''
@@ -43,7 +44,6 @@ class TOC(object):
 		the sections's start page, do the same.
 		'''
 		for s in self.sections:			
-			#print "{0} is gt than {1}? {2}".format(s.articles[0].start_page, s.start_page, (s.articles[0].start_page > s.start_page))
 			if len(s.articles) == 0:
 				art = TOCArticle(['1', s.title, s.start_page])
 				s.addArticle(art)
@@ -51,6 +51,11 @@ class TOC(object):
 				art = TOCArticle(['1', s.title, s.start_page])
 				s.articles.insert(0, art) # add article to start of articles list
 
+	def addArticleNumbers(self):
+		index = 1
+		for article in self.__allArticles():
+			article.number = index
+			index += 1
 
 	def getSections(self):
 		return self.sections
@@ -103,8 +108,8 @@ class TOC(object):
 			print "Section: {0}".format(s.title)
 			print "==========================="
 			for a in s.articles:
-				print u"Title: {0} | Author: {1} | StartPage: {2} | EndPage {3}"\
-				.format(a.title[0:5], a.author, a.start_page, a.end_page) 
+				print u"Title: {0}... | Author: {1} | StartPage: {2} | EndPage {3} | Number {4}"\
+				.format(a.title[0:5], a.author, a.start_page, a.end_page, a.number) 
 
 	def __decodeRow(self, row):	
 		decoded_row = []
@@ -149,6 +154,7 @@ class TOCArticle(object):
 	title = ''
 	start_page = 0
 	end_page = 0
+	number = 0
 
 	def __init__(self, line_array):
 		'''
