@@ -117,6 +117,7 @@ class CreateOJSXML( Step ):
 		# save the xml content to the correct file
 		output_name = os.path.join(self.ojs_metadata_dir, self.command_line.process_title + '.xml')
 		output = open(output_name, 'w')
+
 		output.write(doc.toxml('utf-8'))
 	
 	def createArticlesForSection(self, articles, section_tag, doc, date):
@@ -200,17 +201,23 @@ class CreateOJSXML( Step ):
 		author_tag = doc.createElement('author')
 		name = name_str.split(' ')
 	
-		firstname_tag = self.createXMLTextTag(doc, 'firstname', name[0])
-		lastname_tag = self.createXMLTextTag(doc, 'lastname', name[-1])
+		# only create a firstname if there's more than one name
+		if len(name) > 1:
+			firstname_tag = self.createXMLTextTag(doc, 'firstname', name[0])
+		else:
+			firstname_tag = self.createEmptyElement(doc, 'firstname')
 		
+		# middlename is anything between the first and last names, or an empty element 
 		if len(name[1:-1]) > 0:
 			middlename = ' '.join(name[1:-1])
 			middlename_tag = self.createXMLTextTag(doc, 'middlename', middlename)
 		else:
 			middlename_tag = self.createEmptyElement(doc, 'middlename')
 		
+		lastname_tag = self.createXMLTextTag(doc, 'lastname', name[-1])
 		email_tag = self.createEmptyElement(doc, 'email')
-
+		
+		
 		author_tag.appendChild(firstname_tag)
 		author_tag.appendChild(middlename_tag)
 		author_tag.appendChild(lastname_tag)
