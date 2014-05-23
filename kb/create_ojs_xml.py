@@ -100,31 +100,29 @@ class CreateOJSXML( Step ):
 
 
 		front_section = self.createArticlesForSection(\
-			toc_data.getFrontSection().articles, front_section, doc, date_published, 'f')
+			toc_data.getFrontSection().articles, front_section, doc, date_published)
 
 		doc.documentElement.appendChild(front_section)
 		
 		article_section = self.createArticlesForSection(\
-			toc_data.getBodySection().articles, article_section, doc, date_published, 'a')
+			toc_data.getBodySection().articles, article_section, doc, date_published)
 
 		doc.documentElement.appendChild(article_section)
 		
 		back_section = self.createArticlesForSection(\
-			toc_data.getBackSection().articles, article_section, doc, date_published, 'b')
+			toc_data.getBackSection().articles, article_section, doc, date_published)
 
 		doc.documentElement.appendChild(back_section)
 
 		# save the xml content to the correct file
 		output_name = os.path.join(self.ojs_metadata_dir, self.command_line.process_title + '.xml')
 		output = open(output_name, 'w')
-		
 		output.write(doc.toxml('utf-8'))
 	
-	def createArticlesForSection(self, articles, section_tag, doc, date, key):
-		for index, art in enumerate(articles):
-			suffix = "{0}_{1}".format(key, index)
+	def createArticlesForSection(self, articles, section_tag, doc, date):
+		for art in articles:
 			art = self.__translateArticleTitles(art)
-			article = self.createArticleXML(doc, art, date, suffix)
+			article = self.createArticleXML(doc, art, date, art.number)
 			section_tag.appendChild(article)
 		return section_tag	
 
