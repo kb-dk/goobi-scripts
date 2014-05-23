@@ -4,6 +4,7 @@ from goobi.goobi_step import Step
 
 from tools import tools as tools
 from tools import errors
+from tools.toc import TOC
 import os
 
 class SplitPdf( Step ):
@@ -27,20 +28,17 @@ class SplitPdf( Step ):
         3. cut up pdf file
         4. profit!
         '''
-        error = None
         try:
             self.getVariables()
             self.getPdf()
             self.getToc()
             self.dividePdf()
+            return None
         except ValueError as e:
-            error = e.strerror
-        except IOError as e:
+            return e
+        except (IOError, errors.PdftkError) as e:
             #"Execution halted due to error {0}".format()
-            error = e.strerror
-        except errors.PdftkError as e:
-            error = e.strerror
-        return error
+            return e.strerror
 
     def getVariables(self):
         '''
@@ -81,26 +79,24 @@ class SplitPdf( Step ):
     
     def getToc(self):
         toc = tools.getFirstFileWithExtension(self.toc_dir, '.toc')
-        self.toc_data = tools.parseToc(os.path.join(self.toc_dir, toc))
-        self.toc_data = tools.enrichToc(self.toc_data,
-                                        self.pdfinfo,
-                                        self.overlapping_articles)
+        self.toc_data = TOC(os.path.join(self.toc_dir, toc))
+        self.toc_data.addEndPageInfo(self.pdfinfo,self.overlapping_articles)
 
     def dividePdf(self):
         ''' 
         Cut up the volume into articles pdfs based on the data in the LIMB toc
         '''
-        for index, article in enumerate(self.toc_data):
-            output_name = tools.getArticleName(self.pdf_name, index)
+        for article in self.toc_data.allArticles():
+            output_name = tools.getArticleName(self.pdf_name, article.number)
             output_path = os.path.join(self.pdf_output_dir, output_name)
             self.debug_message("creating file {0}".format(output_path))
             # if our call to pdftk fails, get out quickly
-            if not tools.cutPdf(self.pdf_path,  output_path, article['start_page'], article['end_page']):
+            if not tools.cutPdf(self.pdf_path,  output_path, article.start_page, article.end_page):
                 error = ('PDF division failed. Input file: {0}, '
                          'start page: {1}, end page: {2}')
                 error = error.format(self.pdf_path,
-                                     article['start_page'],
-                                     article['end_page'])
+                                     article.start_page,
+                                     article.end_page)
                 raise IOError(error)
         return None
 
