@@ -53,7 +53,7 @@ class TOC(object):
 
 	def addArticleNumbers(self):
 		index = 1
-		for article in self.__allArticles():
+		for article in self.allArticles():
 			article.number = index
 			index += 1
 
@@ -69,7 +69,7 @@ class TOC(object):
 		info for Toc articles
 		returns dict with new end_page field
 		'''
-		all_articles = self.__allArticles()
+		all_articles = self.allArticles()
 		for index, article in enumerate(all_articles):
 			# we need to figure out how to get the end page for the article
 			start_page = article.start_page
@@ -117,7 +117,7 @@ class TOC(object):
 			decoded_row.insert(i, val.decode('utf-8').replace('"', ''))
 		return decoded_row
 
-	def __allArticles(self):
+	def allArticles(self):
 		all_articles = []
 		for s in self.sections:
 			for a in s.articles:
