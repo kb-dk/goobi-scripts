@@ -30,10 +30,10 @@ class CreateOJSXML( Step ):
 		except OSError as e:
 			return e.strerror + " " + e.filename
 		except (DataError, IOError, InputError) as e:
-			self.glogger.debug_message(str(e))
+			self.debug_message(str(e))
 			return e.strerror
 		except Exception as e:
-			self.glogger.debug_message(str(e))
+			self.debug_message(str(e))
 			raise e
 		# if we got here everything is fine
 		return None
