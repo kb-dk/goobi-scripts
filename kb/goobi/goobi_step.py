@@ -226,6 +226,7 @@ class Step( object ):
                 error_msg = error_msg.format(self.name,
                                              self.auto_report_problem) 
                 self.error_message(error_msg)
+                self.error_message(error)
                 self.reportToStep( error )
             else:
                 error_msg = ('{0} failed. Error message: "{0}"')
