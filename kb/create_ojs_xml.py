@@ -13,7 +13,9 @@ class CreateOJSXML( Step ):
 	def setup(self):
 		self.name = 'Create OJS XML'
 		self.config_main_section = 'ojs'
-		self.essential_config_sections = set( ['ojs', 'process_folder_structure', 'process_files'] )
+		self.essential_config_sections = set( ['ojs',
+											   'process_folder_structure',
+											   'process_files'] )
 		self.essential_commandlines = {
 			'process_id' : 'number',
 			'process_title' : 'string',
@@ -102,20 +104,24 @@ class CreateOJSXML( Step ):
 		back_section = self.createBackSectionXML(doc, anchor_data)
 		date_published = "{0}-01-01".format(anchor_data['PublicationYear'])
 
-
-		front_section = self.createArticlesForSection(\
-			toc_data.getFrontSection().articles, front_section, doc, date_published)
+		temp_front_section = toc_data.getFrontSection()
+		if temp_front_section:
+			front_section = self.createArticlesForSection(\
+				temp_front_section.articles, front_section, doc, date_published)
 
 		doc.documentElement.appendChild(front_section)
 		
-		article_section = self.createArticlesForSection(\
-			toc_data.getBodySection().articles, article_section, doc, date_published)
-
+		temp_body_section = toc_data.getBodySection()
+		if temp_body_section: 
+			article_section = self.createArticlesForSection(\
+				temp_body_section.articles, article_section, doc, date_published)
+		
 		doc.documentElement.appendChild(article_section)
 		
-		back_section = self.createArticlesForSection(\
-			toc_data.getBackSection().articles, article_section, doc, date_published)
-
+		temp_back_section = toc_data.getBackSection()
+		if temp_back_section:
+			back_section = self.createArticlesForSection(\
+				temp_back_section.articles, back_section, doc, date_published)
 		doc.documentElement.appendChild(back_section)
 
 		# save the xml content to the correct file

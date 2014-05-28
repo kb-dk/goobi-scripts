@@ -12,6 +12,12 @@ log_backup_count = 4
 log = /opt/digiverso/logs/goobi_scripts.log
 #log_email = jeel@kb.dk
 
+[goobi]
+host = 127.0.0.1:8080
+passcode = test
+
+
+
 [folder_structure_creator]
 debug=false
 log = /opt/digiverso/logs/folder_structure_creator.log
@@ -59,9 +65,6 @@ debug = true
 log = /opt/digiverso/logs/step_tester.log
 log_email_subject = Goobi Tester step
 
-[goobi]
-host = 127.0.0.1:8080
-passcode = test
 
 [copy_to_limb]
 ;debug = true

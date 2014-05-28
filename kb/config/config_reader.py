@@ -22,8 +22,11 @@ class ConfigReader:
 				print c.my_section.myname # output string "my value"
 	'''
 	
-	def __init__(self, filename ):
-		config = ConfigParser.ConfigParser()
+	def __init__(self, filename, old_config=None ):
+		if old_config:
+			config = ConfigParser.ConfigParser(defaults=old_config)
+		else:
+			config = ConfigParser.ConfigParser()
 		config.readfp( codecs.open( filename, encoding="utf-8", mode="rb") )
 		
 		self.config = config

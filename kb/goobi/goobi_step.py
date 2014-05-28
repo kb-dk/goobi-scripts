@@ -85,7 +85,6 @@ class Step( object ):
     
         # Default names for essential settings
         self.cli_process_id_arg = "process_id"
-        self.cli_config_path_arg = "config_path"
         self.cli_step_id_arg = "step_id"
         self.cli_auto_complete_arg = 'auto_complete'
         self.cli_auto_report_problem_arg = "auto_report_problem"
@@ -94,12 +93,22 @@ class Step( object ):
         self.cli_step_name_arg = 'step_name'
         
         self.config_general_section = "general"
+        self.config_goobi_section = 'goobi'
         
         self.name = ""
+        self.system_config_path = ''
+        self.config_path = ''
         self.config_main_section = "" # Info for this particular step
+        
+        # General section and goobi section must always be present
+        # These are placed in a system specific config file
+        self.essential_system_config_sections = set ([self.config_general_section,
+                                                      self.config_goobi_section])
+        # Config is specific for workflow scripts
         self.essential_config_sections = set( [] )
-        self.essential_commandlines = {}
-
+        # Process id must always be present
+        self.essential_commandlines = {self.cli_process_id_arg: "number"}
+        
         self.command_line = None
         self.config = None
         
@@ -113,18 +122,11 @@ class Step( object ):
         self.auto_complete = False
         self.detach = False
         
-        
+        # Run setup for specific workflow script
         self.setup()
-        
-        
-        # Create list of config setions we want. Always assume Goobi is needed.
-        self.essential_config_sections.update( ["goobi",
-                                                self.config_main_section] ) 
-        
-        # Add process_id to default commandlines - we need it for logging to Goobi
-        if self.cli_process_id_arg not in self.essential_commandlines.keys() :
-            self.essential_commandlines[self.cli_process_id_arg] = "number"
 
+        # Update 
+        self.essential_config_sections.update( [self.config_main_section] ) 
         # We need to make sure we have a full path to our config file
         #if self.cli_config_path_arg not in self.essential_commandlines.keys() :
         #    self.essential_commandlines[self.cli_config_path_arg] = "file"
@@ -134,25 +136,24 @@ class Step( object ):
         self.command_line, error_command_line = \
             self.getCommandLine( must_have=self.essential_commandlines )
         #
-        # Get configuration information
-        # YES. I know this is ugly!
-        #TODO: A better way to give config.ini-path to goobi_step from Goobi
-        self.config_path = ''
-        if not self.command_line.has(self.cli_config_path_arg):
-            self.config_path = '/opt/digiverso/goobi/scripts/kb/config/config.ini'
-        else:
-            self.config_path = self.command_line.config_path 
-        self.config, error = \
-            self.getConfig( self.config_path,
-                            must_have=self.essential_config_sections )
-        if error:
-            self.exit( error )
+        # Load system configuration information
+        if self.system_config_path == '':
+            if not self.command_line.has("system_config_path"):
+                self.system_config_path = '/opt/digiverso/goobi/scripts/kb/config/config.ini'
+            else:
+                self.system_config_path = self.command_line.system_config_path 
+        self.getConfig(self.system_config_path,
+                       must_have=self.essential_system_config_sections )
+        # Load config specific for step
+        if not self.config_path == '':
+            self.getConfig(self.config_path,
+                           must_have=self.essential_config_sections )
         
         if self.command_line.has(self.cli_step_name_arg):
             self.name = self.command_line.get(self.cli_step_name_arg)
         #
         # Are we debugging?
-        self.debug = self.debugging( self.config )
+        self.debug = self.debugging()
             
         if self.command_line and self.command_line.has(self.cli_debug_arg) :
             self.debug = not ( self.command_line.debug.lower() == "false" )
@@ -284,18 +285,17 @@ class Step( object ):
         sys.exit(1)
         
     def getConfig( self, config_file, must_have ) :
-
-        error = None
-        config = ConfigReader(config_file)
+        # Add self.config so new config settings can be added to old.
+        config = ConfigReader(config_file,self.config)
         does_not_have_sections = []
-        
         for section in must_have:
             if len(section) > 0 and not config.hasSection( section ):
                 print "section {0} not found".format(section)
                 does_not_have_sections.append( section )
         if does_not_have_sections:
             error = "Error: Config file does not contain sections:- " + ", ".join( does_not_have_sections )
-        return config, error
+            raise ValueError(error)
+        self.config = config
     
     def getConfigSection(self, section, config=None):
         """
@@ -342,10 +342,8 @@ class Step( object ):
         else:
             return value
 
-    def debugging( self, config = None ) :
-        if not config:
-            config = self.config
-        debug = self.getConfigItem( "debug", config )
+    def debugging( self) :
+        debug = self.getConfigItem( "debug", self.config )
         if not debug:
             debug = False
         return debug
