@@ -22,13 +22,20 @@ class ConfigReader:
 				print c.my_section.myname # output string "my value"
 	'''
 	
-	def __init__(self, filename, old_config=None ):
-		if old_config:
-			config = ConfigParser.ConfigParser(defaults=old_config)
-		else:
-			config = ConfigParser.ConfigParser()
+	def __init__(self, filename, old_config=None,overwrite_sections=False,
+				 overwrite_options=False):
+		config = ConfigParser.ConfigParser()
 		config.readfp( codecs.open( filename, encoding="utf-8", mode="rb") )
-		
+		if old_config:
+			old_config = old_config.config
+			for section in old_config.sections():
+				if overwrite_sections and config.has_section(section):
+					continue
+				config.add_section(section)
+				for name, value in old_config.items( section ):
+					if overwrite_options and config.has_option(section, name):
+						continue
+					config.set(section, name, value)
 		self.config = config
 		
 		for section in config.sections() :

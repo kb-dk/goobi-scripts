@@ -144,8 +144,29 @@ class Step( object ):
                 self.system_config_path = self.command_line.system_config_path 
         self.getConfig(self.system_config_path,
                        must_have=self.essential_system_config_sections )
+        
         # Load config specific for step
+        if self.command_line.has("config_path"):
+            # root is the one above the folder "goobi" where goobi_step.py 
+            # is located
+            cwd = os.path.dirname(os.path.realpath(__file__))
+            root = os.path.split(cwd)[0]
+            config_path = self.command_line.get('config_path')
+            alt_config_path = os.path.join(root,config_path)
+            if (os.path.exists(config_path) and os.path.isfile(config_path)):
+                self.config_path = config_path
+            elif (os.path.exists(alt_config_path) and
+                  os.path.isfile(alt_config_path)):
+                # config_path is a relative path from current working dir
+                self.config_path = alt_config_path
+            else:
+                error = ('config_path  from command line does not exist '
+                         'or is not a valid file. Neither {0} or {1}.')
+                error = error.format(config_path,alt_config_path)
+                raise IOError(error)
+        
         if not self.config_path == '':
+            self.info_message('config_path: '+self.config_path)
             self.getConfig(self.config_path,
                            must_have=self.essential_config_sections )
         
@@ -286,7 +307,9 @@ class Step( object ):
         
     def getConfig( self, config_file, must_have ) :
         # Add self.config so new config settings can be added to old.
-        config = ConfigReader(config_file,self.config)
+        config = ConfigReader(config_file,
+                              self.config,
+                              overwrite_sections=True)
         does_not_have_sections = []
         for section in must_have:
             if len(section) > 0 and not config.hasSection( section ):
@@ -467,8 +490,8 @@ class Step( object ):
         if self.getConfigItem('log'):
             log_file = self.getConfigItem('log')
         else:
-            return 'Error: Unable to open log file at : ' + log_file
-        
+            #TODO: Wrong error message
+            return 'Error: Unable to locate log file: ' + log_file
         try:
             rotating_logger_handler = logging.handlers.RotatingFileHandler( log_file, maxBytes=log_max_bytes, backupCount=log_backup_count )
             # Add Process ID to the log
