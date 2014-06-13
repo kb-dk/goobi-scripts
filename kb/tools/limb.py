@@ -1,5 +1,5 @@
 import tools as tools
-from tools.errors import DataError
+from errors import DataError
 import os
 
 def tocExists(toc_dir):
