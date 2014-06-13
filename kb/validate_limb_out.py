@@ -60,8 +60,7 @@ class ValidateLimbOutput( Step ):
         self.input_files_dir = os.path.join(process_path,input_files)
         
         # throw Error if one of our directories is missing
-        tools.ensureDirsExist(self.limb_dir, self.alto_dir, \
-            self.toc_dir, self.pdf_input_dir, self.input_files_dir)
+        
     
     def step(self):
         '''
@@ -80,6 +79,9 @@ class ValidateLimbOutput( Step ):
                 limb_tools.alreadyMoved(self.goobi_toc,self.goobi_pdf,
                                         self.input_files_dir,self.goobi_altos)):
                 return error
+            tools.ensureDirsExist(self.limb_dir, self.alto_dir,
+                                  self.toc_dir, self.pdf_input_dir,
+                                  self.input_files_dir)
             limb_tools.performValidations(self.toc_dir,self.pdf_input_dir,
                                           self.input_files_dir,self.alto_dir)
             return None

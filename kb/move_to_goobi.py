@@ -30,6 +30,7 @@ class MoveToGoobi( Step ):
                 limb_tools.alreadyMoved(self.goobi_toc,self.goobi_pdf,
                                         self.input_files,self.goobi_altos)):
                 return error
+            tools.ensureDirsExist(self.limb_altos, self.limb_toc, self.limb_pdf)
             self.moveFiles(self.limb_altos, self.goobi_altos)
             self.moveFiles(self.limb_toc, self.goobi_toc)
             self.moveFiles(self.limb_pdf, self.goobi_pdf)
@@ -76,7 +77,7 @@ class MoveToGoobi( Step ):
         self.retries = int(self.getConfigItem('retries', None, 'copy_to_limb'))
         
 
-        tools.ensureDirsExist(self.limb_altos, self.limb_toc, self.limb_pdf)
+        
         tools.ensureDirsExist(self.goobi_altos, self.goobi_toc, self.goobi_pdf)
 
     def moveFiles(self, source_dir, dest_dir):
