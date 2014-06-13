@@ -18,7 +18,6 @@ class WaitForLimb( Step ):
             'step_id' : 'number'
         }
     
-
         
     def step(self):
         '''
@@ -27,9 +26,15 @@ class WaitForLimb( Step ):
         In the event of a timeout, it reports back to 
         previous step before exiting.
         '''
+        error = None
         retry_counter = 0
         try:
             self.getVariables()
+            # First check if files already have been copied to dest
+            if (not self.ignore_dest and 
+                limb_tools.alreadyMoved(self.goobi_toc,self.goobi_pdf,
+                                        self.input_files_dir,self.goobi_altos)):
+                return error
             # keep on retrying for the given number of attempts
             while retry_counter < self.retry_num:
                 
@@ -76,6 +81,14 @@ class WaitForLimb( Step ):
         self.toc_dir = os.path.join(self.limb_dir, toc)
         self.pdf_input_dir = os.path.join(self.limb_dir, pdf)
         
+        # Set destination for paths
+        self.goobi_altos = os.path.join(self.command_line.process_path, 
+            self.getConfigItem('metadata_alto_path', None, 'process_folder_structure'))
+        self.goobi_toc = os.path.join(self.command_line.process_path, 
+            self.getConfigItem('metadata_toc_path', None, 'process_folder_structure'))
+        self.goobi_pdf = os.path.join(self.command_line.process_path, 
+            self.getConfigItem('doc_limbpdf_path', None, 'process_folder_structure'))
+                
         # Get path for input-files in process folder
         process_path = self.command_line.process_path
         input_files = self.getConfigItem('img_master_path',
@@ -85,6 +98,14 @@ class WaitForLimb( Step ):
         # Get retry number and retry-wait time
         self.retry_num = int(self.getConfigItem('retry_num'))
         self.retry_wait = int(self.getConfigItem('retry_wait'))
+        
+        # Set flag for ignore if files already have been copied
+        if (self.command_line.has('ignore_dest') and 
+            self.command_line.ignore_dest.lower() == True):
+            self.ignore_dest = True
+        else:
+            self.ignore_dest = False
+            
         
     def limbIsReady(self):
         '''

@@ -32,12 +32,26 @@ class ValidateLimbOutput( Step ):
         toc = self.getConfigItem('toc')
         pdf = self.getConfigItem('pdf')
         
-        
-        # join paths to create absolute paths
+        # join paths to create absolute paths on limb-server
         self.limb_dir = os.path.join(limb, process_title)
         self.alto_dir = os.path.join(self.limb_dir, alto)
         self.toc_dir = os.path.join(self.limb_dir, toc)
         self.pdf_input_dir = os.path.join(self.limb_dir, pdf)
+        
+        # get paths for output folder on goobi-server
+        self.goobi_altos = os.path.join(self.command_line.process_path, 
+            self.getConfigItem('metadata_alto_path', None, 'process_folder_structure'))
+        self.goobi_toc = os.path.join(self.command_line.process_path, 
+            self.getConfigItem('metadata_toc_path', None, 'process_folder_structure'))
+        self.goobi_pdf = os.path.join(self.command_line.process_path, 
+            self.getConfigItem('doc_limbpdf_path', None, 'process_folder_structure'))
+        
+        # Set flag for ignore if files already have been copied
+        if (self.command_line.has('ignore_dest') and 
+            self.command_line.ignore_dest.lower() == True):
+            self.ignore_dest = True
+        else:
+            self.ignore_dest = False
         
         # Get path for input-files in process folder
         process_path = self.command_line.process_path
@@ -58,46 +72,22 @@ class ValidateLimbOutput( Step ):
         In the case of errors a message will be returned
         and sent to the previous step.
         '''
+        error = None
         try:
             self.getVariables()
-            self.performValidations()
+            # Check files on goobi-server, if they already have been moved
+            if (not self.ignore_dest and 
+                limb_tools.alreadyMoved(self.goobi_toc,self.goobi_pdf,
+                                        self.input_files_dir,self.goobi_altos)):
+                return error
+            limb_tools.performValidations(self.toc_dir,self.pdf_input_dir,
+                                          self.input_files_dir,self.alto_dir)
             return None
         except IOError as e:
             return "IOError - {0}".format(e.strerror)
         except DataError as e: 
             return "Validation error - {0}.".format(e.strerror)
-    
-    def performValidations(self):
-        '''
-        1: validering af pdf (antal sider i pdf == antal input billeder)
-        2: validering af toc-fil (pt. er der en fil - validering ved parsing efterfoelgende)
-        3: validering af alto-filer (evt. "er der lige saa mange som input billeder" eller "er der filer")
         
-        Throw DataError if any validation fails
-        '''
-        if not limb_tools.tocExists(self.toc_dir): 
-            raise DataError("TOC not found!")
-        if not self.pageCountMatches():
-            raise DataError("PDF page count does not match input picture count!")
-        if not limb_tools.altoFileCountMatches(self.alto_dir, self.input_files_dir):
-            raise DataError("Number of alto files does not match number of input files.")
-        #self.info_message("All validations performed successfully.")
-        
-
-    def pageCountMatches(self):
-        '''
-        Compare num pages in pdfinfo with pages in input 
-        picture directory. 
-        return boolean 
-        '''
-        msg = ('Comparing page count with input files')
-        self.debug_message(msg)
-        pdf = tools.getFirstFileWithExtension(self.pdf_input_dir, '.pdf')
-        pdfInfo = tools.pdfinfo(os.path.join(self.pdf_input_dir, pdf))
-        numPages = int(pdfInfo['Pages'])
-        numInputFiles = len(os.listdir(self.input_files_dir))
-        return numPages == numInputFiles
-
 if __name__ == '__main__':
     
     ValidateLimbOutput().begin()

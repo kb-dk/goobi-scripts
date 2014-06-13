@@ -3,6 +3,7 @@
 from goobi.goobi_step import Step
 import os
 from tools import tools
+import tools.limb as limb_tools
 from tools.errors import DataError, TransferError, TransferTimedOut
 
 class MoveToGoobi( Step ):
@@ -20,9 +21,15 @@ class MoveToGoobi( Step ):
     def step(self):
         '''
         Move altos, toc, pdf from limb to goobi
-        '''    
+        ''' 
+        error = None   
         try:
             self.getVariables()
+            # check if files already have been copied:
+            if (not self.ignore_dest and 
+                limb_tools.alreadyMoved(self.goobi_toc,self.goobi_pdf,
+                                        self.input_files_dir,self.goobi_altos)):
+                return error
             self.moveFiles(self.limb_altos, self.goobi_altos)
             self.moveFiles(self.limb_toc, self.goobi_toc)
             self.moveFiles(self.limb_pdf, self.goobi_pdf)
@@ -31,9 +38,7 @@ class MoveToGoobi( Step ):
             #return "Could not convert string to int - check config file."
         except (TransferError, TransferTimedOut, IOError) as e:
             return e.strerror
-
         return None
-
 
     def getVariables(self):
         '''
@@ -53,6 +58,13 @@ class MoveToGoobi( Step ):
             self.getConfigItem('metadata_toc_path', None, 'process_folder_structure'))
         self.goobi_pdf = os.path.join(self.command_line.process_path, 
             self.getConfigItem('doc_limbpdf_path', None, 'process_folder_structure'))
+        
+        # Set flag for ignore if files already have been copied
+        if (self.command_line.has('ignore_dest') and 
+            self.command_line.ignore_dest.lower() == True):
+            self.ignore_dest = True
+        else:
+            self.ignore_dest = False
         
         self.sleep_interval = int(self.getConfigItem('sleep_interval', None, 'copy_to_limb'))
         self.retries = int(self.getConfigItem('retries', None, 'copy_to_limb'))

@@ -4,6 +4,7 @@ from goobi.goobi_step import Step
 import os
 from tools import tools
 from tools import errors
+from tools.filesystem import fs
 
 class CopyToLimb( Step ):
 
@@ -34,6 +35,11 @@ class CopyToLimb( Step ):
         self.hotfolder_dir = os.path.join(self.getConfigItem('limb_hotfolder'),
                                           self.command_line.process_title)
         self.sleep_interval = int(self.getConfigItem('sleep_interval'))
+        if (self.command_line.has('overwrite_files') and 
+            self.command_line.overwrite_files.lower() == True):
+            self.overwrite_destination_files = True
+        else:
+            self.overwrite_destination_files = False
         self.retries = int(self.getConfigItem('retries'))
 
     def step(self):
@@ -43,6 +49,9 @@ class CopyToLimb( Step ):
         msg = msg.format(self.source_dir, self.hotfolder_dir, self.transit_dir)
         self.debug_message(msg)
         try:
+            if not self.overwrite_destination_files:
+                if fs.compareDirectories(self.source_dir, self.hotfolder_dir):
+                    return error
             tools.copy_files(source = self.source_dir,
                              dest = self.hotfolder_dir,
                              transit = self.transit_dir,

@@ -141,9 +141,7 @@ def checkDirectoriesExist(*args):
     return false if any of them do not exist
     """
     for dir in args:
-        if not os.path.isdir(dir):
-            print "{0} is not a valid directory.".format(dir)
-            return False
+        check_folder(dir)
     return True
 
 
