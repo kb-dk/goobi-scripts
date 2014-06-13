@@ -44,6 +44,9 @@ class GoobiLogger():
         
     def debug( self, message ) :
         return self._log( 'debug', message )
+    
+    def exception( self, message ) :
+        return self._log( 'exception', message )
         
     def warning( self, message ): # Not an actual goobi message but here to complete the set of logging functions. 
         return self._log( 'warning' , message )
@@ -82,6 +85,9 @@ class GoobiLogger():
             level = 'info'
         elif level == 'critical' :
             level = 'error'
+        elif level == 'exception' :
+            level = 'error'
+            
         
         # Push the error out to stderr, this will cause Goobi to pause the step if the script is an automatic one.
         if level == 'error' :
@@ -107,6 +113,8 @@ class GoobiLogger():
                 self.pyLogger.critical( message )
             elif level == 'info':
                 self.pyLogger.info( message )
+            elif level == 'exception':
+                self.pyLogger.exception( message )
             elif level == 'user' :
                 self.pyLogger.info( "(Goobi User level) " + message )
                 

@@ -151,6 +151,7 @@ class Step( object ):
             # is located
             cwd = os.path.dirname(os.path.realpath(__file__))
             root = os.path.split(cwd)[0]
+            
             config_path = self.command_line.get('config_path')
             alt_config_path = os.path.join(root,config_path)
             if (os.path.exists(config_path) and os.path.isfile(config_path)):
@@ -160,7 +161,7 @@ class Step( object ):
                 # config_path is a relative path from current working dir
                 self.config_path = alt_config_path
             else:
-                error = ('config_path  from command line does not exist '
+                error = ('config_path from command line does not exist '
                          'or is not a valid file. Neither {0} or {1}.')
                 error = error.format(config_path,alt_config_path)
                 raise IOError(error)

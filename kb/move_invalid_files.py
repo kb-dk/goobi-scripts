@@ -70,14 +70,13 @@ class FileValidator( Step ) :
         self.err_msg_invalid_files = self.getConfigItem('err_msg_invalid_files')
         self.err_msg_contains_folders = self.getConfigItem('err_msg_contains_folders')
         self.valid_exts = self.getConfigItem('valid_file_exts').split(';')
-        
+        # TODO: Generalize this to take input from its own config section        
         rel_invalid_path = self.getConfigItem('img_invalid_path',
                                                None,
                                                self.folder_structure_section)
         self.invalid_path = os.path.join(self.command_line.process_path,
                                          rel_invalid_path)
         tools.find_or_create_dir(self.invalid_path)
-        
         rel_image_path = self.getConfigItem('img_master_path',
                                             None,
                                             self.folder_structure_section) 
