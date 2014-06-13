@@ -28,7 +28,7 @@ class MoveToGoobi( Step ):
             # check if files already have been copied:
             if (not self.ignore_dest and 
                 limb_tools.alreadyMoved(self.goobi_toc,self.goobi_pdf,
-                                        self.input_files_dir,self.goobi_altos)):
+                                        self.input_files,self.goobi_altos)):
                 return error
             self.moveFiles(self.limb_altos, self.goobi_altos)
             self.moveFiles(self.limb_toc, self.goobi_toc)
@@ -58,6 +58,12 @@ class MoveToGoobi( Step ):
             self.getConfigItem('metadata_toc_path', None, 'process_folder_structure'))
         self.goobi_pdf = os.path.join(self.command_line.process_path, 
             self.getConfigItem('doc_limbpdf_path', None, 'process_folder_structure'))
+        
+        # Get path for input-files in process folder
+        process_path = self.command_line.process_path
+        input_files = self.getConfigItem('img_master_path',
+                                         section= self.folder_structure_section) 
+        self.input_files = os.path.join(process_path,input_files)
         
         # Set flag for ignore if files already have been copied
         if (self.command_line.has('ignore_dest') and 

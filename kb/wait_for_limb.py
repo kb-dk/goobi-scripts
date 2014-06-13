@@ -33,7 +33,7 @@ class WaitForLimb( Step ):
             # First check if files already have been copied to dest
             if (not self.ignore_dest and 
                 limb_tools.alreadyMoved(self.goobi_toc,self.goobi_pdf,
-                                        self.input_files_dir,self.goobi_altos)):
+                                        self.input_files,self.goobi_altos)):
                 return error
             # keep on retrying for the given number of attempts
             while retry_counter < self.retry_num:
