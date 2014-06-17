@@ -10,6 +10,9 @@ class MoveToGoobi( Step ):
 
     def setup(self):
         self.config_main_section = 'limb_output'
+        self.folder_structure_section = 'process_folder_structure'
+        self.essential_config_sections.update([self.folder_structure_section, 
+                                               self.folder_structure_section] )
         self.essential_commandlines = {
             "process_id" : "number",
             "process_path" : "folder",
