@@ -96,8 +96,12 @@ def add_text_layer(pdf, hocrfile, height, dpi):
                     innerword = word[0]
                     if innerword.text is not None:
                         rawtext = innerword.text.strip()
+                    else:
+                        continue
                 except:
                     continue
+            if rawtext is None:
+                continue
             font_width = pdf.stringWidth(rawtext, 'invisible', 8)
             if font_width <= 0:
                 continue

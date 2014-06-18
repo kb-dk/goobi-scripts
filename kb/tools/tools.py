@@ -114,6 +114,14 @@ def check_file(file_path) :
             with open( file_path ) : pass
     return True
 
+def folderExist(folder):
+    try:
+        return check_folder(folder)
+    except (NameError, IOError):
+        return False
+    except Exception as e:
+        raise e
+
 def check_folder(folder):
     if not folder:
         raise NameError('Argument "folder" not set.')

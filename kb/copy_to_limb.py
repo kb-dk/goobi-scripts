@@ -50,7 +50,8 @@ class CopyToLimb( Step ):
         self.debug_message(msg)
         try:
             if not self.overwrite_destination_files:
-                if fs.compareDirectories(self.source_dir, self.hotfolder_dir):
+                if (tools.folderExist(self.hotfolder_dir) and
+                    fs.compareDirectories(self.source_dir, self.hotfolder_dir)):
                     return error
             tools.copy_files(source = self.source_dir,
                              dest = self.hotfolder_dir,
