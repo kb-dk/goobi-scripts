@@ -32,7 +32,7 @@ class create_process_folder_structure( Step ) :
         except Exception as e:
             error = str(e)
             self.error_message(error)
-            raise error
+            raise e
     
     def setVariables(self):
         self.folder_structure = self.getConfigSection(self.folder_structure_section)

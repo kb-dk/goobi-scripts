@@ -28,7 +28,7 @@ class CopyToLimb( Step ):
         rel_master_image_path = self.getConfigItem('img_master_path',
                                                    None,
                                                    self.folder_structure_section) 
-        self.source_dir = os.path.join(self.command_line.process_path,
+        self.source_folder = os.path.join(self.command_line.process_path,
                                        rel_master_image_path)
         self.transit_dir = os.path.join(self.getConfigItem('limb_transit'),
                                    self.command_line.process_title)
@@ -46,14 +46,14 @@ class CopyToLimb( Step ):
         error = None
         self.getVariables()
         msg = ('Copying files from {0} to {1} via transit {2}.')
-        msg = msg.format(self.source_dir, self.hotfolder_dir, self.transit_dir)
+        msg = msg.format(self.source_folder, self.hotfolder_dir, self.transit_dir)
         self.debug_message(msg)
         try:
             if not self.overwrite_destination_files:
                 if (tools.folderExist(self.hotfolder_dir) and
-                    fs.compareDirectories(self.source_dir, self.hotfolder_dir)):
+                    fs.compareDirectories(self.source_folder, self.hotfolder_dir)):
                     return error
-            tools.copy_files(source = self.source_dir,
+            tools.copy_files(source = self.source_folder,
                              dest = self.hotfolder_dir,
                              transit = self.transit_dir,
                              delete_original = False,

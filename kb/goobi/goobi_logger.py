@@ -2,6 +2,7 @@
 
 import datetime
 import sys
+import time
 
 from goobi_communicate import GoobiCommunicate
 
@@ -21,12 +22,24 @@ class GoobiLogger():
     type_critical = 'critical'
     type_user = 'user'
     
-    def __init__( self, host, password_token, process_id, pyLogger=None ) :
+    
+    def __init__( self, 
+                  host, 
+                  password_token, 
+                  process_id, 
+                  pyLogger=None, 
+                  use_goobi_communication = True,
+                  intervals_between_alive_logs = 60*10):
+        
         self.host = host
         self.password_token = password_token
-        self._com()
+        self.use_goobi_communication = use_goobi_communication
+        if self.use_goobi_communication: self._com()
         self.process_id = process_id
         self.pyLogger = pyLogger
+        self.last_alive_timestamp = time.time()
+        # Interval should be configurable
+        self.intervals_between_alive_logs = intervals_between_alive_logs
     
     def getLogger( self ):
         """
@@ -36,7 +49,17 @@ class GoobiLogger():
     
     def debugging( self ) :
         self.debugging_on = True
-        self._com()
+        if self.use_goobi_communication:
+            self._com()
+    
+    # Use this one if you only want to print with a specific interval,
+    # e.g. to inform user that process is a alive
+    def alive(self,message):
+        if  ((time.time() - self.last_alive_timestamp) >= 
+             self.intervals_between_alive_logs):
+            alive_msg = 'Script is still alive and processing: {0}'.format(message) 
+            self.info(alive_msg)
+            self.last_alive_timestamp = time.time()
     
     # logger like interface to goobi.
     def info( self, message ) :
@@ -46,7 +69,8 @@ class GoobiLogger():
         return self._log( 'debug', message )
     
     def exception( self, message ) :
-        return self._log( 'exception', message )
+        self._pyLog('exception', message)
+        return self._log( 'error', str(message) )
         
     def warning( self, message ): # Not an actual goobi message but here to complete the set of logging functions. 
         return self._log( 'warning' , message )
@@ -65,9 +89,7 @@ class GoobiLogger():
         
     def _log( self, level, message ):
         
-        self._pyLog( level,
-                     "(PID" + str(self.process_id).zfill(8) +") " + message )
-        
+        self._pyLog( level, "(PID" + str(self.process_id).zfill(8) +") " + message )
         dt = datetime.datetime.utcnow().isoformat()
         formatted_message = self.log_format.format(date=dt,
                                                    process_id=self.process_id,
@@ -93,11 +115,12 @@ class GoobiLogger():
         if level == 'error' :
             sys.stderr.write( "stderr: " + formatted_message + "\n" )
         
-        if not (level == 'debug') or \
-                (level == 'debug' and self.debugging_on):
-            return self.com.addToProcessLog(level,
-                                            goobi_message,
-                                            self.process_id )
+        if (not (level == 'debug') or 
+                (level == 'debug' and self.debugging_on)):
+            if self.use_goobi_communication:
+                return self.com.addToProcessLog(level,
+                                                goobi_message,
+                                                self.process_id )
 
         
     def _pyLog( self, level, message ):

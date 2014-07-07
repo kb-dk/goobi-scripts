@@ -18,9 +18,7 @@ class CommandLine() :
 	_errorText = ''
 	
 	def __init__( self ):
-	
 		args = sys.argv[1:] # skip filename
-		
 		# Gather args together (avoid spaces splititing values)
 		args_list = {}
 		last_key = ''
@@ -33,15 +31,16 @@ class CommandLine() :
 					self._errorText = "First parameter does not contain an equals. Can not proceed."
 			else:
 				key, value = args[i].split( "=" )
-				args_list[key.strip()] = value.strip()
+				# Be able to pass parameters wrapped within quotes
+				if value.startswith('"'):
+					args_list[key.strip()] = value.strip('"')
+				else:
+					args_list[key.strip()] = value.strip()
 				last_key = key.strip()
 		self._parameters = args_list
-		#print args_list
-		
 		# Create variables for this on ConfigReader
 		for item in args_list:
 			item_name = item.replace( ".", "_" )
-			
 			vars(self)[item_name] = args_list[item]
 			
 	def has( self, name ):

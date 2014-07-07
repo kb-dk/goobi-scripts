@@ -6,6 +6,77 @@ Created on 13/06/2014
 import os
 import filecmp
 
+
+def clear_folder(path,also_folder=False,ignore_exceptions=True):
+    '''
+    Deletes all the files in a folder specified by "path". If specified by
+    "also_folder", also delete the folder given by "path".
+    '''
+    if not os.path.isdir(path):
+        if ignore_exceptions:
+            return
+        error = '{0} is not a valid folder.'
+        error = error.format(path)
+        raise IOError(error)
+    for c in os.listdir(path):
+        c = os.path.join(path,c)
+        if os.path.isdir(c) and len(os.listdir(c)) == 0:
+            os.rmdir(path)
+        elif os.path.isfile(c):
+            os.remove(c)
+    if also_folder and len(os.listdir(path)) == 0:
+        os.rmdir(path)
+
+def find_or_create_dir(*paths):
+    '''
+    Given a folder path, check to see 
+    if folder exists or create it
+    Raises exception in case of error
+    '''
+    for path in paths:
+        if os.path.exists(path):
+            if not os.path.isdir(path):
+                error = '{0} is not a valid directory.'.format(path)
+                raise IOError(error)
+        elif not os.path.exists(path):
+            os.makedirs(path)
+
+def detectImagesExts(folder,valid_exts):
+    images = [f for f in os.listdir(folder)
+              if f.split('.')[-1] in valid_exts]
+    ext = ''
+    for image in images:
+        img_ext = image.split('.')[-1]
+        if (not ext == '') and (not img_ext == ext):
+            raise ValueError('Multiple image extension in master folder not allowed.')
+        else:
+            ext = img_ext
+    if not ext == '':
+        return ext
+    else:
+        raise ValueError('No image file extensions found in master image folder.')
+
+def folderExists(folder):
+    return os.path.isdir(folder)
+
+def folderWritable(folder):
+    return os.access(folder, os.W_OK)
+
+def getParentFolder(folder):
+    return os.path.dirname(folder)
+    
+def createFolderIfParentExist(folder):
+    if not os.path.isdir(folder):
+        raise IOError('{0} is not a valid folder'.format(folder))
+    parent_folder = getParentFolder(folder)
+    if not os.path.exists(folder):
+        if os.path.exists(parent_folder):
+            os.mkdir(folder)
+        else:
+            err = ('Parent folder ({0}) to log folder {1} does not exist.')
+            err = err.format(parent_folder,folder)
+            raise IOError(err)
+
 def compareDirectories(src,dest):
     
     checkDirectoriesExist(src,dest)
@@ -64,12 +135,7 @@ def checkDirectory(directory):
     return True
 
 def create_folder(path):
-    error = None
     if not path:
-        error = 'Argument "path" not set.'
+        raise IOError('Argument "path" not set.')
     elif not os.path.exists(path):
-        try:
-            os.makedirs(path)
-        except IOError as e:
-            error = e.strerror
-    return error
+        os.makedirs(path)

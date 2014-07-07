@@ -225,7 +225,6 @@ class Step( object ):
 
     def begin(self) :
         if self.detach:
-            
             # Detach from goobi.
             self.detachSelf()
         error = None
@@ -252,7 +251,7 @@ class Step( object ):
                 self.error_message(error)
                 self.reportToStep( error )
             else:
-                error_msg = ('{0} failed. Error message: "{0}"')
+                error_msg = ('{0} failed. Error message: "{1}"')
                 error_msg = error_msg.format(self.name,error)
                 self.error_message(error_msg)
         return (error == None)
@@ -493,6 +492,17 @@ class Step( object ):
         else:
             #TODO: Wrong error message
             return 'Error: Unable to locate log file: ' + log_file
+        # Check and create log folder structure
+        log_folder = os.path.dirname(log_file)
+        parent_log_folder = os.path.dirname(log_folder)
+        if not os.path.exists(log_folder):
+            if os.path.exists(parent_log_folder):
+                os.mkdir(log_folder)
+            else:
+                err = ('Parent folder ({0}) to log folder {1} does not exist. '
+                       'Cannot create logger for log file {2}.')
+                err = err.format(parent_log_folder,log_folder,log_file)
+                raise IOError(err)
         try:
             rotating_logger_handler = logging.handlers.RotatingFileHandler( log_file, maxBytes=log_max_bytes, backupCount=log_backup_count )
             # Add Process ID to the log

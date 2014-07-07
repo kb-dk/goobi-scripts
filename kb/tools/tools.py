@@ -88,6 +88,24 @@ def getFileExt(name):
         return name.split('.')[-1]
     
 def get_delta_time(s):
+    t = int(s * 100) / 100.0
+    h, remainder = divmod(t, 3600)
+    remainder = round(remainder,3)
+    m, remainder = divmod(remainder, 60)
+    s, ms = divmod(remainder, 1)
+    ms = round(ms,2)*100
+    ret_str = ''
+    if h > 0:
+        ret_str += str(int(h))+' h, '
+    if m > 0:
+        ret_str += str(int(m))+' m, '
+    if s > 0 or ms > 0:
+        if ms > 0:
+            ret_str += (str(int(s))+'.'+str(int(ms))+' s')
+        else:
+            ret_str += str(int(s))+' s'
+    return ret_str.rstrip(', ')
+    '''
     h, remainder = divmod(s, 3600)
     remainder = round(remainder,3)
     m, remainder = divmod(remainder, 60)
@@ -98,7 +116,7 @@ def get_delta_time(s):
     # Example
     # s = 1221358.258
     # result = 339 h, 15 min, 58 sec and 258 ms
-
+    '''
 def check_file(file_path) :
     '''
     Checks a file_path. Returns True if it exist, else raises error.

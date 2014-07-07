@@ -2,7 +2,7 @@
 # -*- coding: utf-8
 from goobi.goobi_step import Step
 import os
-from tools.imconvert import convert_options,pdf
+from tools.img_convert import convert_options,pdf
 
 class CreatePdfFile( Step ):
 
@@ -31,7 +31,7 @@ class CreatePdfFile( Step ):
         process_path = self.command_line.process_path
         rel_master_image_path = self.getConfigItem('img_master_path',
                                                    section=self.folder_structure_section) 
-        self.source_dir = os.path.join(process_path,rel_master_image_path)
+        self.source_folder = os.path.join(process_path,rel_master_image_path)
         # Set location of convert options
         rel_co_folder = self.getConfigItem('metadata_convert_path',
                                            section=self.folder_structure_section)
@@ -43,7 +43,7 @@ class CreatePdfFile( Step ):
                                             section=self.folder_structure_section) 
         pdf_file_name = self.command_line.process_title+'.pdf'
         self.pdf_file_path = os.path.join(process_path,rel_pdf_folder,pdf_file_name)
-        # Set location for temp pdf files production
+        # Set location for temp_folder pdf files production
         rel_temp_folder = self.getConfigItem('temp_pdf_creation_path',
                                             section=self.folder_structure_section) 
         self.temp_folder = os.path.join(process_path,rel_temp_folder)
@@ -56,10 +56,10 @@ class CreatePdfFile( Step ):
         try:
             self.getVariables()
             msg = ('Creating pdf file from images in {0} as defined in {1}.')
-            msg = msg.format(self.source_dir,self.co_file_path)
+            msg = msg.format(self.source_folder,self.co_file_path)
             self.debug_message(msg)
             co = convert_options.load_convert_options(self.co_file_path)
-            msg = ('Creating temp files for pdf in {0} Max batch size: {1}. '
+            msg = ('Creating temp_folder files for pdf in {0} Max batch size: {1}. '
                    'Log count: {2}')
             msg = msg.format(self.temp_folder,self.max_batch_size,self.log_count)
             self.debug_message(msg)
@@ -68,13 +68,13 @@ class CreatePdfFile( Step ):
                                                        self.max_batch_size,
                                                        self.log_count,
                                                        self.glogger)
-            msg = ('Merging {0} temp files to pdf file {1}')
+            msg = ('Merging {0} temp_folder files to pdf file {1}')
             msg = msg.format(str(len(temp_pdf_files)),self.pdf_file_path)
             self.debug_message(msg)
             pdf.merge_temp_pdf_files(self.temp_folder,
                                      temp_pdf_files,
                                      self.pdf_file_path)
-            msg = ('Removing temp files in {0}')
+            msg = ('Removing temp_folder files in {0}')
             msg = msg.format(self.temp_folder)
             self.debug_message(msg)
             #pdf.clear_pdf_conversion(self.temp_folder)

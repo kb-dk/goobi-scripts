@@ -2,7 +2,7 @@
 # -*- coding: utf-8
 from goobi.goobi_step import Step
 import os
-from tools.imconvert import convert_options
+from tools.img_convert import convert_options
 
 class CreateConvertOptions( Step ):
 
@@ -31,7 +31,7 @@ class CreateConvertOptions( Step ):
         # Get path to image files
         rel_master_image_path = self.getConfigItem('img_master_path',
                                                    section=self.folder_structure_section) 
-        self.source_dir = os.path.join(self.command_line.process_path,
+        self.source_folder = os.path.join(self.command_line.process_path,
                                        rel_master_image_path)
         # Get path to store json file with convert options
         rel_co_folder = self.getConfigItem('metadata_convert_path',
@@ -49,10 +49,10 @@ class CreateConvertOptions( Step ):
         try:
             self.getVariables()
             msg = ('Creating convert options for {0}.')
-            msg = msg.format(self.source_dir)
+            msg = msg.format(self.source_folder)
             self.debug_message(msg)
             default_options = convert_options.parse_options(self.default_options)
-            co = convert_options.create_convert_options(self.source_dir,
+            co = convert_options.create_convert_options(self.source_folder,
                                                         default_options)
             convert_options.save_json_file(co,self.co_file_path)
         except Exception as e:

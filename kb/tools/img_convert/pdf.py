@@ -7,6 +7,7 @@ Created on 06/06/2014
 import os
 import time
 import subprocess
+from tools import tools
 
 
 def create_temp_pdf_files(convert_options,
@@ -70,10 +71,10 @@ def create_temp_pdf_files(convert_options,
                     msg = msg.format(str(remaining_images))
                     logger.debug(msg)
                     msg = ('Avg. conversion time: {0} per image')
-                    msg = msg.format(str(delta_time(avg_conversion_time)))
+                    msg = msg.format(str(tools.get_delta_time(avg_conversion_time)))
                     logger.debug(msg)
                     msg = ('Estimated time left: {0}.')
-                    msg = msg.format(str(delta_time(remaining_time)))
+                    msg = msg.format(str(tools.get_delta_time(remaining_time)))
                     logger.debug(msg)
             batch = next_batch
             next_batch = []
@@ -84,28 +85,9 @@ def create_temp_pdf_files(convert_options,
         raise e
     if logger:
         msg = ('Conversion to temp files took {0}')
-        msg = msg.format(delta_time(total_conv_time))
+        msg = msg.format(tools.get_delta_time(total_conv_time))
         logger.debug(msg)
     return temp_pdf_files
-
-
-def delta_time(t):
-    t = int(t * 100) / 100.0
-    h, remainder = divmod(t, 3600)
-    remainder = round(remainder,3)
-    m, remainder = divmod(remainder, 60)
-    s, ms = divmod(remainder, 1)
-    ms = round(ms,2)*100
-    ret_str = ''
-    if h > 0:
-        ret_str += str(int(h))+' h, '
-    if m > 0:
-        ret_str += str(int(m))+' m, '
-    if s > 0:
-        ret_str += str(int(s))+' s, '
-    if ms > 0:
-        ret_str += str(int(ms))+' ms'
-    return ret_str.rstrip(', ')
 
 def convert_to_pdf(file_list,output_file_path):
     '''
