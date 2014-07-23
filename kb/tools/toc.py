@@ -1,4 +1,4 @@
-import csv
+import csv, re
 
 class TOC(object):
 	sections = [] # a list of Section objects (see below)
@@ -153,6 +153,7 @@ class TOCArticle(object):
 
 	author = ''
 	title = ''
+	article_id = ''
 	start_page = 0
 	end_page = 0
 	number = 0
@@ -160,12 +161,26 @@ class TOCArticle(object):
 	def __init__(self, line_array):
 		'''
 		Based on an article line
-		create title, author, startpage 
+		create title, author, startpage and article_id if relevant
 		'''
 		if '|' in line_array[1]:
 			self.author = line_array[1].split('|')[0].strip()
 			self.title = line_array[1].split('|')[1].strip()
+		elif self.isDbcId(line_array[1]):
+			self.author = ""
+			self.title = ""
+			self.article_id = line_array[1]
 		else: 
 			self.author = ""
 			self.title = line_array[1]
 		self.start_page = int(line_array[2])
+
+	@staticmethod
+	def isDbcId(s):
+		'''
+		Given a string, check if it matches
+		pattern <digits>:<digits>
+		in which case it is a DBC id
+		'''
+		pattern = re.compile('\d+:\d+')
+		return pattern.match(s)
