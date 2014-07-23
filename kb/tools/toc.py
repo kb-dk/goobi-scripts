@@ -8,6 +8,7 @@ class TOC(object):
 		Create a new toc representation
 		based on the data in a LIMB *.toc file
 		'''
+		self.sections = []
 		data = []
 		with open(path, 'r') as toc_csv:
 			reader = csv.reader(toc_csv, delimiter=',', quotechar='"')
