@@ -21,6 +21,14 @@ class tocTests(unittest.TestCase):
 		self.failUnless(len(articles) == 12)
 		self.failUnless('Arbejder fra' in articles[0].title)
 		self.failUnless('Annemarie' in articles[0].author)
+		self.failUnless(articles[1].article_id == '34434476:870971')
+		self.failIf(len(articles[1].author) > 0)
+
+	def testIsDbcId(self):
+		self.failUnless(tocfile.TOCArticle.isDbcId('34434476:870971'))
+		self.failIf(tocfile.TOCArticle.isDbcId('3443447870971'))
+		self.failIf(tocfile.TOCArticle.isDbcId('344344a:7870971'))
+
 
 def run():
 	unittest.main()
