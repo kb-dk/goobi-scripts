@@ -64,6 +64,10 @@ class MetaXml(object):
 
 	@staticmethod
 	def createGoobiMetadata(doc, metadata):
+		'''
+		This method focuses specifically on the goobi:metadata
+		fields. See above for a full description of its workings
+		'''
 		goobiTag = doc.createElement('goobi:goobi')
 		goobiTag.setAttributeNS('goobi', 'xmlns:goobi', 'http://meta.goobi.org/v1.5.1/')
 		for element_data in metadata:
@@ -73,6 +77,12 @@ class MetaXml(object):
 
 	@staticmethod
 	def createGoobiMetadataTag(doc, element_data):
+		'''
+		Create tag for a specific element based on a dictionary object e.g. 
+		<goobi:metadata name="Abstract">From the Roman Empire...</goobi:metadata>
+		Note the special handling of multidimensional nodes such as Author
+		discussed above.
+		'''
 		metadataTag = doc.createElement('goobi:metadata')
 		for key,val in element_data.iteritems():
 			if key == 'data':
@@ -87,10 +97,3 @@ class MetaXml(object):
 			else:
 				metadataTag.setAttribute(key,val)
 		return metadataTag
-
-	@staticmethod
-	def generateArticleXmlWithETree():
-		a = ET.Element('a')
-		b = ET.SubElement(a, 'b')
-		c = ET.SubElement(a, 'c')
-		return ET.dump(a)
