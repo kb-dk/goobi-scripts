@@ -18,6 +18,8 @@ class MarcXml(object):
 	danmarcMappings = {
 		'title' : {'field' : '245', 'subfields' : ['a', 'b']},
 		'pages' : {'field' : '300', 'subfields' : ['a'] },
+		'author_firstname' : {'field' : '100', 'subfields' : ['h']},
+		'author_lastname' : {'field' : '100', 'subfields' : ['a']},
 		'other_authors' : {'multiple' : True, 'data': {
 			'given_name' : {'field' : '700', 'subfields' : ['h'] }, 
 			'family_name' : {'field' : '700', 'subfields' : ['a'] }
