@@ -102,7 +102,8 @@ class MarcXml(object):
 			if field.getAttribute('tag') == field_num:
 				content = ""
 				for subfield in subfields:
-					content += self.__getSubFieldData(field, subfield) + " "
+					subfield_data = self.__getSubFieldData(field, subfield)
+					if subfield_data: content += subfield_data + " "
 				self.data[key] = content.strip()
 				break
 
