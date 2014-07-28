@@ -21,7 +21,7 @@ class marcXmlTests(unittest.TestCase):
 		self.failUnless(authors[0]['given_name'] == 'Anders')
 
 	def testAuthor(self):
-		self.failUnless(self.marcXml.data['author_firstname'] == 'Helle')
+		self.failUnless(self.marcXml.data['author_given_name'] == 'Helle')
 
 def run():
 	unittest.main()
