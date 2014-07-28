@@ -5,7 +5,7 @@ marcfile = imp.load_source('toc', '../tools/marcxml.py')
 class marcXmlTests(unittest.TestCase):
 	
 	def setUp(self):
-		self.marcXml = marcfile.marcXml.initFromFile('data/dbc_marc.xml')
+		self.marcXml = marcfile.MarcXml.initFromFile('data/dbc_marc.xml')
 
 	def testNewMarcXml(self):
 		self.failUnless(self.marcXml)

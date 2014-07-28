@@ -2,7 +2,7 @@ import urllib2
 from xml.dom import minidom
 from types import MethodType
 
-class marcXml(object):
+class MarcXml(object):
 	'''
 	This class is responsible for handling of MarcXML files.
 	It initialises via static methods to enable initialisation 
@@ -34,7 +34,7 @@ class marcXml(object):
 		based on the content at this address
 		'''
 		content = urllib2.urlopen(url).read()
-		return marcXml(content)
+		return MarcXml(content)
 
 	@staticmethod
 	def initFromFile(path):
@@ -45,7 +45,7 @@ class marcXml(object):
 		data = ""
 		with open(path, 'r') as myfile:
 			data = myfile.read()
-		return marcXml(data)
+		return MarcXml(data)
 
 	def __init__(self,content):
 		'''
