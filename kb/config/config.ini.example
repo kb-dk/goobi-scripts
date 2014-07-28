@@ -101,3 +101,7 @@ ojs_server_user = goobi
 ojs_app_user = ojs
 upload_dir = /var/www/html/tidsskrift-dk/{0}/{1}/
 tool_path = /var/www/html/ojs/tools/importExport.php
+
+[dbc]
+log = /opt/digiverso/logs/step_update_meta_xml.log
+dbc_service = http://disdev-01.kb.dk/storage/marcx-tidsskr/get-record.xq?id={0}

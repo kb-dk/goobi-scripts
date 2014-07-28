@@ -1,6 +1,5 @@
 
 import xml.dom.minidom
-import xml.etree.ElementTree as ET
 
 class MetaXml(object):
 	'''
@@ -94,8 +93,9 @@ class MetaXml(object):
 			elif key == 'fields':
 				for field in val:
 					tag = doc.createElement(field['tag'])
-					text = doc.createTextNode(field['data'])
-					tag.appendChild(text)
+					text = u"{0}".format(field['data'])
+					text_tag = doc.createTextNode(text)
+					tag.appendChild(text_tag)
 					metadataTag.appendChild(tag)
 			else:
 				metadataTag.setAttribute(key,val)
