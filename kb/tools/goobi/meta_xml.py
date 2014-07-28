@@ -32,6 +32,9 @@ class MetaXml(object):
 		</goobi:metadata>
 		Dictionary tuples are transformed to attributes on the element, except for the 
 		data tuple which is transformed into a text node.
+		Note the special case of the Author field, which is in fact a parent node containing
+		firstName and lastName data fields. If the dictionary contains a 'fields' item, this
+		method will attempt to create a hierarchical node structure in the manner shown here.
 		'''
 		doc = xml.dom.minidom.Document()
 	
