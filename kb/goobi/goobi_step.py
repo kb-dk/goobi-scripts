@@ -124,7 +124,7 @@ class Step( object ):
         
         # Run setup for specific workflow script
         self.setup()
-
+        
         # Update 
         self.essential_config_sections.update( [self.config_main_section] ) 
         # We need to make sure we have a full path to our config file
@@ -191,7 +191,13 @@ class Step( object ):
                                                      logger_name + "_logger")
         if error:
             self.exit( error,self.glogger )
-        #
+        if self.command_line.has( self.cli_process_id_arg ):
+            self.goobi_com = GoobiCommunicate(self.config.goobi.host,
+                                              self.config.goobi.passcode,
+                                              self.debug,
+                                              process_id = self.command_line.get(self.cli_process_id_arg)
+                                              )
+            #
         # Check Commandline parameters
         if error_command_line:
             self.exit( error_command_line,self.glogger )

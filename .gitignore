@@ -1,4 +1,5 @@
 kb/config/config.ini
+kb/tools/tesseract
 .project
 .pydevproject
 *.pyc

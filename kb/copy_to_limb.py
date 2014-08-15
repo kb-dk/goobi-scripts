@@ -35,12 +35,14 @@ class CopyToLimb( Step ):
         self.hotfolder_dir = os.path.join(self.getConfigItem('limb_hotfolder'),
                                           self.command_line.process_title)
         self.sleep_interval = int(self.getConfigItem('sleep_interval'))
+        self.retries = int(self.getConfigItem('retries'))
+        
         if (self.command_line.has('overwrite_files') and 
             self.command_line.overwrite_files.lower() == True):
             self.overwrite_destination_files = True
         else:
             self.overwrite_destination_files = False
-        self.retries = int(self.getConfigItem('retries'))
+
 
     def step(self):
         error = None

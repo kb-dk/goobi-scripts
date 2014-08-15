@@ -3,12 +3,15 @@ Created on 19/06/2014
 
 @author: jeel
 """
+import signal
+import sys
+import os
 
+lib_path = os.path.abspath(os.path.dirname(os.path.realpath(__file__))+os.sep+'../')
+sys.path.append(lib_path)
 from step_job_processor import StepJobProcessor, StepJobQueue
 from tcp_server import StepJobTCPServer, StepJobTCPHandler
 import tools.logging.logger as logger
-import signal
-import sys
 
 class ConvertServer():
     
@@ -16,10 +19,11 @@ class ConvertServer():
         self.logger.info('Processor terminated with SIGTERM. Closing gently down.')
         self.server.server_close()
         self.logger.info('Server closed.')
-        self.logger.info('Closing step job processor.')
-        self.sjp.stop()
-        self.sjp.join()
-        self.logger.info('Command step job processor stopped.')
+        self.logger.info('Closing {0} step job processor(s).'.format(len(self.step_job_processors)))
+        for step_processor in self.step_job_processors:
+            step_processor.stop()
+            step_processor.join()
+        self.logger.info('{0} step job processor(s) stopped.'.format(len(self.step_job_processors)))
         self.logger.info('Existing server.')
         self.logger.info('=============================')
         sys.exit(0)
@@ -40,7 +44,7 @@ class ConvertServer():
         # Create one processor per core - tesseract 3.03 is not multithreaded
         # Todo: Add functionality so first thread will always take from non shared
         # queue, and the other always from the shared. E.g.
-        self.core_num = 1
+        self.core_num = 2
         self.step_job_processors = []
         
         self.job_queue = StepJobQueue(self.logger)
@@ -48,7 +52,7 @@ class ConvertServer():
         self.logger.info('Initiating {0} step job processor(s)...'.format(self.core_num))
         for i in range(self.core_num):
             self.logger.info('Initiating step job processor {0}...'.format(i+1))
-            self.step_job_processors.append(StepJobProcessor(job_queue=self.job_queue,
+            self.step_job_processors.append(StepJobProcessor(shared_job_queue=self.job_queue,
                                                              logger=self.logger))
         self.logger.info('Step job processor started.')
         self.server = StepJobTCPServer(server_address = self.address,

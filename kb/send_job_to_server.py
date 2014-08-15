@@ -26,6 +26,8 @@ class StepJobClient( Step ) :
         try:
             self.getVariables()
             self.send_job_to_server()
+            print('Step job placed in queue on step processing server and '
+                  'will finish this step when done.')
         except Exception as e:
             error = str(e)
             self.glogger.exception(error)

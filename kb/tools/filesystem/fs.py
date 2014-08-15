@@ -66,8 +66,6 @@ def getParentFolder(folder):
     return os.path.dirname(folder)
     
 def createFolderIfParentExist(folder):
-    if not os.path.isdir(folder):
-        raise IOError('{0} is not a valid folder'.format(folder))
     parent_folder = getParentFolder(folder)
     if not os.path.exists(folder):
         if os.path.exists(parent_folder):

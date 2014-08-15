@@ -1,10 +1,8 @@
 from goobi.goobi_step import Step
 import os
 import tools.tools as tools
-import tools.goobi as goobi_tools
+import tools.goobi.metadata as goobi_tools
 from tools.errors import DataError
-import subprocess
-
 
 class UploadToOJS( Step ):
 

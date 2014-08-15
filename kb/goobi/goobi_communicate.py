@@ -15,11 +15,13 @@ class GoobiCommunicate() :
     url_token = "&token={token}"
     url_command = "command={command}"
     
-    def __init__( self, host, password_token, debugging=False ) :
+    def __init__( self, host, password_token, debugging=False,
+                  process_id = None ) :
     
         self.host = host if host is not None else '127.0.0.1'
         self.token = password_token
         self.debugging = debugging
+        self.process_id = process_id
         
         self._update_url_base()
     
@@ -82,16 +84,22 @@ class GoobiCommunicate() :
                       }
         return self._send( "reportProblem", additional )
     
-    def addProperty( self, process_id, name, value ):
+    def addProperty( self, process_id, name, value,overwrite=False ):
         '''
         TODO: Document method
         '''
+        if process_id is None and self.process_id is not None:
+            process_id = self.process_id
+        else:
+            raise ValueError('Process id is missing')
+        
         additional = {
             "processId" : process_id,  
             "property" : name,
-            "value" : value
+            "value" : value,
+            'overwriteExistingProperty': overwrite
         }
-        
+
         return self._send( "AddProperty", additional )
     
     def _update_url_base( self ):

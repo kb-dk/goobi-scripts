@@ -1,6 +1,6 @@
 from goobi.goobi_step import Step
 import os, subprocess
-import tools.goobi as goobi_tools
+import tools.goobi.metadata as goobi_tools
 import tools.tools as tools
 from tools.errors import DataError
 
