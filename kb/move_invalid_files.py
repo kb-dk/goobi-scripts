@@ -82,6 +82,9 @@ class FileValidator( Step ) :
                                             self.folder_structure_section) 
         self.image_path = os.path.join(self.command_line.process_path,
                                        rel_image_path)
+        # Set list for storing paths for invalid files to move
+        self.invalid_files = []
+        
     
     def getBreakLevel(self):
         '''Our break level is used to figure out what errors to tolerate'''
@@ -101,7 +104,7 @@ class FileValidator( Step ) :
             error_level= 2
         else:
             for f in os.listdir(folder):
-                if os.path.isdir(folder + f):
+                if os.path.isdir(os.path.join(folder,f)):
                     msg = '{0} contains a subfolder ({1}) which is not allowd .'
                     msg = msg.format(folder,f)
                     self.debug_message(msg)
@@ -112,21 +115,23 @@ class FileValidator( Step ) :
                 elif tools.getFileExt(f,remove_dot=True) not in valid_exts:
                     #TODO: ��� gives error, decode/encode
                     #UnicodeEncodeError: 'ascii' codec can't encode character u'\xe6' in position 34: ordinal not in range(128)
-                    msg = ('{0} is not a valid file and will be moved to the '
-                           'invalid folder. {1} is not a valid extension.')
+                    msg = ('Den uploadede fil "{0}" er ikke en tilladt '
+                           'filtype. Filen er flyttet til mappen "invalid". '
+                           'Hvis filen ikke skal anvendes kan den slettes og '
+                           'denne opgave kan afsluttes.')
                     msg = msg.format(f,tools.getFileExt(f,remove_dot=True))
-                    self.debug_message(msg)
+                    self.info_message(msg)
                     message =  self.err_msg_invalid_files
                     #('WARNING - Invalid extension {0} found in source folder').format(tools.getFileExt(f))
                     error_level = 1
+                    self.invalid_files.append(os.path.join(folder,f))
         return error_level, message
     
-    def moveInvalidFiles(self, source_root, dest, valid_exts):
-        for f in os.listdir(source_root):
+    def moveInvalidFiles(self, dest, valid_exts):
+        for f in self.invalid_files:
             if tools.getFileExt(f) not in valid_exts:
-                self.debug_message("moving file {0}".format(f))
-                source_path = os.path.join(source_root,f)
-                tools.move_file(source_path, dest,self.glogger)
+                self.debug_message("moving file {0}".format(os.path.basename(f)))
+                tools.move_file(f, dest,self.glogger)
         
 if __name__ == '__main__' :
     FileValidator().begin()
