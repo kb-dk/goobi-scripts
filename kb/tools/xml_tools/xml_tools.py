@@ -180,7 +180,13 @@ def etree_to_dict(t):
         for dc in map(etree_to_dict, children):
             for k, v in dc.iteritems():
                 dd[k].append(v)
-        d = {t.tag: {k:v[0] if len(v) == 1 else v for k, v in dd.iteritems()}}
+        d = dict()
+        for k, v in dd.iteritems():
+            temp_dict = dict()
+            if len(v) == 1: temp_dict[k]=v[0]
+            else: temp_dict[k]=v
+        d[t.tag] = temp_dict
+        #d = {t.tag: {k:v[0] if len(v) == 1 else v for k, v in dd.iteritems()}}
     if t.attrib:
         d[t.tag].update(('@' + k, v) for k, v in t.attrib.iteritems())
     if t.text:
