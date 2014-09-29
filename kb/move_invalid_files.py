@@ -55,9 +55,7 @@ class FileValidator( Step ) :
             self.debug_message(error)
             self.debug_message("Error level exceeds break level exiting...")
         if error_level > 0:
-            self.moveInvalidFiles(self.image_path,
-                                  self.invalid_path,
-                                  self.valid_exts)
+            self.moveInvalidFiles(self.invalid_path,self.valid_exts)
         return error
     
     def getVariables(self):
