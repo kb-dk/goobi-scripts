@@ -49,7 +49,6 @@ class FileValidator( Step ) :
         self.getVariables()
         error_level, message = self.checkForErrors(self.image_path,
                                                    self.valid_exts)
-        
         if error_level > self.break_level:
             error = message
             self.debug_message(error)
@@ -64,9 +63,6 @@ class FileValidator( Step ) :
         and confirm their existence.
         '''
         self.break_level = self.getBreakLevel()
-        self.err_msg_no_files_added = self.getConfigItem('err_msg_no_files_added')
-        self.err_msg_invalid_files = self.getConfigItem('err_msg_invalid_files')
-        self.err_msg_contains_folders = self.getConfigItem('err_msg_contains_folders')
         self.valid_exts = self.getConfigItem('valid_file_exts').split(';')
         # TODO: Generalize this to take input from its own config section        
         rel_invalid_path = self.getConfigItem('img_invalid_path',
@@ -98,15 +94,16 @@ class FileValidator( Step ) :
         msg = ('Valid file extensions are: {0}'.format(', '.join(valid_exts)))
         self.debug_message(msg)
         if len(os.listdir(folder)) == 0:
-            message = self.err_msg_no_files_added
+            message = 'Ingen filer er blevet uploadet til processen.'
             error_level= 2
         else:
             for f in os.listdir(folder):
                 if os.path.isdir(os.path.join(folder,f)):
-                    msg = '{0} contains a subfolder ({1}) which is not allowd .'
+                    msg = ('Der er blevet uploadet en undermappe til "{0}" '
+                           '({1}) hvilket ikke er tilladt.')
                     msg = msg.format(folder,f)
                     self.debug_message(msg)
-                    message = self.err_msg_contains_folder
+                    message = msg
                     #('CRITICAL - Subdirectory {0} found in source folder.').format(folder + f)
                     error_level= 2
                     break
@@ -118,8 +115,8 @@ class FileValidator( Step ) :
                            'Hvis filen ikke skal anvendes kan den slettes og '
                            'denne opgave kan afsluttes.')
                     msg = msg.format(f,tools.getFileExt(f,remove_dot=True))
-                    self.info_message(msg)
-                    message =  self.err_msg_invalid_files
+                    self.debug_message(msg)
+                    message =  msg
                     #('WARNING - Invalid extension {0} found in source folder').format(tools.getFileExt(f))
                     error_level = 1
                     self.invalid_files.append(os.path.join(folder,f))
