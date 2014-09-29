@@ -139,7 +139,7 @@ class Step( object ):
         # Load system configuration information
         if self.system_config_path == '':
             if not self.command_line.has("system_config_path"):
-                self.system_config_path = '/opt/digiverso/goobi/scripts/kb/workflows/system_config.ini'
+                self.system_config_path = '/opt/digiverso/goobi/scripts/kb/workflows/system/config.ini'
             else:
                 self.system_config_path = self.command_line.system_config_path 
         self.getConfig(self.system_config_path,
