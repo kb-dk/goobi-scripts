@@ -83,7 +83,7 @@ class Step( object ):
         
     def __init__( self ) :
     
-        # Default names for essential settings
+        # Default names for essential config
         self.cli_process_id_arg = "process_id"
         self.cli_step_id_arg = "step_id"
         self.cli_auto_complete_arg = 'auto_complete'
@@ -92,7 +92,7 @@ class Step( object ):
         self.cli_debug_arg = "debug"
         self.cli_step_name_arg = 'step_name'
         
-        self.config_general_section = "general"
+        self.config_general_section = 'general'
         self.config_goobi_section = 'goobi'
         
         self.name = ""
@@ -139,7 +139,7 @@ class Step( object ):
         # Load system configuration information
         if self.system_config_path == '':
             if not self.command_line.has("system_config_path"):
-                self.system_config_path = '/opt/digiverso/goobi/scripts/kb/config/config.ini'
+                self.system_config_path = '/opt/digiverso/goobi/scripts/kb/workflows/system_config.ini'
             else:
                 self.system_config_path = self.command_line.system_config_path 
         self.getConfig(self.system_config_path,
@@ -241,9 +241,12 @@ class Step( object ):
                 trace = traceback.format_exc()
                 self.error_message('Exception occured in ' + self.name +\
                                    ' :- ' + e.message + ". Trace: " + trace )
+            except TypeError:
+                self.error_message('Exception occured in ' + self.name +\
+                                   ' :- ' + str(e) + ". Trace: " + trace )
             except:
                 self.error_message( 'Exception occured in ' + self.name  )
-            raise
+            raise e
         if not error :
             self.info_message( 'Completed ' + self.name )
             if self.auto_complete:
@@ -312,7 +315,7 @@ class Step( object ):
         sys.exit(1)
         
     def getConfig( self, config_file, must_have ) :
-        # Add self.config so new config settings can be added to old.
+        # Add self.config so new config config can be added to old.
         config = ConfigReader(config_file,
                               self.config,
                               overwrite_sections=True)

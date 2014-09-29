@@ -21,8 +21,6 @@ def getSubTree(dict_tree,ns=None, elem_name=None,elem_attrib_key=None,
     elem_name is the name of elem the find as parent of the resulting sub dict_tree
     elem_atrrib is a tuple of the key and value of the root in the new sub dict_tree
         second element may be empty
-    
-    ns,elem_name and elem_attrib may be None
     '''
     if dict_tree is None: return None
     if type(dict_tree) is dict:
@@ -59,7 +57,7 @@ def getSubTree(dict_tree,ns=None, elem_name=None,elem_attrib_key=None,
                 return None
             return None
         else:
-            return dict_tree
+            return lookup_dict_tree
     elif type(dict_tree) is list:
         # loop multiple branches
         for sub_etree in dict_tree:
@@ -83,49 +81,53 @@ def getAllSubTrees(dict_tree,ns=None, elem_name=None,elem_attrib_key=None,
     '''
     if dict_tree is None or dict_tree is []: return None
     subtrees = []
+    lookup_name = elem_name
+    if elem_name and ns: lookup_name = ns+elem_name
     if type(dict_tree) is dict:
-        correct_tree = False
-        lookup_name = elem_name
-        lookup_dict_tree = dict_tree
-        if ns is not None:
-            if elem_name is None:
-                err = ('Element name cannot not be empty if ns is given')
-                raise ValueError(err)
-            else:
-                lookup_name = ns+elem_name
-        if lookup_name is not None: # Find lookup_name
-            if lookup_name in dict_tree:
-                correct_tree = True
-                lookup_dict_tree = dict_tree[lookup_name]
-                
-        else: # No lookup name -> look at this level and check attribs
+        #=======================================================================
+        # dict_tree is a dictionary
+        #=======================================================================
+        correct_tree = False # As default dive into branch
+        if lookup_name and lookup_name in dict_tree: # Find lookup_name
+            lookup_dict_tree = dict_tree[lookup_name]
             correct_tree = True
-        if (elem_attrib_key is not None): # Find attrib key
-            # @is added by etree_to_dict to attribs
-            elem_attrib_key = '@'+elem_attrib_key 
-            if elem_attrib_key in lookup_dict_tree:
+        else:
+            lookup_dict_tree = dict_tree
+        if elem_attrib_key: # Check for elem_attribute
+            if '@'+elem_attrib_key in lookup_dict_tree: # @is added by etree_to_dict to attribs
                 if elem_attrib_val is not None: # Check attrib val
-                    correct_tree = (lookup_dict_tree[elem_attrib_key] == elem_attrib_val)
+                    correct_tree = lookup_dict_tree['@'+elem_attrib_key] == elem_attrib_val
                 else: correct_tree = True
             else: correct_tree = False
-        if not correct_tree:
+        if not correct_tree: # Dive in
             if len(dict_tree.keys()) > 0:
                 for _,val in dict_tree.items():
                     if type(val) is dict or type(val) is list:
                         subtree = getAllSubTrees(val,ns, elem_name,
                                                  elem_attrib_key,elem_attrib_val)
-                        if subtree is not None: subtrees.extend(subtree)
+                        if subtree: subtrees.extend(subtree)
                 return subtrees
             return None
         else:
-            return [dict_tree]
+            return [lookup_dict_tree] if lookup_name else [dict_tree]
+    #===========================================================================
+    # dict_tree is a list
+    #===========================================================================
     elif type(dict_tree) is list:
         # loop multiple branches
         for sub_etree in dict_tree:
-            # traverse each branch
+            '''# Check if this branch is correct before diving into it
+            if (isinstance(sub_etree,dict) and 
+                (elem_attrib_key) and '@'+elem_attrib_key in sub_etree):
+                if (elem_attrib_val):
+                    if lookup_dict_tree['@'+elem_attrib_key] == elem_attrib_val:
+                        return[sub_etree]
+                else: return[sub_etree]'''
+            if lookup_name: sub_etree = {lookup_name:sub_etree}
+            # traverse each branch.
             subtree =  getAllSubTrees(sub_etree,ns, elem_name,elem_attrib_key,
                                       elem_attrib_val)
-            if subtree is not None: subtrees.extend(subtree)
+            if subtree: subtrees.extend(subtree)
         return subtrees
 
 def getSingleSection(etree,ns,elem_name,attrib='',attrib_val=''):
@@ -221,7 +223,8 @@ def dict_to_etree(d):
                 else:
                     _to_etree(v, ET.SubElement(root, k))
         else: assert d == 'invalid type'
-    assert isinstance(d, dict) and len(d) == 1
+    assert isinstance(d, dict), 'Dict tree must be a dictionary but is a '+str(type(d))
+    assert len(d) == 1, 'Dict tree must only contain one element, but contains '+str(len(d))
     tag, body = next(iter(d.items()))
     node = ET.Element(tag)
     _to_etree(body, node)

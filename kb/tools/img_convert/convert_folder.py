@@ -31,13 +31,14 @@ def convert_folder(input_folder, output_folder,quality=50,resize_type='width',
     '''
     images = sorted([f for f in os.listdir(input_folder) if f.endswith(input_ext)])
     image_jobs = set()
-    index = 0
+    index = 1
     for image in images:
         input_path = os.path.join(input_folder,image)
         #output_file_name = input_folder_name+'-'+str(index).zfill(8)+'.'+output_ext
         output_file_name = str(index).zfill(8)+'.'+output_ext
         output_path = os.path.join(output_folder,output_file_name)
-        image_jobs.add((input_path,output_path,quality,resize_type,resize))
+        if not os.path.exists(output_path): # Skip file if already exist
+            image_jobs.add((input_path,output_path,quality,resize_type,resize))
         index += 1
     # Ready for multithreading - notice that im and gm is multithreaded.
     return tools.get_delta_time(convert_images(image_jobs))
@@ -59,9 +60,9 @@ def convert_images(image_jobs):
             err = err.format(cmd,result['output'])
             raise ConvertError(err)
         proc_time = time.time() - proc_start_time
-        results.append((proc_time,result)) 
+        results.append((proc_time,result))
     total_proc_time = time.time()-start
-    return  total_proc_time
+    return total_proc_time
 
 def split_set_equally(input_set, chunks=2):
     #http://enginepewpew.blogspot.dk/2012/03/splitting-dictionary-into-equal-chunks.html

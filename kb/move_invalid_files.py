@@ -94,21 +94,28 @@ class FileValidator( Step ) :
         '''
         error_level = 0
         message = ''
+        msg = ('Valid file extensions are: {0}'.format(', '.join(valid_exts)))
+        self.debug_message(msg)
         if len(os.listdir(folder)) == 0:
             message = self.err_msg_no_files_added
             error_level= 2
         else:
             for f in os.listdir(folder):
                 if os.path.isdir(folder + f):
+                    msg = '{0} contains a subfolder ({1}) which is not allowd .'
+                    msg = msg.format(folder,f)
+                    self.debug_message(msg)
                     message = self.err_msg_contains_folder
                     #('CRITICAL - Subdirectory {0} found in source folder.').format(folder + f)
                     error_level= 2
                     break
-                elif tools.getFileExt(f) not in valid_exts:
+                elif tools.getFileExt(f,remove_dot=True) not in valid_exts:
                     #TODO: ��� gives error, decode/encode
                     #UnicodeEncodeError: 'ascii' codec can't encode character u'\xe6' in position 34: ordinal not in range(128)
-                    err_file_msg = '{0} is not a valid file and will be removed.'.format(f)
-                    self.debug_message(err_file_msg)
+                    msg = ('{0} is not a valid file and will be moved to the '
+                           'invalid folder. {1} is not a valid extension.')
+                    msg = msg.format(f,tools.getFileExt(f,remove_dot=True))
+                    self.debug_message(msg)
                     message =  self.err_msg_invalid_files
                     #('WARNING - Invalid extension {0} found in source folder').format(tools.getFileExt(f))
                     error_level = 1

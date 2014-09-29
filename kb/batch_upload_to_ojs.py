@@ -29,7 +29,7 @@ def buildArgs(abs_path, options):
 	'''
 	Generate the arguments that will be used by both scripts
 	'''
-	abs_config = os.path.abspath(options.config)
+	abs_config = os.path.abspath(options.settings)
 	process_title = getProcessTitle(abs_path, abs_config)
 	args = "process_id=1 process_path={0} process_title={1} config_path={2}"\
 		.format(abs_path, process_title, abs_config)
@@ -67,8 +67,8 @@ def getOptions():
 	try:
 		parser=OptionParser()
 		parser.add_option('-d', '--dir', dest='root_dir', help='The directory containing all the process directories.')
-		parser.add_option('-c', '--config', dest='config', 
-			help='The config file to be read by the scripts. If not specified, the system default will be assumed.')
+		parser.add_option('-c', '--settings', dest='settings', 
+			help='The settings file to be read by the scripts. If not specified, the system default will be assumed.')
 		parser.add_option('-v', '--debug', dest='debug', help='Should the scripts run in debug mode?')
 		(options, args) = parser.parse_args()
 		ensureValidOptions(options, parser)
@@ -83,8 +83,8 @@ def getOptions():
 def ensureValidOptions(options, parser):
 	if not options.root_dir:
 		exitWithError("We can't do this without a root directory...", parser)
-	if not options.config:
-		exitWithError("We cant do this without a config file...", parser)
+	if not options.settings:
+		exitWithError("We cant do this without a settings file...", parser)
 		
 	# if we have a debug argument - convert it to boolean
 	if options.debug:

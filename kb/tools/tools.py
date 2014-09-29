@@ -15,34 +15,7 @@ import shutil
 
 # Import from tools - same package
 import errors
-
-
-def fix_path(p, check_p = False, logger=None):
-    '''
-    Add "\" or "/" to the end of p. Also check if p is a dir if check_p.
-    Input: path w/wo trailing "/" or "\"
-    
-    Output: path w trailing "/" or "\" and error msg if check_p=True
-    '''
-    if not p:
-        msg = 'No path given.'
-        logger.error(msg)
-        return p,msg
-    if check_p:
-        if not os.path.exists(p):
-            msg = p+' does not exist or cannot be accessed'
-            if logger: logger.error(msg)
-            return p,msg
-        elif not os.path.isdir(p):
-            msg = p+' is does not a valid directory.'
-            if logger: logger.error(msg)
-            return p,msg
-        p = os.path.normpath(p) + os.sep
-        return p,None
-    else:
-        p = os.path.normpath(p) + os.sep
-        return p,None
-
+import hashlib
 
 def find_or_create_dir(path):
     '''
@@ -84,10 +57,26 @@ def move_file(file_path,dest_folder,logger=None):
         raise Exception(error)
     return True
 
-def getFileExt(name): 
-        return name.split('.')[-1]
-    
+def add_to_file_name(filename,add_text):
+    name, ext = os.path.splitext(filename)
+    name = name+add_text
+    print(name)
+    return name+ext
+
+def getFileExt(name,remove_dot=False): 
+        ext = os.path.splitext(name)[-1]
+        if remove_dot: ext = ext.strip('.')
+        return ext
+
+def get_filename(path,with_ext = True): 
+        filename = os.path.basename(path)
+        if not with_ext:
+            return os.path.splitext(filename)[0]
+        else:
+            return filename
+
 def get_delta_time(s):
+    if s == 0: return '0 ms'
     t = int(s * 100) / 100.0
     h, remainder = divmod(t, 3600)
     remainder = round(remainder,3)
@@ -274,13 +263,17 @@ def enrichToc(toc_data, pdfinfo, overlapping_articles=False):
         toc_data[index]['end_page'] = end_page
     return toc_data
 
-def getArticleName(pdf_name, index):
+def getHashName(title):
+    return hashlib.md5(title.encode('utf-8')).hexdigest().decode()
+
+def getArticleName(md5_name, start_page, end_page):
     '''
     Generate article name for OJS articles
     in format <pdf_name>_<index>
     '''
-    index = str(index).zfill(4) # Add leading zeros to index
-    return "{0}_{1}.pdf".format(pdf_name.replace('.pdf', ''), index)
+    start_page = str(start_page).zfill(4) # Add leading zeros to index
+    end_page = str(end_page).zfill(4) # Add leading zeros to index
+    return "{0}_{1}_{2}.pdf".format(start_page, end_page,md5_name)
 
 def pdfinfo(infile):
     """
@@ -464,17 +457,80 @@ def cutPdf(inputPdf, outputPdf, fromPage, toPage):
 
 def convertLangToLocale(code):
     '''
-    TODO - Clarify this with Jeppe
-    Need to map between lang codes supplied
-    by Goobi (ISO 639-1?) e.g. da
-    and the locale codes that OJS needs, e.g. da_DK
-    For now we'll just use a placeholder
+    This will convert from Goobi mets language std (639-1) to OJS language
+    type names.
+    
+    http://pkp.sfu.ca/wiki/index.php/Translating_OxS
+    If this link fail the relevant content is here:
+    
+    OJS Languages
+    
+        Basque (eu_ES)
+        Bulgarian (bg_BG)
+        Catalan (ca_ES)
+        Chinese (zh_CN)
+        Chinese (zh_TW)
+        Croatian (hr_HR)
+        Czech (cs_CZ)
+        Danish (da_DK)
+        Dutch (nl_NL)
+        Farsi (fa_IR)
+        French (fr_CA)
+        Galician (gl_ES)
+        German (de_DE)
+        Greek (el_GR)
+        Indonesian (id_ID)
+        Italian (it_IT)
+        Japanese (ja_JP)
+        Macedonian (mk_MK)
+        Malayalam (ml_IN)
+        Norwegian (no_NO)
+        Polish (pl_PL)
+        Portuguese (pt_BR)
+        Portuguese (pt_PT)
+        Romanian (ro_RO)
+        Russian (ru_RU)
+        Serbian (sr_SR)
+        Spanish (es_AR)
+        Spanish (es_ES)
+        Swedish (sv_SE)
+        Turkish (tr_TR)
+        Ukranian (uk_UA)
+        Vietnamese (vi_VN)
+        Welsh (cy_GB)
+    
+    
+    OCS Languages
+    
+        Basque (eu_ES)
+        Catalan (ca_ES)
+        Chinese (zh_TW)
+        Czech (cs_CZ)
+        Farsi (fa_IR)
+        French (fr_CA)
+        German (de_DE)
+        Italian (it_IT)
+        Portuguese (pt_BR)
+        Portuguese (pt_PT)
+        Spanish (es_AR)
+        Spanish (es_ES)
+    
+    
+    OMP Languages
+    
+        French (fr_CA)
+        Greek (el_GR)
+        Portuguese (pt_BR)
+        Spanish (es_ES)
+    
     '''
     try:
         return {
             'da': 'da_DK',
-            'en': 'en_US'
-        }[code]
+            'en': 'en_US',
+            'no': 'no_NO',
+            'sv': 'sv_SE' 
+            }[code]
     except: 
         return ''
 

@@ -24,26 +24,26 @@ class ConfigReader:
 	
 	def __init__(self, filename, old_config=None,overwrite_sections=False,
 				 overwrite_options=False):
-		config = ConfigParser.ConfigParser()
-		config.readfp( codecs.open( filename, encoding="utf-8", mode="rb") )
+		settings = ConfigParser.ConfigParser()
+		settings.readfp( codecs.open( filename, encoding="utf-8", mode="rb") )
 		if old_config:
 			old_config = old_config.config
 			for section in old_config.sections():
-				if overwrite_sections and config.has_section(section):
+				if overwrite_sections and settings.has_section(section):
 					continue
-				config.add_section(section)
+				settings.add_section(section)
 				for name, value in old_config.items( section ):
-					if overwrite_options and config.has_option(section, name):
+					if overwrite_options and settings.has_option(section, name):
 						continue
-					config.set(section, name, value)
-		self.config = config
+					settings.set(section, name, value)
+		self.config = settings
 		
-		for section in config.sections() :
+		for section in settings.sections() :
 			section_name = section.replace( " ", "_" )
 			new_section = ConfigSection()
 			vars(self) [section_name] = new_section
 			
-			for name, value in config.items( section ):
+			for name, value in settings.items( section ):
 				if value.lower() == "true" :
 					vars( new_section )[name] =  True
 				elif value.lower() == "false" :

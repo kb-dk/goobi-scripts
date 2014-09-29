@@ -24,8 +24,7 @@ class ConvertServer():
             step_processor.stop()
             step_processor.join()
         self.logger.info('{0} step job processor(s) stopped.'.format(len(self.step_job_processors)))
-        self.logger.info('Existing server.')
-        self.logger.info('=============================')
+        self.logger.log_section('Existing server.')
         sys.exit(0)
     
     def __init__(self,config_path=None):
@@ -36,7 +35,7 @@ class ConvertServer():
         # Setup logger
         log_path = '/opt/digiverso/logs/step_server/' 
         log_level = 'INFO'
-        self.logger = logger.setup(log_path,log_level)
+        self.logger = logger.logger(log_path,log_level)
         # Setup host and port for connection
         host = 'localhost'
         port = 37000
@@ -62,7 +61,7 @@ class ConvertServer():
                                        logger=self.logger)
     
     def start(self):
-        self.logger.info('Starting step job processor(s)...')
+        self.logger.log_section('Starting step job processor(s)...')
         for step_processor in self.step_job_processors:
             step_processor.start()
         self.logger.info('Step job processor(s) started.')
@@ -84,8 +83,7 @@ class ConvertServer():
             step_processor.stop()
             step_processor.join()
         self.logger.info('{0} step job processor(s) stopped.'.format(len(self.step_job_processors)))
-        self.logger.info('Existing server.')
-        self.logger.info('=============================')
+        self.logger.log_section('Existing server.')
 
 if __name__ == "__main__":
     cs = ConvertServer()

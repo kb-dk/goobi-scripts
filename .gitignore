@@ -1,4 +1,4 @@
-kb/config/config.ini
+kb/workflows/system_config.ini
 kb/tools/tesseract
 .project
 .pydevproject
