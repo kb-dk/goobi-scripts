@@ -4,7 +4,7 @@ import datetime
 import sys
 import time
 
-from goobi_communicate import GoobiCommunicate
+from goobi.goobi_communicate import GoobiCommunicate
 
 
 class GoobiLogger():

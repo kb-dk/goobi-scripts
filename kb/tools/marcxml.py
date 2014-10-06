@@ -80,7 +80,7 @@ class MarcXml(object):
         
 
     def prettyPrint(self):
-        for k,v in self.data.iteritems():
+        for k,v in self.data.items():
             print(u"{0}: {1}".format(k,v))
 
     def __mapData(self):
@@ -90,7 +90,7 @@ class MarcXml(object):
         dictionary and the relevant values in the MARC file
         '''
         dataFields = self.__getDataFields(self.dom) 
-        for key, val in self.danmarcMappings.iteritems():
+        for key, val in self.danmarcMappings.items():
             if 'multiple' in val.keys() and val['multiple']: 
                 self.__handleMultiValuedAttribute(key, val['data'], dataFields)
             else:
@@ -107,7 +107,7 @@ class MarcXml(object):
         for field in dataFields:
             data_values = dict()
             # run through the submappings within the element
-            for key, val in subelements.iteritems():
+            for key, val in subelements.items():
                 if isinstance(val, list):
                     for sub_val in val:# val is a list of dicts
                         # This makes it possible to add several subelements with

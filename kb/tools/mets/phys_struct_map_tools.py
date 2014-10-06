@@ -8,8 +8,8 @@ import pprint
 lib_path = os.path.abspath(os.path.dirname(os.path.realpath(__file__))+os.sep+'../')
 sys.path.append(lib_path)
 
-from xml_tools import xml_tools
-import fs_tools
+from tools.xml_tools import xml_tools
+from tools.mets import fs_tools
 
 def isEmpty(physical_struct_map):
     div_key = '{http://www.loc.gov/METS/}div'

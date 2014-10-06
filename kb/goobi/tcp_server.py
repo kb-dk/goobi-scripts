@@ -3,11 +3,11 @@ Created on 20/06/2014
 
 @author: jeel
 '''
-import SocketServer
+import socketserver
 import thread
 import time
 
-class StepJobTCPServer(SocketServer.TCPServer):
+class StepJobTCPServer(socketserver.TCPServer):
     #http://stackoverflow.com/questions/15889241/send-a-variable-to-a-tcphandler-in-python
     def __init__(self, 
                  server_address, 
@@ -19,12 +19,12 @@ class StepJobTCPServer(SocketServer.TCPServer):
             raise ValueError('A step_job_processor thread must be given to server.')
         self.step_job_queue = step_job_queue
         self.logger = logger
-        SocketServer.TCPServer.__init__(self, 
+        socketserver.TCPServer.__init__(self, 
                                         server_address, 
                                         RequestHandlerClass, 
                                         bind_and_activate=True)
 
-class StepJobTCPHandler(SocketServer.BaseRequestHandler):
+class StepJobTCPHandler(socketserver.BaseRequestHandler):
     """
     Todo: document
     """
@@ -47,7 +47,7 @@ class StepJobTCPHandler(SocketServer.BaseRequestHandler):
                 def stop_server(server):
                     server.shutdown()
                     time.sleep(0.3)
-                # shutdown must be called in a separate thread due to server_forever mechanism - se BaseServer in SocketServer
+                # shutdown must be called in a separate thread due to server_forever mechanism - se BaseServer in socketserver
                 thread.start_new_thread(stop_server, (self.server,))
             else:
                 self.request.sendall('"'+self.data + '" recieved correctly. Nothing done.')

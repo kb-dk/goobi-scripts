@@ -2,7 +2,7 @@
 # -*- coding: utf-8
 #Send a log message: 'http://127.0.0.1/goobi/wi?command=addToProcessLog&processId='+processId+'&value=Beginning&jpeg2000&conversion&type=error&token=Xasheax7ai'
 # close a step automatically: 'http://127.0.0.1/goobi/wi?command=closeStep&stepId='+stepId+'&token=Xasheax7ai'
-import urllib2
+from urllib import request,parse
 
 
 class GoobiCommunicate() :
@@ -112,7 +112,7 @@ class GoobiCommunicate() :
         '''
         TODO: Document method
         '''
-        return urllib2.quote( str(string), safe="" )
+        return parse.quote( str(string), safe="" )
     
     def _send( self, command, additional=None ) :
         '''
@@ -133,7 +133,7 @@ class GoobiCommunicate() :
         # TODO: Tidy this up. Need to catch exceptions properly and ensure 
         # request is closed (although python handles that too)
         try:
-            response = urllib2.urlopen( url )
+            response = request.urlopen( url )
             
             if response.code == 200:
             

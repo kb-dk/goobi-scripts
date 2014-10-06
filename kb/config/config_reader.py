@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8
-import ConfigParser
+import configparser
 import codecs
 
 
@@ -24,7 +24,7 @@ class ConfigReader:
 	
 	def __init__(self, filename, old_config=None,overwrite_sections=False,
 				 overwrite_options=False):
-		settings = ConfigParser.ConfigParser()
+		settings = configparser.ConfigParser()
 		settings.readfp( codecs.open( filename, encoding="utf-8", mode="rb") )
 		if old_config:
 			old_config = old_config.config

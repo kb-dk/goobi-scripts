@@ -7,11 +7,12 @@ Created on 19/08/2014
 import sys
 import os
 import pprint
+
 from tools.mets import log_struct_map_tools, struct_link_tools
 lib_path = os.path.abspath(os.path.dirname(os.path.realpath(__file__))+os.sep+'../')
 sys.path.append(lib_path)
 
-from xml_tools import xml_tools
+from tools.xml_tools import xml_tools
 
 def addDmdSec(dict_tree, dmd_log_id, doc_struct_info):
     '''

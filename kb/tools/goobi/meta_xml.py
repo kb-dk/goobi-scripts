@@ -86,7 +86,7 @@ class MetaXml(object):
 		discussed above.
 		'''
 		metadataTag = doc.createElement('goobi:metadata')
-		for key,val in element_data.iteritems():
+		for key,val in element_data.items():
 			if key == 'data':
 				text = doc.createTextNode(val)
 				metadataTag.appendChild(text)

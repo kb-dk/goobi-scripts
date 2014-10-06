@@ -5,7 +5,7 @@ Created on 20/06/2014
 '''
 import sys
 import os
-import Queue
+import queue
 from threading import Thread
 import time
 
@@ -14,10 +14,10 @@ lib_path = os.path.abspath(os.path.dirname(os.path.realpath(__file__))+os.sep+'.
 sys.path.append(lib_path)
 from tools.processing import processing
 
-class StepJobQueue():
+class StepJobqueue():
     
     def __init__(self,logger):
-        self.step_job_queue = Queue.Queue()
+        self.step_job_queue = queue.Queue()
         self.logger = logger
     
     def get_queue(self):
@@ -41,7 +41,7 @@ class StepJobProcessor(Thread):
         super(StepJobProcessor, self).__init__()
         if shared_job_queue is not None:
             self.shared_job_queue = shared_job_queue
-        self.step_job_queue = Queue.Queue()
+        self.step_job_queue = queue.Queue()
         self.running = True
         self.logger = logger
  
@@ -73,7 +73,7 @@ class StepJobProcessor(Thread):
                     # Try anyway
                     job = self.step_job_queue.get(block=True, timeout=0.5)
                 self.process(job)
-            except Queue.Empty:
+            except queue.Empty:
                 pass
                 #sys.stdout.write('.')
                 #sys.stdout.flush()

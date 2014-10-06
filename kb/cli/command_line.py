@@ -22,7 +22,7 @@ class CommandLine() :
 		# Gather args together (avoid spaces splititing values)
 		args_list = {}
 		last_key = ''
-		for i in xrange( len( args ) ):
+		for i in range(len(args)):
 			if "=" not in args[i]:
 				if last_key != '':
 					args_list[last_key] += " " + args[i]

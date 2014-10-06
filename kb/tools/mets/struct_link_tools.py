@@ -3,8 +3,10 @@ Created on 19/08/2014
 
 @author: jeel
 '''
-import phys_struct_map_tools
 import pprint
+
+from tools.mets import phys_struct_map_tools
+
 
 def get(dict_tree):
     mets_elem = '{http://www.loc.gov/METS/}mets'

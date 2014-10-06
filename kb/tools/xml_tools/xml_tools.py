@@ -179,16 +179,16 @@ def etree_to_dict(t):
     if children:
         dd = defaultdict(list)
         for dc in map(etree_to_dict, children):
-            for k, v in dc.iteritems():
+            for k, v in dc.items():
                 dd[k].append(v)
         '''temp_dict = dict()
-        for k, v in dd.iteritems():
+        for k, v in dd.items():
             if len(v) == 1: temp_dict[k]=v[0]
             else: temp_dict[k]=v
         d = {t.tag:temp_dict}'''
-        d = {t.tag: {k:v[0] if len(v) == 1 else v for k, v in dd.iteritems()}}
+        d = {t.tag: {k:v[0] if len(v) == 1 else v for k, v in dd.items()}}
     if t.attrib:
-        d[t.tag].update(('@' + k, v) for k, v in t.attrib.iteritems())
+        d[t.tag].update(('@' + k, v) for k, v in t.attrib.items())
     if t.text:
         text = t.text.strip()
         if children or t.attrib:

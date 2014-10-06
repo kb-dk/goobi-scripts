@@ -5,14 +5,16 @@ Created on 19/08/2014
 @author: jeel
 '''
 from xml.dom import minidom
-import phys_struct_map_tools
-import fs_tools
-import file_sec_tools
-import log_struct_map_tools
-import dmd_sec_tools
-import struct_link_tools
 import pprint
 import sys
+
+from tools.mets import phys_struct_map_tools
+from tools.mets import fs_tools
+from tools.mets import file_sec_tools
+from tools.mets import log_struct_map_tools
+from tools.mets import dmd_sec_tools
+from tools.mets import struct_link_tools
+
 
 #===============================================================================
 # Function to a add new doc struct to dict_tree - wrapper
