@@ -32,7 +32,7 @@ class GoobiCommunicate() :
         goobi_levels = ['info', 'error', 'debug', 'user']
         
         if level not in goobi_levels:
-            print "Level not recognised, use one of " + ",".join( goobi_levels )
+            print("Level not recognised, use one of " + ",".join( goobi_levels ))
             return False
         
         additional = {
@@ -47,7 +47,7 @@ class GoobiCommunicate() :
         TODO: Document method
         '''
         if not step_id and not process_id:
-            print "Must have either a step id or a process id!"
+            print("Must have either a step id or a process id!")
         
         if step_id:
             additional = { "stepId" : step_id }
@@ -128,7 +128,7 @@ class GoobiCommunicate() :
         url += self.url_token.format( token=self.token )
         
         if self.debugging and additional and 'value' in additional:
-            print additional['value']
+            print(additional['value'])
         
         # TODO: Tidy this up. Need to catch exceptions properly and ensure 
         # request is closed (although python handles that too)
@@ -142,7 +142,7 @@ class GoobiCommunicate() :
             else:
                 
                 if self.debugging:
-                    print "Debug: GoobiCommunicate() None OK response from Goobi:", response.msg, response.code
+                    print("Debug: GoobiCommunicate() None OK response from Goobi:", response.msg, response.code)
             response.close()        
         except:
             pass

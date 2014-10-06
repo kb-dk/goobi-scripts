@@ -24,8 +24,8 @@ def decodeDictTree(dict_tree,encoding='UTF-8'):
                 try:
                     dict_tree[key] = value.decode(encoding)
                 except Exception as e:
-                    print value
-                    print type(value)
+                    print(value)
+                    print(type(value))
                     raise e
             elif isinstance(value,dict):
                 dict_tree[key] = decodeDictTree(dict_tree[key],encoding)

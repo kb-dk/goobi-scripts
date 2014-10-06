@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import os
 from goobi.goobi_step import Step
 from tools.xml_tools import dict_tools, xml_tools
@@ -70,6 +71,7 @@ class CreateMetsFile( Step ):
 		'''
 		
 		dt,_ = dict_tools.parseXmlToDict(self.meta_file)
+		
 		if not mets_tools.containsImages(dt):
 			dt = mets_tools.addImages(dt,self.img_src)
 			xml_tools.writeDictTreeToFile(dt,self.meta_file)

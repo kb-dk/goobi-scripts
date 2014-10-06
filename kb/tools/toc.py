@@ -279,12 +279,12 @@ class TOC(object):
 
     def prettyPrint(self):
         for s in self.sections:
-            print "==========================="
-            print "Section: {0}".format(s.title)
-            print "==========================="
+            print("===========================")
+            print("Section: {0}".format(s.title))
+            print("===========================")
             for a in s.articles:
-                print u"Title: {0}... | Author: {1} | StartPage: {2} | EndPage {3} | Number {4}"\
-                .format(a.title[0:5].encode('utf-8'), a.author, a.start_page, a.end_page, a.number) 
+                print(u"Title: {0}... | Author: {1} | StartPage: {2} | EndPage {3} | Number {4}"
+                .format(a.title[0:5].encode('utf-8'), a.author, a.start_page, a.end_page, a.number)) 
     
     def __decodeRow(self, row):    
         decoded_row = []

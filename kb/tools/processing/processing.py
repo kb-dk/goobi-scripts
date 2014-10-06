@@ -86,7 +86,7 @@ class processExe():
         retval['stdout'] = stdout
         retval['stderr'] = stderr
         if self.print_output:
-            print output
+            print(output)
         return retval
 
     

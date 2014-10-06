@@ -12,7 +12,6 @@ import sys
 # I dont like it, http://stackoverflow.com/a/4284378
 lib_path = os.path.abspath(os.path.dirname(os.path.realpath(__file__))+os.sep+'../../')
 sys.path.append(lib_path)
-#print lib_path
 import tools.tools as tools
 from tools.processing import processing
 

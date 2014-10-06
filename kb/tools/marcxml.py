@@ -81,7 +81,7 @@ class MarcXml(object):
 
     def prettyPrint(self):
         for k,v in self.data.iteritems():
-            print u"{0}: {1}".format(k,v)
+            print(u"{0}: {1}".format(k,v))
 
     def __mapData(self):
         '''

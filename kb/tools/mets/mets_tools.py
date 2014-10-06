@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
 Created on 19/08/2014
 
@@ -226,14 +227,14 @@ def getIssueData(data):
     return issue_data
 
 def getArticleData(data,sections):
-    ret_sections = {s: [] for s in sections}
+    ret_sections = dict([(s,[]) for s in sections])
     mets_ns = 'http://www.loc.gov/METS/'
     #=======================================================================
     # Dig in and get DMDID for elements in sections front matter, articles
     # and back matter 
     #=======================================================================
     structMap = getElemByNsNameType(data, mets_ns, 'structMap', 'LOGICAL')
-    section_dmd_ids = {s: [] for s in sections}
+    section_dmd_ids = dict([(s,[]) for s in sections])
     log_ids = dict() # mapping log_id -> dmd_id, for pages
     for div in structMap.getElementsByTagNameNS(mets_ns,'div'):
         section_type = div.getAttribute('TYPE')

@@ -41,7 +41,7 @@ def uploadFiles(args):
 	'''
 	call upload step with args
 	'''
-	print 'python upload_to_ojs.py {0}'.format(args)
+	print('python upload_to_ojs.py {0}'.format(args))
 	os.system('python upload_to_ojs.py {0}'.format(args))
 	
 
@@ -49,7 +49,7 @@ def runImportScript(args):
 	'''
 	Call import script with args
 	'''
-	print 'python run_ojs_import.py {0}'.format(args)
+	print('python run_ojs_import.py {0}'.format(args))
 	os.system('python run_ojs_import.py {0}'.format(args))
 
 def getProcessTitle(path, config_file):
@@ -74,8 +74,8 @@ def getOptions():
 		ensureValidOptions(options, parser)
 		tools.ensureDirsExist(options.root_dir)
 	except IOError as e:
-		print e.strerror
-		print parser.print_help()
+		print(e.strerror)
+		print(parser.print_help())
 		sys.exit(1)
 
 	return options
@@ -91,8 +91,8 @@ def ensureValidOptions(options, parser):
 		options.debug = (options.debug.lower() == 'true')
 
 def exitWithError(msg, parser):
-	print msg
-	print parser.print_help()
+	print(msg)
+	print(parser.print_help())
 	sys.exit(1)
 
 if __name__ == '__main__':

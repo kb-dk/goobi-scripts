@@ -1,4 +1,4 @@
-﻿#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8
 import sys, os, os.path, re, traceback, datetime, subprocess
 import logging, logging.handlers
@@ -305,9 +305,8 @@ class Step( object ):
     def exit( self, message,log=None ) :
         # TODO: make this method a nice exit
         ''' Nice exit '''
-        print "Exit being called with args: "
-        print "Message is {0}".format(str( message))
-        print "Log is {0}".format(str(log))
+        msg = ('Exit being called with args: .\nMessage is {0}.\nLog is {1}')
+        msg = msg.format(str(message),str(log)) 
         if log.__class__.__name__  == 'Logger':
             log.error( message )
         else:
@@ -322,7 +321,7 @@ class Step( object ):
         does_not_have_sections = []
         for section in must_have:
             if len(section) > 0 and not config.hasSection( section ):
-                print "section {0} not found".format(section)
+                print("section {0} not found".format(section))
                 does_not_have_sections.append( section )
         if does_not_have_sections:
             error = "Error: Config file does not contain sections:- " + ", ".join( does_not_have_sections )

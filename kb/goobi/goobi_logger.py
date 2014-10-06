@@ -101,7 +101,7 @@ class GoobiLogger():
                                                      message=message )
         
         #if self.debugging_on:
-        #    print formatted_message
+        #    print(formatted_message)
         
         if level == 'warning':
             level = 'info'

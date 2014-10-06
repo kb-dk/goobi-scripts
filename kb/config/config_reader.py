@@ -19,7 +19,7 @@ class ConfigReader:
 
 			read.py :
 				c = ConfigReader( "config.ini" )
-				print c.my_section.myname # output string "my value"
+				print(c.my_section.myname # output string "my value")
 	'''
 	
 	def __init__(self, filename, old_config=None,overwrite_sections=False,
@@ -67,19 +67,19 @@ if __name__ == '__main__' :
 
 	c = ConfigReader( "../config.ini" )
 	
-	print 'Has section "DUMMY": ' + str( c.hasSection( "DUMMY" ) )
+	print('Has section "DUMMY": ' + str( c.hasSection( "DUMMY" ) ))
 	
 	hasDatabank = c.hasSection( "databank" )
-	print 'Has section "databank" : ' + str( hasDatabank )
+	print('Has section "databank" : ' + str( hasDatabank ))
 	if hasDatabank:
 	
-		print 'Has item "databank.dummy": ' + str(c.hasItem( "databank", "dummy" ) )
+		print('Has item "databank.dummy": ' + str(c.hasItem( "databank", "dummy" ) ))
 		
 		hasDatabankHost = c.hasItem( "databank", "host" )
-		print 'Has item "databank.host" : ' + str( hasDatabankHost )
+		print('Has item "databank.host" : ' + str( hasDatabankHost ))
 		
 		if hasDatabankHost:
-			print "Databank host = " + c.databank.host
+			print("Databank host = " + c.databank.host)
 
 	
 	
