@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# -*- coding: utf-8
+
 import os
 from goobi.goobi_step import Step
 from tools.xml_tools import dict_tools, xml_tools

@@ -1,5 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: utf-8
 import sys, os
-import ConfigParser
+import configparser
 from optparse import OptionParser
 
 import tools.tools as tools
@@ -57,7 +59,7 @@ def getProcessTitle(path, config_file):
 	We assume that the process title for the given directory
 	is the same as the name of the toc file minus .toc
 	'''
-	config = ConfigParser.RawConfigParser()
+	config = configparser.RawConfigParser()
 	config.read(config_file)
 	toc_dir = os.path.join(path, config.get('process_folder_structure', 'metadata_toc_path'))
 	toc_name = tools.getFirstFileWithExtension(toc_dir, 'toc')

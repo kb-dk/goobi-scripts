@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8
+
 '''
 Created on 20/06/2014
 
@@ -48,30 +51,21 @@ class processExe():
             process = self._start_process()
         except Exception as e:
             raise e
-        if self.timeout is not None:
-            assert type(self.timeout) is float,\
-                   '"timeout" %s is not a float' % self.timeout 
-            exec_start = time.time()
-            # Note this is implemented as a timeout in Python
-            # wait till process is finished/killed (e.g. poll != None) or
-            # timeout has been passed
-            while ((exec_start+self.timeout) > time.time() and
-                   process.poll() is None):
-                time.sleep(0.5)
-            if (process.poll() is None):
-                # Kill whole group - needed because shell is true
-                # Works in linux 
-                os.killpg(process.pid, signal.SIGTERM)
-                stdout, stderr = process.communicate()
-                msg = 'Process "{0}" timeout after {1} sec. Stdout: {2}. Stderr: {3}'
-                msg = msg.format(shlex.split(self.cmd)[0],self.timeout,stdout,stderr)
-                if self.raise_errors:
-                    raise TimeoutError(msg)
-                else:
-                    retval['timedout'] = True
-                    retval['output'] = msg
-                    return retval
-        error_code = process.poll()
+        try:
+            error_code = process.wait(self.timeout)
+        except subprocess.TimeoutExpired:
+            # Kill whole group - needed because shell is true
+            # Works in linux 
+            os.killpg(process.pid, signal.SIGTERM)
+            stdout, stderr = process.communicate()
+            msg = 'Process "{0}" timeout after {1} sec. Stdout: {2}. Stderr: {3}'
+            msg = msg.format(shlex.split(self.cmd)[0],self.timeout,stdout,stderr)
+            if self.raise_errors:
+                raise TimeoutError(msg)
+            else:
+                retval['timedout'] = True
+                retval['output'] = msg
+                return retval
         stdout, stderr = process.communicate()
         output = 'Stdout: {0}. Stderr: {1}'.format(stdout, stderr)
         if error_code > 0:

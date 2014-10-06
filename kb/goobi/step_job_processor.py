@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8
+
 '''
 Created on 20/06/2014
 
@@ -8,6 +11,7 @@ import os
 import queue
 from threading import Thread
 import time
+import traceback
 
 # I dont like it, http://stackoverflow.com/a/4284378
 lib_path = os.path.abspath(os.path.dirname(os.path.realpath(__file__))+os.sep+'../')
@@ -108,7 +112,9 @@ class StepJobProcessor(Thread):
                 if self.logger: self.logger.error(err)
                 err = 'Error from failed step job: {0}'
                 err = err.format(str(e))
-                if self.logger: self.logger.error(err)
+                if self.logger: 
+                    self.logger.error(err)
+                    self.logger.error(traceback.format_exc())
                 return
             msg = 'Step job {0} completed with result{1}.'
             msg = msg.format(step_job_filename,result['output'])

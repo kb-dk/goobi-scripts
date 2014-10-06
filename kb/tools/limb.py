@@ -1,5 +1,8 @@
-import tools as tools
-from errors import DataError
+#!/usr/bin/env python
+# -*- coding: utf-8
+
+import tools.tools as tools
+from tool.errors import DataError
 import os
 
 def tocExists(toc_dir):

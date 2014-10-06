@@ -1,4 +1,7 @@
-import urllib2
+#!/usr/bin/env python
+# -*- coding: utf-8
+
+from urllib import request
 from xml.dom import minidom
 from types import MethodType
 
@@ -54,7 +57,7 @@ class MarcXml(object):
         Given a web address, initialise a class instance
         based on the content at this address
         '''
-        content = urllib2.urlopen(url).read()
+        content = request.urlopen(url).read()
         return MarcXml(content)
 
     @staticmethod

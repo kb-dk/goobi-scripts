@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8
 from goobi.goobi_step import Step
 import os, subprocess
 import tools.goobi.metadata as goobi_tools
