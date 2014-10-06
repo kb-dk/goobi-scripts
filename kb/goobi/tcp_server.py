@@ -4,7 +4,7 @@ Created on 20/06/2014
 @author: jeel
 '''
 import socketserver
-import thread
+import threading
 import time
 
 class StepJobTCPServer(socketserver.TCPServer):
@@ -32,7 +32,7 @@ class StepJobTCPHandler(socketserver.BaseRequestHandler):
     def handle(self):
         step_job_queue = self.server.step_job_queue
         # self.request is the TCP socket connected to the client
-        self.data = self.request.recv(1024).strip()
+        self.data = self.request.recv(1024).strip().decode() # Comes as bytes, convert to string
         if self.server.logger:
             msg = "{0} wrote: {1}"
             msg = msg.format(self.client_address[0],self.data)
@@ -43,14 +43,20 @@ class StepJobTCPHandler(socketserver.BaseRequestHandler):
             command = command_arguments[0] 
             # TODO: add command to get info about queue
             if command in ['quit','exit','close','die','incinerate']:
-                self.request.sendall('"'+self.data + '" recieved correctly. Shutting down server.')
+                r = ('"{0}" recieved correctly. Shutting down server.')
+                r = r.format(self.data).encode() # encode to bytes to send via socket
+                self.request.sendall(r)
                 def stop_server(server):
                     server.shutdown()
                     time.sleep(0.3)
                 # shutdown must be called in a separate thread due to server_forever mechanism - se BaseServer in socketserver
-                thread.start_new_thread(stop_server, (self.server,))
+                threading.Thread(target=stop_server, args=(self.server,)).start().run()
             else:
-                self.request.sendall('"'+self.data + '" recieved correctly. Nothing done.')
+                r = ('"{0}" recieved correctly. Nothing done.')
+                r = r.format(self.data).encode() # encode to bytes to send via socket
+                self.request.sendall(r)
         elif command_lenght > 1:
             step_job_queue.add(command_arguments)
-            self.request.sendall('"'+self.data + '" recieved correctly and added to queue')
+            r = ('"{0}" recieved correctly and added to queue')
+            r = r.format(self.data).encode() # encode to bytes to send via socket
+            self.request.sendall(r)

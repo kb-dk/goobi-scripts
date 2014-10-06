@@ -9,8 +9,8 @@ import os
 
 lib_path = os.path.abspath(os.path.dirname(os.path.realpath(__file__))+os.sep+'../')
 sys.path.append(lib_path)
-from step_job_processor import StepJobProcessor, StepJobQueue
-from tcp_server import StepJobTCPServer, StepJobTCPHandler
+from goobi.step_job_processor import StepJobProcessor, StepJobQueue
+from goobi.tcp_server import StepJobTCPServer, StepJobTCPHandler
 import tools.logging.logger as logger
 
 class ConvertServer():

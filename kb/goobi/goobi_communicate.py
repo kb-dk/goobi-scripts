@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8
 #Send a log message: 'http://127.0.0.1/goobi/wi?command=addToProcessLog&processId='+processId+'&value=Beginning&jpeg2000&conversion&type=error&token=Xasheax7ai'
 # close a step automatically: 'http://127.0.0.1/goobi/wi?command=closeStep&stepId='+stepId+'&token=Xasheax7ai'

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8
 '''
 Created on 26/03/2014
@@ -46,12 +46,12 @@ class StepJobClient( Step ) :
         msg = msg.format(self.host, self.port)
         self.glogger.debug(msg)
         # Send data to server
-        sock.sendall(self.step_job_cmd + "\n")
+        sock.sendall((self.step_job_cmd + "\n").encode()) # Convert to bytes
         msg = 'Data sent to server {0}:{1} - {2}'
         msg = msg.format(self.host, self.port,self.step_job_cmd)
         self.glogger.debug(msg)
         # Receive reciept from the server
-        reciept = sock.recv(1024)
+        reciept = sock.recv(1024).decode() # comes as bytes
         msg = 'Reciept recieved from server {0}:{1} - {2}.'
         msg = msg.format(self.host,self.port,reciept)
         self.glogger.debug(msg)

@@ -14,7 +14,7 @@ lib_path = os.path.abspath(os.path.dirname(os.path.realpath(__file__))+os.sep+'.
 sys.path.append(lib_path)
 from tools.processing import processing
 
-class StepJobqueue():
+class StepJobQueue():
     
     def __init__(self,logger):
         self.step_job_queue = queue.Queue()
