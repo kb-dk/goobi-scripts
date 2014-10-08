@@ -367,11 +367,54 @@ class Step( object ):
                 value = config.item( self.config_general_section, key )
         if value is None:
             error = '{0} not defined in section {1} in config file.'
-            error = error.format(key,
-                                 section)
+            error = error.format(key,section)
             raise KeyError(error)
         else:
             return value
+
+    def getSetting(self,var_name,var_type,conf=None,conf_sec=None,default=None):
+        '''
+        Get and parse variable from either commmandline or configuration 
+        settings. The variable is casted to a type, e.g. a int, string og bool.
+        
+        :param var_name: name of variable to retrieve
+        :param var_type: what to cast the variable to. Per default the variable is a string
+            Use: int,float or bool
+        :param conf: (optional) a configuration to use (alternative to self.config)
+        :param conf_sec: (optional) the section in the cofiguration to locate the variable witin
+        :param default: (optional) default return value if the variable wasn't found, e.g. False
+        '''
+        try:
+            basestring
+        except NameError:  # python3
+            basestring = str
+        ret_val = default
+        if self.command_line.has(var_name):
+            if var_type and (var_type == int or var_type == float):
+                if (self.command_line.get(var_name) == ''):
+                    ret_val = default
+                else:
+                    ret_val = self.command_line.get(var_name)
+            else:
+                ret_val = self.command_line.get(var_name)
+        else:
+            try:
+                ret_val = self.getConfigItem(var_name, config=conf, 
+                                             section=conf_sec)
+            except KeyError as e:
+                if default: ret_val = default
+                else:
+                    error = '"{0}" not defined in commandline or in config file.'
+                    error = error.format(var_name)
+                    raise KeyError(error)
+        if var_type is not None:
+            if var_type == float:
+                ret_val = float(ret_val)
+            elif var_type == int:
+                ret_val = int(ret_val)
+            elif var_type == bool:
+                ret_val = (ret_val.lower() == 'true')
+        return ret_val
 
     def debugging( self) :
         debug = self.getConfigItem( "debug", self.config )

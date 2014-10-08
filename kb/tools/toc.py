@@ -54,14 +54,14 @@ class TOC(object):
                     raise ValueError(error)
             # As we exit the loop we will have one more section we need to save
             if sect: self.addSection(sect)
+        # Add page offset, only to dbc-articles
+        self.addPageOffset()
         # Fix the sections, so empty sections will appear as articles
         self.correctSections()
         # Set first page in front matter, if not set
         self.correctFirstPage()
         # Fix the article, so names are translated and empty front matter is fixed
         self.translateArticleNames()
-        # Add page offset, only to dbc-articles
-        self.addPageOffset()
         # Sort the articles by their start pages -> they may come in random order
         self.sortPages()
         # Add end page to those articles where it hasn't been set (i.e. limb toc articles)
@@ -141,7 +141,7 @@ class TOC(object):
         Returns a list of keywords extracted from DBC metadata for an article
         :param dbc_data: parsed metadata from DBC MarcX file
         '''
-        return map(lambda k: k['subject'],self.getFromDbcData(dbc_data,'subjects', []))
+        return list(map(lambda k: k['subject'],self.getFromDbcData(dbc_data,'subjects', [])))
         
     def getAuthorsFromDbcData(self,dbc_data):
         '''
@@ -193,7 +193,7 @@ class TOC(object):
         re_onepage_1 = '[Ss]\.[ ]*\d+.*'
         extr_re = re.compile('\d+')
         if not re_twopages_1.match(pages) or not re_twopages_2.match(pages):
-            start_page,end_page = map(lambda x: int(x), extr_re.findall(pages)[:2])
+            start_page,end_page = list(map(lambda x: int(x), extr_re.findall(pages)[:2]))
         elif not re_onepage_1.match(pages):
             start_page = end_page = int(extr_re.findall(pages)[0])
         else:
@@ -276,7 +276,9 @@ class TOC(object):
             if len(s.articles) == 0:
                 art = TOCArticle(['1', s.title, s.start_page])
                 s.addArticle(art)
-            elif s.articles[0] and s.articles[0].start_page > s.start_page:
+            elif (s.articles[0] and # Contains articles
+                  s.articles[0].start_page > s.start_page # first article doesnt start at the same page as section
+                  ):
                 art = TOCArticle(['1', s.title, s.start_page])
                 s.articles.insert(0, art) # add article to start of articles list
 

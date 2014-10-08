@@ -62,8 +62,8 @@ def getFilePaths(files):
     href_key = '@{http://www.w3.org/1999/xlink}href'
     href_val = 'file://'
     try:
-        file_paths = map(lambda x: x[file_locater_key][href_key].replace(href_val,''),
-                         files)
+        file_paths = list(map(lambda x: x[file_locater_key][href_key].replace(href_val,''),
+                         files))
     except (IndexError, KeyError):
         file_paths = []
     return file_paths

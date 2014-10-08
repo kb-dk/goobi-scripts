@@ -20,51 +20,6 @@ class WaitForLimb( Step ):
             'auto_report_problem' : 'string',
             'step_id' : 'number'
         }
-    
-        
-    def step(self):
-        '''
-        This script's role is to wait until
-        LIMB processing is complete before finishing.
-        In the event of a timeout, it reports back to 
-        previous step before exiting.
-        '''
-        error = None
-        retry_counter = 0
-        try:
-            self.getVariables()
-            # First check if files already have been copied to dest
-            if (not self.ignore_dest and 
-                limb_tools.alreadyMoved(self.goobi_toc,self.goobi_pdf,
-                                        self.input_files,self.goobi_altos)):
-                return error
-            # keep on retrying for the given number of attempts
-            while retry_counter < self.retry_num:
-                
-                if self.limbIsReady():
-                    msg = ('LIMB output is ready - exiting.')
-                    self.debug_message(msg)
-                    return None # this is the only successful exit possible
-                else:
-                    # if they haven't arrived, sit and wait for a while
-                    msg = ('LIMB output not ready - sleeping for {0} seconds...')
-                    msg = msg.format(self.retry_wait)
-                    self.debug_message(msg)
-                    retry_counter += 1
-                    time.sleep(self.retry_wait)
-        except IOError as e:
-            # if we get an IO error we need to crash
-            error = ('Error reading from directory {0}')
-            error = error.format(e.strerror)
-            return error
-        except ValueError as e:
-            # caused by conversion of non-numeric strings in config to nums
-            error = "Invalid config data supplied, error: {0}"
-            error = error.format(e.strerror)
-            return error
-        # if we've gotten this far, we've timed out and need to go back to the previous step
-        return "Timed out waiting for LIMB output."
-
     def getVariables(self):
         '''
         We need the limb_output folder,
@@ -102,13 +57,53 @@ class WaitForLimb( Step ):
         self.retry_num = int(self.getConfigItem('retry_num'))
         self.retry_wait = int(self.getConfigItem('retry_wait'))
         
-        # Set flag for ignore if files already have been copied
-        if (self.command_line.has('ignore_dest') and 
-            self.command_line.ignore_dest.lower() == True):
-            self.ignore_dest = True
-        else:
-            self.ignore_dest = False
-            
+        # Set flag for ignore if files already have been copied to goobi
+        self.ignore_goobi_folder = self.getSetting('ignore_goobi_folder', bool, default=False)
+        
+    def step(self):
+        '''
+        This script's role is to wait until
+        LIMB processing is complete before finishing.
+        In the event of a timeout, it reports back to 
+        previous step before exiting.
+        '''
+        error = None
+        retry_counter = 0
+        try:
+            self.getVariables()
+            # First check if files already have been copied to goobi
+            if (not self.ignore_goobi_folder and 
+                limb_tools.alreadyMoved(self.goobi_toc,self.goobi_pdf,
+                                        self.input_files,self.goobi_altos)):
+                return error
+            # keep on retrying for the given number of attempts
+            while retry_counter < self.retry_num:
+                
+                if self.limbIsReady():
+                    msg = ('LIMB output is ready - exiting.')
+                    self.debug_message(msg)
+                    return None # this is the only successful exit possible
+                else:
+                    # if they haven't arrived, sit and wait for a while
+                    msg = ('LIMB output not ready - sleeping for {0} seconds...')
+                    msg = msg.format(self.retry_wait)
+                    self.debug_message(msg)
+                    retry_counter += 1
+                    time.sleep(self.retry_wait)
+        except IOError as e:
+            # if we get an IO error we need to crash
+            error = ('Error reading from directory {0}')
+            error = error.format(e.strerror)
+            return error
+        except ValueError as e:
+            # caused by conversion of non-numeric strings in config to nums
+            error = "Invalid config data supplied, error: {0}"
+            error = error.format(e.strerror)
+            return error
+        # if we've gotten this far, we've timed out and need to go back to the previous step
+        return "Timed out waiting for LIMB output."
+
+
         
     def limbIsReady(self):
         '''

@@ -25,23 +25,30 @@ class CopyToLimb( Step ):
         Get all required vars from command line + config
         and confirm their existence.
         '''
+        
+        proc_title = self.command_line.process_title
+        
         rel_master_image_path = self.getConfigItem('img_master_path',
                                                    None,
                                                    self.folder_structure_section) 
         self.source_folder = os.path.join(self.command_line.process_path,
                                        rel_master_image_path)
         self.transit_dir = os.path.join(self.getConfigItem('limb_transit'),
-                                   self.command_line.process_title)
-        self.hotfolder_dir = os.path.join(self.getConfigItem('limb_hotfolder'),
-                                          self.command_line.process_title)
+                                        proc_title)
         self.sleep_interval = int(self.getConfigItem('sleep_interval'))
         self.retries = int(self.getConfigItem('retries'))
         
-        if (self.command_line.has('overwrite_files') and 
-            self.command_line.overwrite_files.lower() == True):
-            self.overwrite_destination_files = True
-        else:
-            self.overwrite_destination_files = False
+        #=======================================================================
+        # Get the correct LIMB workflow hotfolder for the issue - BW or Color
+        #=======================================================================
+        limb_workflow_type = self.getSetting('limb_workflow_type')
+        if limb_workflow_type == 'bw':
+            limb_hotfolder = self.getSetting('limb_bw_hotfolder')
+        elif limb_workflow_type == 'color':
+            limb_hotfolder = self.getSetting('limb_color_hotfolder')
+        self.hotfolder_dir = os.path.join(limb_hotfolder,proc_title)
+        
+        self.overwrite_destination_files = self.getSetting('overwrite_files', bool , default= False)
 
 
     def step(self):

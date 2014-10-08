@@ -20,7 +20,6 @@ class CreateOJSXML( Step ):
             'process_id' : 'number',
             'process_title' : 'string',
             'process_path' : 'folder',
-            'overlapping_articles' : 'string',
             'step_id' : 'number'
         }
 
@@ -61,14 +60,9 @@ class CreateOJSXML( Step ):
         # 'doc_limbpdf_path' contains the splitted pdf-files
         tools.ensureFilesExist(self.mets_file)
         tools.ensureDirsExist(self.ojs_metadata_dir)
-
+        
         # parse boolean from command line
-        if self.command_line.overlapping_articles.lower() == 'true':
-            self.overlapping_articles = True
-        elif self.command_line.overlapping_articles.lower() == 'false':
-            self.overlapping_articles = False
-        else:
-            raise InputError("overlapping_articles parameter was not a valid boolean")
+        self.overlapping_articles = self.getSetting('overlapping_articles', bool, default=True)
 
         # we also need the required issue fields
         req_fields = self.getConfigItem('issue_required_fields')

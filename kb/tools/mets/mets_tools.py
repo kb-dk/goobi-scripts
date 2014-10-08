@@ -266,7 +266,7 @@ def getArticleData(data,sections):
     pages = getPages(data) # Pages is a dict: log_id->list of pages/order
     for log_id,dmd_id in log_ids.items():
         if log_id in pages:
-            temp_pages = map(lambda x: int(x), pages[log_id]) # Convert to integers
+            temp_pages = list(map(lambda x: int(x), pages[log_id])) # Convert to integers
             start_page = temp_pages[0]
             end_page = temp_pages[-1]
             ret_sections = addPagesToArticle(dmd_id,start_page,end_page,ret_sections)

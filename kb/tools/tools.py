@@ -265,7 +265,7 @@ def enrichToc(toc_data, pdfinfo, overlapping_articles=False):
     return toc_data
 
 def getHashName(title):
-    return hashlib.md5(title.encode('utf-8')).hexdigest().decode()
+    return hashlib.md5(title.encode('utf-8')).hexdigest()
 
 def getArticleName(md5_name, start_page, end_page):
     '''

@@ -150,12 +150,12 @@ def getPages(physical_struct_map,details=False):
     if not div_key in physical_struct_map[div_key]:
         return []
     if details:
-        struct_map_pages =  map(lambda x: x['@ID'],
-                                physical_struct_map[div_key][div_key])
+        struct_map_pages =  list(map(lambda x: x['@ID'],
+                                     physical_struct_map[div_key][div_key]))
     else:
         # Get list of physical pages converted to integers: 'PHYS_0001' -> 1, etc
-        struct_map_pages =  map(lambda x: int(x['@ID'].split('_')[-1]),
-                                physical_struct_map[div_key][div_key])
+        struct_map_pages =  list(map(lambda x: int(x['@ID'].split('_')[-1]),
+                                     physical_struct_map[div_key][div_key]))
     return struct_map_pages
 
 def getSelectedPages(physical_struct_map,selected_pages):
