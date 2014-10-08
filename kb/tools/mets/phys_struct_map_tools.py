@@ -226,8 +226,8 @@ def addOffset(physical_struct_map,offset):
         return []
     for page in physical_struct_map[div_key][div_key]:
         if ('@ORDER' in page and page['@ORDER'].isdigit() and
-            int(page['@ORDER']) > offset):
-            page['@ORDERLABEL'] = str(int(page['@ORDER']) - offset)
+            int(page['@ORDER']) < offset):
+            page['@ORDERLABEL'] = str(int(page['@ORDER']) + offset)
     return physical_struct_map
 
 def get(dict_tree,ns=None):

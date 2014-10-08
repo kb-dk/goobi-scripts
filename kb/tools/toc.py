@@ -1,17 +1,29 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 import csv, re
-from marcxml import MarcXml
+from tools.marcxml import MarcXml
+import sys
+
+try:
+    basestring
+except NameError:  # python3
+    basestring = str
 
 class TOC(object):
     sections = [] # a list of Section objects (see below)
-
+    
     def __init__(self, path, dbc_service, pdfinfo, overlapping_articles,
                  logger = None):
         '''
         Create a new toc representation
         based on the data in a LIMB *.toc file
         '''
+        # TODO: move to config
+        self.buildin_sections = ['Front Matter', 'Body','Back Matter']
+        # TODO: move to config
+        self.limb_struct_translations = {'Contents':'Indholdsfortegnelse',
+                                         'Contents':'Indholdsfortegnelse',
+                                         }
         self.sections = []
         self.page_offset = None
         data = []
@@ -43,16 +55,18 @@ class TOC(object):
                     raise ValueError(error)
             # As we exit the loop we will have one more section we need to save
             if sect: self.addSection(sect)
+        # Fix the sections, so empty sections will appear as articles
+        self.correctSections()
+        # Fix the article, so names are translated and empty front matter is fixed
+        self.correctArticles()
         # Add page offset, only to dbc-articles
         self.addPageOffset()
         # Sort the articles by their start pages -> they may come in random order
         self.sortPages()
-        # Fix the sections, so empty sections will appear as articles
-        self.correctSections()
         # Add end page to those articles where it hasn't been set (i.e. limb toc articles)
         self.addEndPageInfo(pdfinfo, overlapping_articles)
         # Add article numbers to the articles for OJS (?)
-        self.addArticleNumbers() 
+        self.addArticleNumbers()
     
     def sortPages(self):
         temp_sections = {}
@@ -189,8 +203,8 @@ class TOC(object):
             if self.logger: self.logger.info_message(err)
         if (self.page_offset is None and # Not yet set
             toc_data.start_page > 1 and   # page number set for article
-            toc_data.start_page > start_page): # volume has offset
-            self.page_offset = toc_data.start_page-start_page
+            start_page > toc_data.start_page): # volume has offset, toc_data follow file number
+            self.page_offset = start_page-toc_data.start_page
         return start_page,end_page
     
     def getDBCData(self, article_id):
@@ -202,11 +216,32 @@ class TOC(object):
             return 
         for s in self.sections:
             for a in s.articles:
-                if not a.article_id: continue # Only add offset for the ones from dbc
+                if not a.article_id: continue
                 if a.start_page > 0:
-                    a.start_page = a.start_page + self.page_offset
+                    a.start_page = a.start_page - self.page_offset
                 if a.end_page > 0:
-                    a.end_page = a.end_page + self.page_offset
+                    a.end_page = a.end_page - self.page_offset
+    
+    def correctFrontMatter(self):
+        '''
+        Make sure that the starting pages are placed in an article
+        '''
+        s = self.getFrontMatterSection()
+        first_page = -1
+        if s:
+            for a in s.articles:
+                if (first_page == -1) or (first_page > a.start_page):
+                    first_page = a.start_page
+            if first_page > 1: # Starting pages not in article
+                inserted = False
+                for a in s.articles:
+                    if a.title == 'Front Matter':
+                        a.start_page = 0
+                        inserted = True
+                        break
+                if not inserted:
+                    fm = TOCArticle(['1','Front Matter',1])
+                    s.articles = [fm]+s.articles
     
     def correctSections(self):
         '''
@@ -217,13 +252,12 @@ class TOC(object):
         '''
         for s in self.sections:
             if len(s.articles) == 0:
-                print(s.title)
-                print(s.start_page)
                 art = TOCArticle(['1', s.title, s.start_page])
                 s.addArticle(art)
             elif s.articles[0] and s.articles[0].start_page > s.start_page:
-                art = TOCArticle(['1', s.title, s.start_page])
-                s.articles.insert(0, art) # add article to start of articles list
+                if not s.title in self.buildin_sections:
+                    art = TOCArticle(['1', s.title, s.start_page])
+                    s.articles.insert(0, art) # add article to start of articles list
 
     def addArticleNumbers(self):
         index = 1
@@ -275,7 +309,7 @@ class TOC(object):
         return self.__getSection('Body')
 
     def getBackMatterSection(self):
-        return self.__getSection('Back Matter')            
+        return self.__getSection('Back Matter')
 
     def prettyPrint(self):
         for s in self.sections:
@@ -289,7 +323,8 @@ class TOC(object):
     def __decodeRow(self, row):    
         decoded_row = []
         for i, val in enumerate(row):
-            decoded_row.insert(i, val.decode('utf-8').replace('"', ''))
+            if isinstance(val,bytes): val = val.decode('utf-8')
+            decoded_row.insert(i, val.replace('"', ''))
         return decoded_row
 
     def allArticles(self):

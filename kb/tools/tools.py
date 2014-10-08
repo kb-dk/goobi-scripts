@@ -323,7 +323,8 @@ def pdfinfo(infile):
     cmd_output = subprocess.Popen([cmd, infile], stdout=subprocess.PIPE).communicate()[0]
     for line in cmd_output.splitlines():
         for label in labels:
-            if label in line:
+            if isinstance(line, bytes): line = line.decode()
+            if label in line.decode():
                 output[label] = _extract(line)
  
     return output

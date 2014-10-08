@@ -146,6 +146,9 @@ def addImages(dict_tree,image_src):
     return dict_tree
 
 def addOffsetToPhysicalStructMap(dict_tree, page_offset):
+    '''
+    Adds page_offset to all orderlabels. page_offset is a positive integer.
+    '''
     if page_offset is not None:
         physical_struct_map = phys_struct_map_tools.get(dict_tree)
         # Check if offset is already set for book and skip if it is

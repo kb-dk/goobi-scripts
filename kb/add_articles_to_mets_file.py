@@ -37,30 +37,34 @@ class AddArticlesToMetsFile( Step ):
             return e.strerror
 
     def get_setting(self,var_name,var_type,conf=None,conf_sec=None,default=None):
-            ret_val = default
-            if self.command_line.has(var_name):
-                if var_type is not None and (var_type == 'int' or var_type == 'float'):
-                    if (self.command_line.get(var_name) == ''):
-                        ret_val = default
-                    else:
-                        ret_val = self.command_line.get(var_name)
+        try:
+            basestring
+        except NameError:  # python3
+            basestring = str
+        ret_val = default
+        if self.command_line.has(var_name):
+            if var_type is not None and (var_type == 'int' or var_type == 'float'):
+                if (self.command_line.get(var_name) == ''):
+                    ret_val = default
                 else:
                     ret_val = self.command_line.get(var_name)
             else:
-                try:
-                    ret_val = self.getConfigItem(var_name, config=conf, 
-                                                 section=conf_sec)
-                except KeyError:
-                    pass
-            if var_type is not None:
-                if var_type == 'float':
-                    ret_val = float(ret_val)
-                elif var_type == 'int':
-                    ret_val = int(ret_val)
-                elif var_type == 'bool' or var_type == 'boolean':
-                    if isinstance(ret_val,basestring):
-                        ret_val = (ret_val.lower() == True)
-            return ret_val
+                ret_val = self.command_line.get(var_name)
+        else:
+            try:
+                ret_val = self.getConfigItem(var_name, config=conf, 
+                                             section=conf_sec)
+            except KeyError:
+                pass
+        if var_type is not None:
+            if var_type == 'float':
+                ret_val = float(ret_val)
+            elif var_type == 'int':
+                ret_val = int(ret_val)
+            elif var_type == 'bool' or var_type == 'boolean':
+                if isinstance(ret_val,basestring):
+                    ret_val = (ret_val.lower() == True)
+        return ret_val
 
     def getVariables(self):
         '''
@@ -165,13 +169,15 @@ class AddArticlesToMetsFile( Step ):
         
     def createFrontMatterSection(self):
         articles = self.toc_data.getFrontMatterSection()
-        self.createArticles(articles,'FrontMatter')
-    def createBackMatterSection(self):
-        articles = self.toc_data.getBackMatterSection()
-        self.createArticles(articles,'BackMatter')
+        if articles: self.createArticles(articles,'FrontMatter')
+    
     def createArticlesSection(self):
         articles = self.toc_data.getArticlesSection()
-        self.createArticles(articles,'Articles')
+        if articles: self.createArticles(articles,'Articles')
+    
+    def createBackMatterSection(self):
+        articles = self.toc_data.getBackMatterSection()
+        if articles: self.createArticles(articles,'BackMatter')
         
     def createArticles(self,section,section_type):
         if not mets_tools.docTypeExists(self.meta_data, section_type):

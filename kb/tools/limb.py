@@ -2,7 +2,7 @@
 # -*- coding: utf-8
 
 import tools.tools as tools
-from tool.errors import DataError
+from tools.errors import DataError
 import os
 
 def tocExists(toc_dir):

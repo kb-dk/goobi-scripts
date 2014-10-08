@@ -128,7 +128,7 @@ def addLinksToStructLink(struct_link,link_from,link_to_list):
     '''
     sm_link_key = '{http://www.loc.gov/METS/}smLink'
     # Check tree
-    if struct_link is None:
+    if not struct_link: #is None, '' or []
         # Create new list if no one exists
         struct_link_list = []
         struct_link = {sm_link_key: []}
