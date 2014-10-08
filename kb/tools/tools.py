@@ -15,7 +15,7 @@ import time
 import shutil
 
 # Import from tools - same package
-import errors
+from tools import errors
 import hashlib
 
 def find_or_create_dir(path):
@@ -324,7 +324,7 @@ def pdfinfo(infile):
     for line in cmd_output.splitlines():
         for label in labels:
             if isinstance(line, bytes): line = line.decode()
-            if label in line.decode():
+            if label in line:
                 output[label] = _extract(line)
  
     return output

@@ -19,10 +19,9 @@ class TOC(object):
         based on the data in a LIMB *.toc file
         '''
         # TODO: move to config
-        self.buildin_sections = ['Front Matter', 'Body','Back Matter']
-        # TODO: move to config
         self.limb_struct_translations = {'Contents':'Indholdsfortegnelse',
-                                         'Contents':'Indholdsfortegnelse',
+                                         'Front Matter':'Forsidestof',
+                                         'Back Matter':'Bagsidestof',
                                          }
         self.sections = []
         self.page_offset = None
@@ -57,8 +56,10 @@ class TOC(object):
             if sect: self.addSection(sect)
         # Fix the sections, so empty sections will appear as articles
         self.correctSections()
+        # Set first page in front matter, if not set
+        self.correctFirstPage()
         # Fix the article, so names are translated and empty front matter is fixed
-        self.correctArticles()
+        self.translateArticleNames()
         # Add page offset, only to dbc-articles
         self.addPageOffset()
         # Sort the articles by their start pages -> they may come in random order
@@ -222,13 +223,13 @@ class TOC(object):
                 if a.end_page > 0:
                     a.end_page = a.end_page - self.page_offset
     
-    def correctFrontMatter(self):
+    def correctFirstPage(self):
         '''
         Make sure that the starting pages are placed in an article
         '''
         s = self.getFrontMatterSection()
-        first_page = -1
         if s:
+            first_page = -1
             for a in s.articles:
                 if (first_page == -1) or (first_page > a.start_page):
                     first_page = a.start_page
@@ -242,6 +243,27 @@ class TOC(object):
                 if not inserted:
                     fm = TOCArticle(['1','Front Matter',1])
                     s.articles = [fm]+s.articles
+        else: # Front Matter hasnt been created
+            s = self.getArticlesSection()
+            first_page = -1
+            for a in s.articles:
+                if (first_page == -1) or (first_page > a.start_page):
+                    first_page = a.start_page
+            if first_page > 1: # Starting pages not in article
+                # Create Front Matter section
+                sect = TOCSection(['0','Front Matter',str(first_page)])
+                # create front matter article
+                art = TOCArticle(['1', sect.title, sect.start_page])
+                # add article to front matter
+                sect.articles.insert(0, art)
+                # add front matter section to start of section list
+                self.sections = [sect] + self.sections 
+    
+    def translateArticleNames(self):
+        for s in self.sections:
+            for a in s.articles:
+                if a.title in self.limb_struct_translations:
+                     a.title = self.limb_struct_translations[a.title]
     
     def correctSections(self):
         '''
@@ -255,9 +277,8 @@ class TOC(object):
                 art = TOCArticle(['1', s.title, s.start_page])
                 s.addArticle(art)
             elif s.articles[0] and s.articles[0].start_page > s.start_page:
-                if not s.title in self.buildin_sections:
-                    art = TOCArticle(['1', s.title, s.start_page])
-                    s.articles.insert(0, art) # add article to start of articles list
+                art = TOCArticle(['1', s.title, s.start_page])
+                s.articles.insert(0, art) # add article to start of articles list
 
     def addArticleNumbers(self):
         index = 1
