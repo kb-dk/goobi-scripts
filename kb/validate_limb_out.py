@@ -47,12 +47,8 @@ class ValidateLimbOutput( Step ):
         self.goobi_pdf = os.path.join(self.command_line.process_path, 
             self.getConfigItem('doc_limbpdf_path', None, 'process_folder_structure'))
         
-        # Set flag for ignore if files already have been copied
-        if (self.command_line.has('ignore_dest') and 
-            self.command_line.ignore_dest.lower() == True):
-            self.ignore_dest = True
-        else:
-            self.ignore_dest = False
+        # Set flag for ignore if files already have been copied to goobi
+        self.ignore_goobi_folder = self.getSetting('ignore_goobi_folder', bool, default=False)
         
         # Get path for input-files in process folder
         process_path = self.command_line.process_path
@@ -76,7 +72,7 @@ class ValidateLimbOutput( Step ):
         try:
             self.getVariables()
             # Check files on goobi-server, if they already have been moved
-            if (not self.ignore_dest and 
+            if (not self.ignore_goobi_folder and 
                 limb_tools.alreadyMoved(self.goobi_toc,self.goobi_pdf,
                                         self.input_files_dir,self.goobi_altos)):
                 return error

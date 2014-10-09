@@ -207,11 +207,12 @@ def addPagesOnLevel(logical_struct_map,dict_tree):
 # and splitting pdf-files
 #===============================================================================
 
-def getIssueData(data):
+def getIssueData(mets_file):
     '''
     Get the required data from the meta.xml
     file - raise an error if any required data is missing
     '''
+    data = minidom.parse(mets_file)
     mets_ns = 'http://www.loc.gov/METS/'
     #=======================================================================
     # Dig in and get DMDID for periodical and periodical volume

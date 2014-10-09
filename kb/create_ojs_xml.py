@@ -85,7 +85,7 @@ class CreateOJSXML( Step ):
         Use this to construct the OJS XML
         '''
         data = minidom.parse(self.mets_file)
-        issue_data = mets_tools.getIssueData(data)
+        issue_data = mets_tools.getIssueData(self.mets_file)
         article_data = mets_tools.getArticleData(data,['FrontMatter','Articles','BackMatter'])
         # this is the dir where files will be uploaded to
         journal_title_path = tools.parseTitle(issue_data['TitleDocMainShort'])
@@ -94,18 +94,18 @@ class CreateOJSXML( Step ):
         # Get and validate PublicationYear
         # I.e. s only four digits and starts with 17,18,19 or 20
         #=======================================================================
-        err = ('Publiceringsåret for hæftet skal være et firecifret tal '
+        err = ('Publiceringsåret ("{0}") for hæftet skal være et firecifret tal '
                'begyndende med enten 17, 18, 19 eller 20, f.eks. 1814, 1945 '
-               'eller 2001.  {0}. Åben metadata-editor og ret metadata for '
+               'eller 2001.  {1}. Åben metadata-editor og ret metadata for '
                'hæftet og afslut opgaven.')
         pub_year = issue_data['PublicationYear']
         pub_year = pub_year.strip() # Remove leading and trailing spaces.
         if not pub_year.isdigit():
-            raise Exception(err.format('Data er ikke et korrekt firecifret tal'))
+            raise Exception(pub_year,err.format('Data er ikke et korrekt firecifret tal'))
         if not len(pub_year) == 4:
-            raise Exception(err.format('Tallet er ikke præcis fire cifre langt'))
-        if not int(pub_year)/100 in [17,18,19,20]:
-            raise Exception(err.format('Tallet starter ikke med 17, 18, 19 eller 20'))
+            raise Exception(pub_year,err.format('Tallet er ikke præcis fire cifre langt'))
+        if not int(int(pub_year)/100) in [17,18,19,20]:
+            raise Exception(pub_year,err.format('Tallet starter ikke med 17, 18, 19 eller 20'))
         date_published = "{0}-01-01".format(pub_year)
         #=======================================================================
         # Create base xml for issue
@@ -140,8 +140,7 @@ class CreateOJSXML( Step ):
         # save the xml content to the correct file
         output_name = os.path.join(self.ojs_metadata_dir, self.command_line.process_title + '.xml')
         output = open(output_name, 'w')
-        output.write(doc.toxml('utf-8'))
-
+        output.write(doc.toxml())#'utf-8'))
     
     
     def createArticlesForSection(self, articles, section_tag, doc, date):

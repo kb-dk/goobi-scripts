@@ -5,6 +5,7 @@ from goobi.goobi_step import Step
 import os
 import tools.tools as tools
 import tools.goobi.metadata as goobi_tools
+from tools.mets import mets_tools
 from tools.errors import DataError
 
 class UploadToOJS( Step ):
@@ -49,20 +50,22 @@ class UploadToOJS( Step ):
         the current process dir, the pdf dir,
         and the ojs xml dir.
         '''
+        process_path = self.command_line.process_path
+        mets_file_name = self.getConfigItem('metadata_goobi_file', None, 'process_files')
+        mets_file = os.path.join(process_path, mets_file_name)
+        
         ojs_mount = self.getConfigItem('ojs_mount')
         ojs_metadata_dir = self.getConfigItem('metadata_ojs_path',
                                               section= self.folder_structure_section)
-        self.ojs_metadata_dir = os.path.join(self.command_line.process_path, ojs_metadata_dir)
+        self.ojs_metadata_dir = os.path.join(process_path, ojs_metadata_dir)
         
         pdf_path = self.getConfigItem('doc_pdf_path',
                                       section= self.folder_structure_section)
-        self.pdf_input_dir = os.path.join(self.command_line.process_path, pdf_path)
+        self.pdf_input_dir = os.path.join(process_path, pdf_path)
         
-        anchor_name = self.getConfigItem('metadata_goobi_anchor_file',
-                                          section= self.process_files_section)
-        anchor_data = goobi_tools.getAnchorFileData(os.path.join(self.command_line.process_path, anchor_name),
-                                                    ['TitleDocMainShort'])
-        volume_title = tools.parseTitle(anchor_data['TitleDocMainShort'])
+        issue_data = mets_tools.getIssueData(mets_file)
+        
+        volume_title = tools.parseTitle(issue_data['TitleDocMainShort'])
 
         ojs_journal_folder = os.path.join(ojs_mount, volume_title)
         tools.find_or_create_dir(ojs_journal_folder)

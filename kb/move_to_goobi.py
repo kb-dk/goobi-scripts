@@ -29,7 +29,7 @@ class MoveToGoobi( Step ):
         try:
             self.getVariables()
             # check if files already have been copied:
-            if (not self.ignore_dest and 
+            if (not self.ignore_goobi_folder and 
                 limb_tools.alreadyMoved(self.goobi_toc,self.goobi_pdf,
                                         self.input_files,self.goobi_altos)):
                 return error
@@ -69,12 +69,8 @@ class MoveToGoobi( Step ):
                                          section= self.folder_structure_section) 
         self.input_files = os.path.join(process_path,input_files)
         
-        # Set flag for ignore if files already have been copied
-        if (self.command_line.has('ignore_dest') and 
-            self.command_line.ignore_dest.lower() == True):
-            self.ignore_dest = True
-        else:
-            self.ignore_dest = False
+        # Set flag for ignore if files already have been copied to goobi
+        self.ignore_goobi_folder = self.getSetting('ignore_goobi_folder', bool, default=False)
         
         self.sleep_interval = int(self.getConfigItem('sleep_interval', None, 'copy_to_limb'))
         self.retries = int(self.getConfigItem('retries', None, 'copy_to_limb'))

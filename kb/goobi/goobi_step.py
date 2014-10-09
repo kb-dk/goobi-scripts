@@ -402,7 +402,7 @@ class Step( object ):
                 ret_val = self.getConfigItem(var_name, config=conf, 
                                              section=conf_sec)
             except KeyError as e:
-                if default: ret_val = default
+                if default is not None: ret_val = default # default may be 0,False or ''
                 else:
                     error = '"{0}" not defined in commandline or in config file.'
                     error = error.format(var_name)
@@ -413,7 +413,8 @@ class Step( object ):
             elif var_type == int:
                 ret_val = int(ret_val)
             elif var_type == bool:
-                ret_val = (ret_val.lower() == 'true')
+                if isinstance(ret_val,basestring):
+                    ret_val = (ret_val.lower() == 'true')
         return ret_val
 
     def debugging( self) :
