@@ -108,6 +108,12 @@ class FileValidator( Step ) :
                     error_level= 2
                     break
                 elif tools.getFileExt(f,remove_dot=True) not in valid_exts:
+                    if 'Thumbs.db' in f: # removing Thumbs.db is newer an error
+                        msg = ('Filen "Thumbs.db" er blevet fjernet fra '
+                               'billedmappe og lagt i invalid-mappen.')
+                        self.info_message(msg)
+                        self.invalid_files.append(os.path.join(folder,f))
+                        continue
                     #TODO: ��� gives error, decode/encode
                     #UnicodeEncodeError: 'ascii' codec can't encode character u'\xe6' in position 34: ordinal not in range(128)
                     msg = ('Den uploadede fil "{0}" er ikke en tilladt '

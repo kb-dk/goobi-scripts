@@ -9,6 +9,7 @@ Created on 19/06/2014
 import signal
 import sys
 import os
+import json
 
 lib_path = os.path.abspath(os.path.dirname(os.path.realpath(__file__))+os.sep+'../')
 sys.path.append(lib_path)
@@ -35,21 +36,30 @@ class ConvertServer():
         Todo: Document this
         
         ''' 
+        def confGet(config, var,default):
+            if not config: return default
+            if not var in config: return default
+            return config[var]
+        
+        config = None
+        if config_path and os.path.exists(config_path):
+            config = json.load(config_path, parse_float= True, parse_int=True)
+        
         # Setup logger
-        log_path = '/opt/digiverso/logs/step_server/' 
-        log_level = 'INFO'
+        log_path = confGet(config,'log_path','/opt/digiverso/logs/step_server/')
+        log_level = confGet(config,'log_level','INFO')
         self.logger = logger.logger(log_path,log_level)
         self.logger.log_section('Setting up step server')
         # Setup host and port for connection
-        host = 'localhost'
-        port = 37000
+        host = confGet(config,'host','localhost')
+        port = confGet(config,'port',37000)
         self.address = (host, port)
         # Create one processor per core - tesseract 3.03 is not multithreaded
-        # Todo: Add functionality so first thread will always take from non shared
+        # TODO: Add functionality so first thread will always take from non shared
         # queue, and the others always from the shared.
-        
-        # TODO: add core_num to a configuration file
-        self.core_num = 2
+        # I.e. if multiple threads call a program with multithreading built-in
+        # the system will heavily loaded. 
+        self.core_num = confGet(config,'core_num',2)
         self.step_job_processors = []
         
         self.job_queue = StepJobQueue(self.logger)
