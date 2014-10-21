@@ -56,7 +56,7 @@ class RunOJSImport( Step ):
         mets_file_name = self.getConfigItem('metadata_goobi_file', None, 'process_files')
         mets_file = os.path.join(process_path, mets_file_name)
         issue_data = mets_tools.getIssueData(mets_file)
-        self.volume_title = tools.parseTitle(issue_data['TitleDocMainShort'])
+        self.volume_title = tools.parseTitle(issue_data['TitleDocMain'])
 
         # build the path to the ojs xml file based in the form 
         # <upload_dir>/<journal_name>/<process_name>/<process_name>.xml

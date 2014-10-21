@@ -88,7 +88,7 @@ class CreateOJSXML( Step ):
         issue_data = mets_tools.getIssueData(self.mets_file)
         article_data = mets_tools.getArticleData(data,['FrontMatter','Articles','BackMatter'])
         # this is the dir where files will be uploaded to
-        journal_title_path = tools.parseTitle(issue_data['TitleDocMainShort'])
+        journal_title_path = tools.parseTitle(issue_data['TitleDocMain'])
         self.ojs_dir = os.path.join(self.ojs_root,journal_title_path, self.command_line.process_title)
         #=======================================================================
         # Get and validate PublicationYear
@@ -294,7 +294,7 @@ class CreateOJSXML( Step ):
         top.setAttribute('identification', 'num_vol_year')
         
         
-        title_tag = self.createXMLTextTag(doc, 'title', issue_data['TitleDocMainShort'])
+        title_tag = self.createXMLTextTag(doc, 'title', issue_data['TitleDocMain'])
         top.appendChild(title_tag)
         
         year_tag = self.createXMLTextTag(doc, 'year', issue_data['PublicationYear'])

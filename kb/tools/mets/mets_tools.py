@@ -359,7 +359,7 @@ def getElemByNsNameType(data,ns,name,elem_type):
     for elem in elems:
         if elem.getAttribute('TYPE') == elem_type: return elem
 
-def hasMetadataField(data,metadata_key='TitleDocMainShort'):
+def hasMetadataField(data,metadata_key='TitleDocMain'):
     # Get all goobi:metadata for dmd_secs. Metadata is a list of dictionaries 
     metadata = dmd_sec_tools.getAllMetadata(data)
     # Return True if metadata_key is in metadata and has content

@@ -182,7 +182,7 @@ class AddArticlesToMetsFile( Step ):
     def createArticles(self,section,section_type):
         if not mets_tools.docTypeExists(self.meta_data, section_type):
             # Create section, e.g. FrontMatter if it doesn't exists
-            section_data = {'doc_type': section_type,'content': [{'name':'TitleDocMainShort','data':section_type}]}
+            section_data = {'doc_type': section_type,'content': [{'name':'TitleDocMain','data':section_type}]}
             self.meta_data = mets_tools.addNewDocStruct(self.meta_data,section_data)
         articles = section.articles
         #TODO: Create articles-docstruct if not already there

@@ -65,7 +65,7 @@ class UploadToOJS( Step ):
         
         issue_data = mets_tools.getIssueData(mets_file)
         
-        volume_title = tools.parseTitle(issue_data['TitleDocMainShort'])
+        volume_title = tools.parseTitle(issue_data['TitleDocMain'])
 
         ojs_journal_folder = os.path.join(ojs_mount, volume_title)
         tools.find_or_create_dir(ojs_journal_folder)
