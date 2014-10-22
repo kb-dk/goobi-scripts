@@ -182,6 +182,14 @@ def ensureFilesExist(*args):
         if not os.path.isfile(file):
             raise IOError(1, "File {0} could not be found".format(file))
 
+def getFileCountWithExtension(input_files_dir,valid_exts):
+    '''
+    Return the number of files in 'input_files_dir' with the the valid extension
+    as defined in the list 'valid_exts'
+    '''
+    return sum([f for f in os.listdir(input_files_dir)
+                if os.path.splitext(f)(1).lstrip('.') in valid_exts])
+
 def getFirstFileWithExtension(dir, ext):
     '''
     Return the first file we can find in the given directory

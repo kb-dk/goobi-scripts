@@ -34,7 +34,7 @@ class FileValidator( Step ) :
 
     def setup(self):
     
-        self.name = "Move invalid files"
+        self.name = "Validering af importerede filer"
         self.config_main_section = "move_invalid_files"
         self.essential_config_sections = set( [] )
         self.folder_structure_section = 'process_folder_structure'

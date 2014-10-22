@@ -17,7 +17,7 @@ class CreateThumbnails( Step ) :
 
     def setup(self):
     
-        self.name = "Create thumbnails"
+        self.name = "Oprettelse af thumbnails"
         self.config_main_section = "create_thumbnails"
         self.essential_config_sections = set( [] )
         self.folder_structure_section = 'process_folder_structure'

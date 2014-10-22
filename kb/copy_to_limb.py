@@ -9,7 +9,7 @@ from tools.filesystem import fs
 class CopyToLimb( Step ):
 
     def setup(self):
-        self.name = 'Copy to LIMB'
+        self.name = 'Kopiering af billeder til LIMB'
         self.config_main_section = 'copy_to_limb'
         self.folder_structure_section = 'process_folder_structure'
         self.essential_config_sections.update([self.folder_structure_section, 

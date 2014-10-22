@@ -10,6 +10,7 @@ from tools.mets import mets_tools
 class CreateMetsFile( Step ):
 
 	def setup(self):
+		self.name = 'Oprettelse af METS-filer'
 		self.config_main_section = 'create_mets_file'
 		self.essential_config_sections = set( ['process_folder_structure', 'process_files'] )
 		self.essential_commandlines = {

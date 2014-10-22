@@ -11,8 +11,10 @@ class MoveToGoobi( Step ):
     def setup(self):
         self.config_main_section = 'limb_output'
         self.folder_structure_section = 'process_folder_structure'
+        self.valid_exts_section = 'move_invalid_files'
         self.essential_config_sections.update([self.folder_structure_section, 
-                                               self.folder_structure_section] )
+                                               self.folder_structure_section,
+                                               self.valid_exts_section] )
         self.essential_commandlines = {
             "process_id" : "number",
             "process_path" : "folder",
@@ -31,7 +33,8 @@ class MoveToGoobi( Step ):
             # check if files already have been copied:
             if (not self.ignore_goobi_folder and 
                 limb_tools.alreadyMoved(self.goobi_toc,self.goobi_pdf,
-                                        self.input_files,self.goobi_altos)):
+                                        self.input_files,self.goobi_altos,
+                                          self.valid_exts)):
                 return error
             tools.ensureDirsExist(self.limb_altos, self.limb_toc, self.limb_pdf)
             self.moveFiles(self.limb_altos, self.goobi_altos)
@@ -62,7 +65,7 @@ class MoveToGoobi( Step ):
             self.getConfigItem('metadata_toc_path', None, 'process_folder_structure'))
         self.goobi_pdf = os.path.join(self.command_line.process_path, 
             self.getConfigItem('doc_limbpdf_path', None, 'process_folder_structure'))
-        
+        self.valid_exts = self.getConfigItem('valid_file_exts',None, self.valid_exts_section).split(';')
         # Get path for input-files in process folder
         process_path = self.command_line.process_path
         input_files = self.getConfigItem('img_master_path',

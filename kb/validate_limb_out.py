@@ -13,8 +13,10 @@ class ValidateLimbOutput( Step ):
         self.name = 'ValidateLimbOutput'
         self.config_main_section = 'limb_output'
         self.folder_structure_section = 'process_folder_structure'
+        self.valid_exts_section = 'move_invalid_files'
         self.essential_config_sections.update([self.folder_structure_section, 
-                                               self.folder_structure_section] )
+                                               self.folder_structure_section,
+                                               self.valid_exts_section] )
         self.essential_commandlines = {
             'process_title' : 'string',
             'process_path' : 'folder',
@@ -46,7 +48,7 @@ class ValidateLimbOutput( Step ):
             self.getConfigItem('metadata_toc_path', None, 'process_folder_structure'))
         self.goobi_pdf = os.path.join(self.command_line.process_path, 
             self.getConfigItem('doc_limbpdf_path', None, 'process_folder_structure'))
-        
+        self.valid_exts = self.getConfigItem('valid_file_exts',None, self.valid_exts_section).split(';')
         # Set flag for ignore if files already have been copied to goobi
         self.ignore_goobi_folder = self.getSetting('ignore_goobi_folder', bool, default=False)
         
@@ -74,13 +76,15 @@ class ValidateLimbOutput( Step ):
             # Check files on goobi-server, if they already have been moved
             if (not self.ignore_goobi_folder and 
                 limb_tools.alreadyMoved(self.goobi_toc,self.goobi_pdf,
-                                        self.input_files_dir,self.goobi_altos)):
+                                        self.input_files_dir,self.goobi_altos,
+                                          self.valid_exts)):
                 return error
             tools.ensureDirsExist(self.limb_dir, self.alto_dir,
                                   self.toc_dir, self.pdf_input_dir,
                                   self.input_files_dir)
             limb_tools.performValidations(self.toc_dir,self.pdf_input_dir,
-                                          self.input_files_dir,self.alto_dir)
+                                          self.input_files_dir,self.alto_dir,
+                                          self.valid_exts)
             return None
         except IOError as e:
             return "IOError - {0}".format(e.strerror)

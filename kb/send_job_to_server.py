@@ -56,7 +56,7 @@ class StepJobClient( Step ) :
         msg = msg.format(self.host,self.port,reciept)
         self.glogger.debug(msg)
         msg = 'Step job {0} sent to server'.format(self.step_job_filename)
-        self.glogger.info(msg)
+        self.glogger.debug(msg)
         # Close socket
         sock.close()
         msg = 'Connection to socket server {0}:{1} has been closed.'

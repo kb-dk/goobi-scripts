@@ -171,7 +171,7 @@ class Step( object ):
             self.getConfig(self.config_path,
                            must_have=self.essential_config_sections )
         
-        if self.command_line.has(self.cli_step_name_arg):
+        if self.command_line.has(self.cli_step_name_arg) and self.name == '':
             self.name = self.command_line.get(self.cli_step_name_arg)
         #
         # Are we debugging?
@@ -248,19 +248,19 @@ class Step( object ):
                 self.error_message( 'Exception occured in ' + self.name  )
             raise e
         if not error :
-            self.info_message( 'Completed ' + self.name )
+            self.info_message(self.name +' afsluttet korrekt.')
             if self.auto_complete:
                 self.closeStep()
         else:
             if self.auto_report_problem:
-                error_msg = ('Error occured in {0}. Sending task back to {1}')
+                error_msg = ('Error occured in "{0}". Sending task back to {1}')
                 error_msg = error_msg.format(self.name,
                                              self.auto_report_problem) 
                 self.error_message(error_msg)
                 self.error_message(error)
                 self.reportToStep( error )
             else:
-                error_msg = ('{0} failed. Error message: "{1}"')
+                error_msg = ('"{0}" failed. Error message: "{1}"')
                 error_msg = error_msg.format(self.name,error)
                 self.error_message(error_msg)
         return (error == None)
@@ -275,7 +275,7 @@ class Step( object ):
             step_id = self.command_line.get(self.cli_step_id_arg)
         except KeyError:
             msg = 'Failed to report this problem to a previous step.'+\
-                  ' In ' + self.name + ' ' + self.cli_step_id_arg +\
+                  ' In "' + self.name + '" ' + self.cli_step_id_arg +\
                   ' was not passed into command line.'
             self.error(msg)
             raise KeyError(msg)
@@ -300,7 +300,7 @@ class Step( object ):
         elif self.command_line.has( self.cli_step_id_arg ) :
             goobi_com.closeStep( self.command_line.get( self.cli_step_id_arg ) )
         else:
-            self.info( 'Failed to close this step in ' + self.name + ". Neither " + self.cli_process_id_arg + " or " + self.cli_step_id_arg + " were passed into commandline." )
+            self.info( 'Failed to close this step in "' + self.name + '". Neither ' + self.cli_process_id_arg + " or " + self.cli_step_id_arg + " were passed into commandline." )
             
     def exit( self, message,log=None ) :
         # TODO: make this method a nice exit
