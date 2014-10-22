@@ -11,7 +11,7 @@ import traceback
 class CreateOJSXML( Step ):
 
     def setup(self):
-        self.name = 'Create OJS XML'
+        self.name = 'Oprettelse af OJS XML-filer til www.tidsskrift.dk'
         self.config_main_section = 'ojs'
         self.essential_config_sections = set( ['ojs',
                                                'process_folder_structure',

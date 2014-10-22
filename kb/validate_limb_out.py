@@ -10,7 +10,7 @@ import os
 class ValidateLimbOutput( Step ):
 
     def setup(self):
-        self.name = 'ValidateLimbOutput'
+        self.name = 'Validering af output-filer fra LIMB'
         self.config_main_section = 'limb_output'
         self.folder_structure_section = 'process_folder_structure'
         self.valid_exts_section = 'move_invalid_files'

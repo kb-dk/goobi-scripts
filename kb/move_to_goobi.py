@@ -9,6 +9,7 @@ from tools.errors import DataError, TransferError, TransferTimedOut
 class MoveToGoobi( Step ):
 
     def setup(self):
+        self.name = 'Flyt filer fra LIMB til Goobi'
         self.config_main_section = 'limb_output'
         self.folder_structure_section = 'process_folder_structure'
         self.valid_exts_section = 'move_invalid_files'

@@ -9,7 +9,7 @@ import os, time
 class WaitForLimb( Step ):
 
     def setup(self):
-        self.name = 'Wait for LIMB'
+        self.name = 'Vent på output-filer fra LIMB'
         self.config_main_section = 'limb_output'
         self.folder_structure_section = 'process_folder_structure'
         self.valid_exts_section = 'move_invalid_files'

@@ -11,6 +11,7 @@ from xml.dom import minidom
 class SplitPdf( Step ):
 
     def setup(self):
+        self.name = 'Opdeling af PDF-fil til en PDF pr artikel'
         self.config_main_section = 'split_pdf_file'
         self.folder_structure_section = 'process_folder_structure'
         self.process_files_section = 'process_files'
