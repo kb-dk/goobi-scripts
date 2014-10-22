@@ -16,14 +16,14 @@ def tocExists(toc_dir):
         return False
     return toc
 
-def altoFileCountMatches(alto_dir, input_files_dir):
+def altoFileCountMatches(alto_dir, input_files_dir,valid_exts):
     '''
     Ensure number of alto files is the same as the
     number of input files.
     Return boolean
     '''
     numAlto = len(os.listdir(alto_dir))
-    numInputFiles = len(os.listdir(input_files_dir))
+    numInputFiles = tools.getFileCountWithExtension(input_files_dir,valid_exts)
 
     return numAlto == numInputFiles
 
@@ -36,7 +36,7 @@ def pageCountMatches(pdf_input_dir,input_files_dir,valid_exts):
     pdf = tools.getFirstFileWithExtension(pdf_input_dir, '.pdf')
     pdfInfo = tools.pdfinfo(os.path.join(pdf_input_dir, pdf))
     numPages = int(pdfInfo['Pages'])
-    numInputFiles = tools.getFileCountWithExtension(input_files_dir,valid_exts)#len(os.listdir(input_files_dir))
+    numInputFiles = tools.getFileCountWithExtension(input_files_dir,valid_exts)
     return numPages == numInputFiles
 
 def alreadyMoved(toc_dir,pdf_input_dir,input_files_dir,alto_dir,valid_exts):
@@ -58,6 +58,6 @@ def performValidations(toc_dir,pdf_input_dir,input_files_dir,alto_dir,valid_exts
         raise DataError("TOC not found!")
     if not pageCountMatches(pdf_input_dir,input_files_dir,valid_exts):
         raise DataError("PDF page count does not match input picture count!")
-    if not altoFileCountMatches(alto_dir, input_files_dir):
+    if not altoFileCountMatches(alto_dir, input_files_dir,valid_exts):
         raise DataError("Number of alto files does not match number of input files.")
     

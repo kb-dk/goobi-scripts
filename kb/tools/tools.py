@@ -187,8 +187,8 @@ def getFileCountWithExtension(input_files_dir,valid_exts):
     Return the number of files in 'input_files_dir' with the the valid extension
     as defined in the list 'valid_exts'
     '''
-    return sum([f for f in os.listdir(input_files_dir)
-                if os.path.splitext(f)(1).lstrip('.') in valid_exts])
+    return len([f for f in os.listdir(input_files_dir)
+                if os.path.splitext(f)[1].lstrip('.') in valid_exts])
 
 def getFirstFileWithExtension(dir, ext):
     '''
