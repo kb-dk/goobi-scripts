@@ -203,8 +203,8 @@ class TOC(object):
             err = err.format(dbc_data['title'],toc_data.article_id)
             if self.logger: self.logger.info_message(err)
         if (self.page_offset is None and # Not yet set
-            toc_data.start_page > 1 and   # page number set for article
-            start_page > toc_data.start_page): # volume has offset, toc_data follow file number
+                toc_data.start_page > 1 and   # page number set for article
+                not start_page == toc_data.start_page): # volume has offset, toc_data follow file number + can be both positive and negative
             self.page_offset = start_page-toc_data.start_page
         return start_page,end_page
     
