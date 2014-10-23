@@ -185,6 +185,14 @@ class CreateOJSXML( Step ):
         title_tag = self.createXMLTextTag(doc, 'title', article['TitleDocMain'])
         article_tag.appendChild(title_tag)
         #=======================================================================
+        # Add DBC-id to article
+        #=======================================================================
+        dbc_id_tag = doc.createElement('id')
+        dbc_id_tag.setAttribute('type','dbcMarcxID')
+        if 'dbcMarcxID' in article:
+            dbc_id_tag.createTextNode(article['dbcMarcxID'])
+        article_tag.appendChild(dbc_id_tag)
+        #=======================================================================
         # Add page range
         #=======================================================================
         start_page,end_page = article['start_page'], article['end_page']
