@@ -187,10 +187,9 @@ class CreateOJSXML( Step ):
         #=======================================================================
         # Add DBC-id to article
         #=======================================================================
-        dbc_id_tag = doc.createElement('id')
+        dbc_marcx_id = article['dbcMarcxID'] if 'dbcMarcxID' in article else ''
+        dbc_id_tag = self.createXMLTextTag(doc, 'title', dbc_marcx_id)
         dbc_id_tag.setAttribute('type','dbcMarcxID')
-        if 'dbcMarcxID' in article:
-            dbc_id_tag.createTextNode(article['dbcMarcxID'])
         article_tag.appendChild(dbc_id_tag)
         #=======================================================================
         # Add page range
