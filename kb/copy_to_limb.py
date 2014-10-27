@@ -62,7 +62,7 @@ class CopyToLimb( Step ):
         self.goobi_pdf = os.path.join(process_path, 
             self.getConfigItem('doc_limbpdf_path', None, 'process_folder_structure'))
         self.valid_exts = self.getConfigItem('valid_file_exts',None, self.valid_exts_section).split(';')
-        input_files = self.getConfigItem('img_master_path',self.folder_structure_section) 
+        input_files = self.getConfigItem('img_master_path',None, self.folder_structure_section) 
         self.input_files = os.path.join(process_path,input_files)
         
         #=======================================================================
