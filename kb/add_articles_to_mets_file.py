@@ -33,9 +33,11 @@ class AddArticlesToMetsFile( Step ):
             self.buildXml()
             self.writeXml()
         except ValueError as e:
-            return e
+            return str(e) + str(traceback.format_exc())
         except IOError as e:
-            return e.strerror
+            return str(e) + str(traceback.format_exc())
+        except Exception as e:
+            return str(e) + str(traceback.format_exc())
 
     def get_setting(self,var_name,var_type,conf=None,conf_sec=None,default=None):
         try:

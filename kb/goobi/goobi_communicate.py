@@ -133,7 +133,8 @@ class GoobiCommunicate() :
         # TODO: Tidy this up. Need to catch exceptions properly and ensure 
         # request is closed (although python handles that too)
         try:
-            response = request.urlopen( url )
+            #content_type = {"Content-Type":" application/x-www-form-urlencoded;charset=utf-8"}
+            response = request.urlopen( url.encode('utf-8') )
             
             if response.code == 200:
             

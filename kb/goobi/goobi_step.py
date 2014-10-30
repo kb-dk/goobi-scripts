@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8
+# -*- encoding: utf-8 -*-
 import sys, os, os.path, re, traceback, datetime, subprocess
 import logging, logging.handlers
 from tools import tools
@@ -181,6 +181,7 @@ class Step( object ):
             self.debug = not ( self.command_line.debug.lower() == "false" )
             # Override config setting at commandline. (if it says anything but false turn it on.)
         if self.debug:
+            self.name = self.name.encode('ascii','replace').decode()
             print(self.name + ": Debugging ON")
         # Create out logger
         logger_name = self.name.replace(' ','').lower()
@@ -191,12 +192,11 @@ class Step( object ):
                                                      logger_name + "_logger")
         if error:
             self.exit( error,self.glogger )
-        if self.command_line.has( self.cli_process_id_arg ):
-            self.goobi_com = GoobiCommunicate(self.config.goobi.host,
-                                              self.config.goobi.passcode,
-                                              self.debug,
-                                              process_id = self.command_line.get(self.cli_process_id_arg)
-                                              )
+        self.goobi_com = GoobiCommunicate(self.config.goobi.host,
+                                          self.config.goobi.passcode,
+                                          self.debug,
+                                          process_id = self.command_line.get(self.cli_process_id_arg)
+                                          )
             #
         # Check Commandline parameters
         if error_command_line:
@@ -257,7 +257,7 @@ class Step( object ):
                 error_msg = error_msg.format(self.name,
                                              self.auto_report_problem) 
                 self.error_message(error_msg)
-                self.error_message(error)
+                self.error_message(str(error))
                 self.reportToStep( error )
             else:
                 error_msg = ('"{0}" failed. Error message: "{1}"')
@@ -280,25 +280,18 @@ class Step( object ):
             self.error(msg)
             raise KeyError(msg)
         prev_step_name = self.auto_report_problem
-        goobi_com = GoobiCommunicate(self.config.goobi.host,
-                                     self.config.goobi.passcode,
-                                     self.debug )
-        goobi_com.reportToPrevStep(step_id,
-                                   prev_step_name,
-                                   message )
+
+        self.goobi_com.reportToPrevStep(step_id,prev_step_name,message)
         
     def closeStep(self):
         '''
         TODO: Document method
         '''
-        goobi_com = GoobiCommunicate(self.config.goobi.host,
-                                     self.config.goobi.passcode,
-                                     self.debug )
         
-        if self.command_line.has( self.cli_process_id_arg ) :
-            goobi_com.closeStepByProcessId( self.command_line.get( self.cli_process_id_arg ) )
-        elif self.command_line.has( self.cli_step_id_arg ) :
-            goobi_com.closeStep( self.command_line.get( self.cli_step_id_arg ) )
+        if self.command_line.has(self.cli_step_id_arg): # Prefer this one
+            self.goobi_com.closeStep( self.command_line.get( self.cli_step_id_arg ) )
+        #elif self.command_line.has(self.cli_process_id_arg) :
+        #    self.goobi_com.closeStepByProcessId( self.command_line.get( self.cli_process_id_arg ) )
         else:
             self.info( 'Failed to close this step in "' + self.name + '". Neither ' + self.cli_process_id_arg + " or " + self.cli_step_id_arg + " were passed into commandline." )
             
@@ -556,7 +549,7 @@ class Step( object ):
                 err = err.format(parent_log_folder,log_folder,log_file)
                 raise IOError(err)
         try:
-            rotating_logger_handler = logging.handlers.RotatingFileHandler( log_file, maxBytes=log_max_bytes, backupCount=log_backup_count )
+            rotating_logger_handler = logging.handlers.RotatingFileHandler( log_file, maxBytes=log_max_bytes, backupCount=log_backup_count, encoding='utf-8')
             # Add Process ID to the log
             pid = "unknown"
             if command_line.has( self.cli_process_id_arg ) :

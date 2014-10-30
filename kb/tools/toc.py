@@ -28,7 +28,7 @@ class TOC(object):
         data = []
         self.dbc_service = dbc_service
         self.logger = logger
-        with open(path, 'r') as toc_csv:
+        with open(path, 'r', encoding='utf-8') as toc_csv:
             reader = csv.reader(toc_csv, delimiter=',', quotechar='"')
             # skip the first line as this just contains header data
             iterreader = iter(reader) 
