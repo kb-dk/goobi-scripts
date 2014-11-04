@@ -134,7 +134,7 @@ class GoobiCommunicate() :
         # request is closed (although python handles that too)
         try:
             #content_type = {"Content-Type":" application/x-www-form-urlencoded;charset=utf-8"}
-            response = request.urlopen( url.encode('utf-8') )
+            response = request.urlopen( url)#.encode('utf-8') )
             
             if response.code == 200:
             

@@ -39,36 +39,6 @@ class AddArticlesToMetsFile( Step ):
         except Exception as e:
             return str(e) + str(traceback.format_exc())
 
-    def get_setting(self,var_name,var_type,conf=None,conf_sec=None,default=None):
-        try:
-            basestring
-        except NameError:  # python3
-            basestring = str
-        ret_val = default
-        if self.command_line.has(var_name):
-            if var_type is not None and (var_type == 'int' or var_type == 'float'):
-                if (self.command_line.get(var_name) == ''):
-                    ret_val = default
-                else:
-                    ret_val = self.command_line.get(var_name)
-            else:
-                ret_val = self.command_line.get(var_name)
-        else:
-            try:
-                ret_val = self.getConfigItem(var_name, config=conf, 
-                                             section=conf_sec)
-            except KeyError:
-                pass
-        if var_type is not None:
-            if var_type == 'float':
-                ret_val = float(ret_val)
-            elif var_type == 'int':
-                ret_val = int(ret_val)
-            elif var_type == 'bool' or var_type == 'boolean':
-                if isinstance(ret_val,basestring):
-                    ret_val = (ret_val.lower() == True)
-        return ret_val
-
     def getVariables(self):
         '''
         This method pulls in all the variables
@@ -105,11 +75,11 @@ class AddArticlesToMetsFile( Step ):
         self.pdf_input_dir = os.path.join(process_path, pdf_input)
         
         # parse for overlapping articles
-        self.overlapping_articles = self.get_setting('overlapping_articles',
-                                                     'bool',default=True)
+        self.overlapping_articles = self.getSetting('overlapping_articles',
+                                                    'bool',default=True)
         # parse boolean from command line - for overlapping articles
-        self.default_language = self.get_setting('default_language',
-                                                 'string',default='da')
+        self.default_language = self.getSetting('default_language',
+                                                'string',default='da')
 
     def getDBCData(self, article_id):
         url = self.service_url.format(article_id)

@@ -95,17 +95,17 @@ class CreateOJSXML( Step ):
         # I.e. s only four digits and starts with 17,18,19 or 20
         #=======================================================================
         err = ('Publiceringsåret ("{0}") for hæftet skal være et firecifret tal '
-               'begyndende med enten 17, 18, 19 eller 20, f.eks. 1814, 1945 '
-               'eller 2001.  {1}. Åben metadata-editor og ret metadata for '
+               'begyndende med enten 17, 18, 19 eller 20, f.eks. 1814, 1914 '
+               'eller 2014.  {1}. Åben metadata-editor og ret metadata for '
                'hæftet og afslut opgaven.')
         pub_year = issue_data['PublicationYear']
         pub_year = pub_year.strip() # Remove leading and trailing spaces.
         if not pub_year.isdigit():
-            raise Exception(pub_year,err.format('Data er ikke et korrekt firecifret tal'))
+            raise Exception(err.format(pub_year,'Data er ikke et korrekt firecifret tal'))
         if not len(pub_year) == 4:
-            raise Exception(pub_year,err.format('Tallet er ikke præcis fire cifre langt'))
+            raise Exception(err.format(pub_year,'Tallet er ikke præcis fire cifre langt'))
         if not int(int(pub_year)/100) in [17,18,19,20]:
-            raise Exception(pub_year,err.format('Tallet starter ikke med 17, 18, 19 eller 20'))
+            raise Exception(err.format(pub_year,'Tallet starter ikke med 17, 18, 19 eller 20'))
         date_published = "{0}-01-01".format(pub_year)
         #=======================================================================
         # Create base xml for issue

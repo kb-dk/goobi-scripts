@@ -120,8 +120,7 @@ class GoobiLogger():
         if (not (level == 'debug') or 
                 (level == 'debug' and self.debugging_on)):
             if self.use_goobi_communication:
-                return self.com.addToProcessLog(level,
-                                                goobi_message,
+                return self.com.addToProcessLog(level,goobi_message,
                                                 self.process_id )
 
         

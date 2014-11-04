@@ -109,6 +109,7 @@ class Step( object ):
         # Process id must always be present
         self.essential_commandlines = {self.cli_process_id_arg: "number"}
         
+        self.process_id = self.command_line.get(self.cli_process_id_arg)
         self.command_line = None
         self.config = None
         
@@ -661,4 +662,5 @@ class Step( object ):
         if self.glogger:
             self.glogger.debug(message)
         if self.print_debug:
+            message = message.encode('ascii','replace').decode()
             print("Debug: " + str(message))

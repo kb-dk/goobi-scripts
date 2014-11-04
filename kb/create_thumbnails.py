@@ -34,12 +34,14 @@ class CreateThumbnails( Step ) :
         self.getVariables()
         try:
             image_ext = fs.detectImagesExts(self.input_folder,self.valid_exts)
-            convert.convert_folder(input_folder    = self.input_folder,
-                                   output_folder   = self.output_folder,
-                                   quality         = self.quality,
-                                   resize_type     = self.resize_type,
-                                   resize          = self.resize,
-                                   input_ext       = image_ext)
+            converttime= convert.convert_folder(input_folder    = self.input_folder,
+                                                output_folder   = self.output_folder,
+                                                quality         = self.quality,
+                                                resize_type     = self.resize_type,
+                                                resize          = self.resize,
+                                                input_ext       = image_ext)
+            self.debug_message('Thumbsnails of images for process {0} '
+                               'converted in {1}'.format(self.process_id,converttime))
         except convert.ConvertError as e:
             error = str(e)
         except Exception as e:
