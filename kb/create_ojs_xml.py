@@ -69,7 +69,7 @@ class CreateOJSXML( Step ):
         self.overlapping_articles = self.getSetting('overlapping_articles', bool, default=True)
         
         # Get path to generate ojs_dir -> system means "define it from system variables"
-        self.ojs_journal_path = self.getSetting('ojs_journal_path', bool, default='system')
+        self.ojs_journal_path = self.getSetting('ojs_journal_path', default='system')
         # we also need the required issue fields
         req_fields = self.getConfigItem('issue_required_fields')
         self.issue_required_fields = req_fields.split(';')
