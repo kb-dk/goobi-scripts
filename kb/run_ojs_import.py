@@ -53,14 +53,14 @@ class RunOJSImport( Step ):
         self.ojs_app_user = self.getConfigItem('ojs_app_user')
         self.tool_path = self.getConfigItem('tool_path')
 
-        # Get path to generate ojs_dir -> system means "define it from system variables"
-        self.ojs_journal_path = self.getSetting('ojs_journal_path', default='system')
 
         process_path = self.command_line.process_path
         mets_file_name = self.getConfigItem('metadata_goobi_file', None, 'process_files')
         mets_file = os.path.join(process_path, mets_file_name)
         issue_data = mets_tools.getIssueData(mets_file)
         
+        # Get path to generate ojs_dir -> system means "define it from system variables"
+        self.ojs_journal_path = self.getSetting('ojs_journal_path', default='system')
         if self.ojs_journal_path == 'system':
             self.volume_title = tools.parseTitle(issue_data['TitleDocMain'])
             # TODO: write this one back as a property?

@@ -65,7 +65,16 @@ class UploadToOJS( Step ):
         
         issue_data = mets_tools.getIssueData(mets_file)
         
-        volume_title = tools.parseTitle(issue_data['TitleDocMain'])
+                # Get path to generate ojs_dir -> system means "define it from system variables"
+        self.ojs_journal_path = self.getSetting('ojs_journal_path', default='system')
+        if self.ojs_journal_path == 'system':
+            volume_title = tools.parseTitle(issue_data['TitleDocMain'])
+            # TODO: write this one back as a property?
+            #self.goobi_com.addProperty(self.process_id, 'ojs_journal_path', volume_title, overwrite=True)
+        else:
+            volume_title = self.ojs_journal_path
+        
+        #volume_title = tools.parseTitle(issue_data['TitleDocMain'])
 
         ojs_journal_folder = os.path.join(ojs_mount, volume_title)
         tools.find_or_create_dir(ojs_journal_folder)
