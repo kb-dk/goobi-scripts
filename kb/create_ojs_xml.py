@@ -32,8 +32,12 @@ class CreateOJSXML( Step ):
         except (DataError, IOError, InputError) as e:
             self.debug_message(str(e))
             return e.strerror
-        except Exception as e:
+        except ValueError as e:
             self.debug_message(str(e))
+            self.debug_message(str(traceback.format_exc()))
+            return e
+        except Exception as e:
+            print(str(e))
             print(str(traceback.format_exc()))
             raise e
         # if we got here everything is fine
@@ -63,7 +67,9 @@ class CreateOJSXML( Step ):
         
         # parse boolean from command line
         self.overlapping_articles = self.getSetting('overlapping_articles', bool, default=True)
-
+        
+        # Get path to generate ojs_dir -> system means "define it from system variables"
+        self.ojs_journal_path = self.getSetting('ojs_journal_path', bool, default='system')
         # we also need the required issue fields
         req_fields = self.getConfigItem('issue_required_fields')
         self.issue_required_fields = req_fields.split(';')
@@ -88,7 +94,12 @@ class CreateOJSXML( Step ):
         issue_data = mets_tools.getIssueData(self.mets_file)
         article_data = mets_tools.getArticleData(data,['FrontMatter','Articles','BackMatter'])
         # this is the dir where files will be uploaded to
-        journal_title_path = tools.parseTitle(issue_data['TitleDocMain'])
+        if self.ojs_journal_path == 'system':
+            journal_title_path = tools.parseTitle(issue_data['TitleDocMain'])
+            # TODO: write this one back as a property?
+            #self.goobi_com.addProperty(self.process_id, 'ojs_journal_path', journal_title_path, overwrite=True)
+        else:
+            journal_title_path = self.ojs_journal_path
         self.ojs_dir = os.path.join(self.ojs_root,journal_title_path, self.command_line.process_title)
         #=======================================================================
         # Get and validate PublicationYear
@@ -101,11 +112,11 @@ class CreateOJSXML( Step ):
         pub_year = issue_data['PublicationYear']
         pub_year = pub_year.strip() # Remove leading and trailing spaces.
         if not pub_year.isdigit():
-            raise Exception(err.format(pub_year,'Data er ikke et korrekt firecifret tal'))
+            raise ValueError(err.format(pub_year,'Det indtastede i feltet årstal er ikke et korrekt tal'))
         if not len(pub_year) == 4:
-            raise Exception(err.format(pub_year,'Tallet er ikke præcis fire cifre langt'))
+            raise ValueError(err.format(pub_year,'Tallet er ikke præcis fire cifre langt'))
         if not int(int(pub_year)/100) in [17,18,19,20]:
-            raise Exception(err.format(pub_year,'Tallet starter ikke med 17, 18, 19 eller 20'))
+            raise ValueError(err.format(pub_year,'Tallet starter ikke med 17, 18, 19 eller 20'))
         date_published = "{0}-01-01".format(pub_year)
         #=======================================================================
         # Create base xml for issue

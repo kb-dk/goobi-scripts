@@ -109,7 +109,7 @@ class Step( object ):
         # Process id must always be present
         self.essential_commandlines = {self.cli_process_id_arg: "number"}
         
-        self.process_id = self.command_line.get(self.cli_process_id_arg)
+        
         self.command_line = None
         self.config = None
         
@@ -136,7 +136,8 @@ class Step( object ):
         # Get command line parameters (want to pass process_id to log if we have it)        
         self.command_line, error_command_line = \
             self.getCommandLine( must_have=self.essential_commandlines )
-        #
+        # Get process id
+        self.process_id = self.command_line.get(self.cli_process_id_arg)
         # Load system configuration information
         if self.system_config_path == '':
             if not self.command_line.has("system_config_path"):
@@ -182,10 +183,9 @@ class Step( object ):
             self.debug = not ( self.command_line.debug.lower() == "false" )
             # Override config setting at commandline. (if it says anything but false turn it on.)
         if self.debug:
-            self.name = self.name.encode('ascii','replace').decode()
             print(self.name + ": Debugging ON")
         # Create out logger
-        logger_name = self.name.replace(' ','').lower()
+        logger_name = str(self.name).replace(' ','').lower()
         self.glogger, error = self.getLoggingSystems(self.config,
                                                      self.config_main_section,
                                                      self.command_line,
@@ -222,7 +222,7 @@ class Step( object ):
         #
         # Pass message back to Goobi to say everything looks fine and start process.
         update_message = "Basic checks complete, "
-        update_message += 'beginning main process of step "' + self.name + '" - '
+        update_message += 'beginning main process of step "' + str(self.name) + '" - '
         update_message += 'DETACH:' + ( "ON" if self.detach else "OFF" )
         update_message += ', AUTO-COMPLETE:' + ( "ON" if self.auto_complete else "OFF" ) # if successful
         update_message += ', REPORT-PROBLEM:' + ( "ON" if self.auto_report_problem else "OFF" ) # if unsuccessful
@@ -240,23 +240,22 @@ class Step( object ):
         except Exception as e:
             try:
                 trace = traceback.format_exc()
-                self.error_message('Exception occured in ' + self.name +\
+                self.error_message('Exception occured in ' + str(self.name) +\
                                    ' :- ' + e.message + ". Trace: " + trace )
             except TypeError:
-                self.error_message('Exception occured in ' + self.name +\
+                self.error_message('Exception occured in ' + str(self.name) +\
                                    ' :- ' + str(e) + ". Trace: " + trace )
             except:
-                self.error_message( 'Exception occured in ' + self.name  )
+                self.error_message( 'Exception occured in ' + str(self.name)  )
             raise e
         if not error :
-            self.info_message(self.name +' afsluttet korrekt.')
+            self.info_message(str(self.name) +' afsluttet korrekt.')
             if self.auto_complete:
                 self.closeStep()
         else:
             if self.auto_report_problem:
                 error_msg = ('Error occured in "{0}". Sending task back to {1}')
-                error_msg = error_msg.format(self.name,
-                                             self.auto_report_problem) 
+                error_msg = error_msg.format(self.name,self.auto_report_problem) 
                 self.error_message(error_msg)
                 self.error_message(str(error))
                 self.reportToStep( error )
@@ -276,7 +275,7 @@ class Step( object ):
             step_id = self.command_line.get(self.cli_step_id_arg)
         except KeyError:
             msg = 'Failed to report this problem to a previous step.'+\
-                  ' In "' + self.name + '" ' + self.cli_step_id_arg +\
+                  ' In "' + str(self.name) + '" ' + self.cli_step_id_arg +\
                   ' was not passed into command line.'
             self.error(msg)
             raise KeyError(msg)
@@ -294,7 +293,7 @@ class Step( object ):
         #elif self.command_line.has(self.cli_process_id_arg) :
         #    self.goobi_com.closeStepByProcessId( self.command_line.get( self.cli_process_id_arg ) )
         else:
-            self.info( 'Failed to close this step in "' + self.name + '". Neither ' + self.cli_process_id_arg + " or " + self.cli_step_id_arg + " were passed into commandline." )
+            self.info( 'Failed to close this step in "' + str(self.name) + '". Neither ' + self.cli_process_id_arg + " or " + self.cli_step_id_arg + " were passed into commandline." )
             
     def exit( self, message,log=None ) :
         # TODO: make this method a nice exit
@@ -580,7 +579,7 @@ class Step( object ):
             
             log_email_subject = self.getConfigItem( "log_email_subject", config )
             if not log_email_subject:
-                log_email_subject = "Goobi Error " + self.name
+                log_email_subject = "Goobi Error " + str(self.name)
                 
             email_logger_handler = logging.handlers.SMTPHandler( "smtp.ox.ac.uk", logger.name + "@goobi.bodleian.ox.ac.uk", log_email, log_email_subject)
             email_logger_handler.setLevel( logging.WARNING )

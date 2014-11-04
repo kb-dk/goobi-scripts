@@ -68,7 +68,7 @@ def convert_images(image_jobs):
 
 def split_set_equally(input_set, chunks=2):
     #http://enginepewpew.blogspot.dk/2012/03/splitting-dictionary-into-equal-chunks.html
-    return_list = [set() for idx in xrange(chunks)]
+    return_list = [set() for idx in range(chunks)]
     idx = 0
     for elem in input_set:
         return_list[idx].add(elem)

@@ -6,6 +6,7 @@ import tools.goobi.metadata as goobi_tools
 import tools.tools as tools
 from tools.mets import mets_tools
 from tools.errors import DataError
+from kb.tools.processing import processing
 
 
 
@@ -31,8 +32,8 @@ class RunOJSImport( Step ):
             self.runImport()
         except DataError as e:
             return "Execution halted due to error {0}".format(e.strerror)
-        except subprocess.CalledProcessError as e:
-            return "System command failed {0}".format(e.cmd)
+        except RuntimeError as e:
+            return e
         return None
 
     def getVariables(self):
@@ -76,8 +77,17 @@ class RunOJSImport( Step ):
         public/private key setup. See the wiki for more details.
         '''
         login = "{0}@{1}".format(self.ojs_server_user, self.ojs_server)
-        subprocess.check_call(['ssh', login, 'sudo', 'php', self.tool_path, 
-            'NativeImportExportPlugin', 'import', self.xml_path, self.volume_title, self.ojs_app_user])
+        cmd = 'ssh {0} sudo php {1} NativeImportExportPlugin import {2} {3} {4}'
+        cmd = cmd.format(login,self.tool_path,self.xml_path, self.volume_title, self.ojs_app_user)
+        result = processing.run_cmd(cmd,shell=True,print_output=False,raise_errors=False)
+        if result['erred']:
+            err = ('Der opstod en fejl ved import af OJS-xml-filen på '
+                   ' www.tidsskrift.dk ved kørsel af kommandoen: {0}. '
+                   'Fejlen er: {1}.')
+            err = err.format(cmd,result['output'])
+            raise RuntimeError(err)
+        #subprocess.check_call(['ssh', login, 'sudo', 'php', self.tool_path, 
+        #    'NativeImportExportPlugin', 'import', self.xml_path, self.volume_title, self.ojs_app_user])
         
 
 if __name__ == '__main__':
