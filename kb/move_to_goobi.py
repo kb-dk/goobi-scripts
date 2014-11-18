@@ -41,6 +41,13 @@ class MoveToGoobi( Step ):
             self.moveFiles(self.limb_altos, self.goobi_altos)
             self.moveFiles(self.limb_toc, self.goobi_toc)
             self.moveFiles(self.limb_pdf, self.goobi_pdf)
+            # Delete the empty process folder in LIMBs output folder
+            try:
+                os.rmdir(self.limb_process_root)
+            except OSError:
+                msg = 'Process folder "{0}" on LIMB could not be deleted.'
+                msg = msg.format(self.limb_process_root)
+                self.info_message(msg)
         except ValueError as e:
             return e.strerror
             #return "Could not convert string to int - check config file."
@@ -55,10 +62,10 @@ class MoveToGoobi( Step ):
         Throws ValueError if config strings cannot be converted to input_files
         Throws IOError if necessary directories could not be found
         '''
-        limb_process_root = os.path.join(self.getConfigItem('limb_output'), self.command_line.process_title)
-        self.limb_altos = os.path.join(limb_process_root, self.getConfigItem('alto'))
-        self.limb_toc = os.path.join(limb_process_root, self.getConfigItem('toc'))
-        self.limb_pdf = os.path.join(limb_process_root, self.getConfigItem('pdf'))
+        self.limb_process_root = os.path.join(self.getConfigItem('limb_output'), self.command_line.process_title)
+        self.limb_altos = os.path.join(self.limb_process_root, self.getConfigItem('alto'))
+        self.limb_toc = os.path.join(self.limb_process_root, self.getConfigItem('toc'))
+        self.limb_pdf = os.path.join(self.limb_process_root, self.getConfigItem('pdf'))
         
         self.goobi_altos = os.path.join(self.command_line.process_path, 
             self.getConfigItem('metadata_alto_path', None, 'process_folder_structure'))

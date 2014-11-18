@@ -199,12 +199,12 @@ class TOC(object):
         else:
             err = ('Det var ikke muligt at anvende start og slutsidetal for '
                    'artiklen "{0}" med id {1}. Disse skal indtastes manuelt '
-                   ' og de �vrige af h�ftets artiklers sidetal skal tjekkes.')
+                   ' og de øvrige af hæftets artiklers sidetal skal tjekkes.')
             err = err.format(dbc_data['title'],toc_data.article_id)
             if self.logger: self.logger.info_message(err)
-        if (self.page_offset is None and # Not yet set
-                toc_data.start_page > 1 and   # page number set for article
-                not start_page == toc_data.start_page): # volume has offset, toc_data follow file number + can be both positive and negative
+        if (self.page_offset is None# Not yet set
+            and toc_data.start_page > 1 # page number set for article
+            and not start_page == toc_data.start_page): # volume has offset, toc_data follow file number + can be both positive and negative
             self.page_offset = start_page-toc_data.start_page
         return start_page,end_page
     

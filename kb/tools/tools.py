@@ -338,7 +338,7 @@ def pdfinfo(infile):
     return output
 
 def copy_files(source,dest,transit=None,delete_original=False,wait_interval=60,
-               max_retries=5,logger=None):
+               max_retries=5,logger=None,change_owner=None):
     """
     Copies all file (non recursive) from 'source' directory to 'dest'.
     if 'trasit' directory is given then the files are first copied to this directory, which is then moved to 'dest' dir
@@ -350,6 +350,7 @@ def copy_files(source,dest,transit=None,delete_original=False,wait_interval=60,
     :param wait_interval: int, wait time between failed copy
     :param max_retries: int, how many times to retry copy
     :param logger: object, goobi-logger 
+    :param change_owner: an integer to change the owner of dir or file to
     """
     dest_dir = dest
     if transit:
@@ -372,6 +373,11 @@ def copy_files(source,dest,transit=None,delete_original=False,wait_interval=60,
             #create destination dir, if it does not exists
             if not os.path.exists(dest_dir):
                 os.makedirs(dest_dir)
+                if change_owner is not None:
+                    # Change the owner of the dir to "change_owner" (an integer)
+                    # and set the correct rights for the dir
+                    shutil.chown(dest_dir, group=change_owner)
+                    os.chmod(dest_dir, 775)
             i = 0
             for src_file in src_files:
                 i += 1
@@ -387,6 +393,12 @@ def copy_files(source,dest,transit=None,delete_original=False,wait_interval=60,
                             msg = "Copying file {0}".format(src_file[0])
                             logger.debug(msg)
                         shutil.copy2(src_file[0], dest_dir)
+                        if change_owner is not None:
+                            # Change the owner of the file to "change_owner" (an integer)
+                            # and set the correct rights for the file
+                            temp_path = os.path.join(dest_dir,src_file[0])
+                            shutil.chown(temp_path, group=change_owner)
+                            os.chmod(temp_path, 664)
                         src_file[1] = True
                     else:
                         #Remove elem so it doesn't count as a not yet copied file.

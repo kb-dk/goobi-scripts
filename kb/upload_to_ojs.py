@@ -11,6 +11,7 @@ from tools.errors import DataError
 class UploadToOJS( Step ):
 
     def setup(self):
+        self.name = 'Upload PDF-filer og XML-fil til OJS'
         self.config_main_section = 'ojs'
         self.folder_structure_section = 'process_folder_structure'
         self.process_files_section = 'process_files'
@@ -93,7 +94,8 @@ class UploadToOJS( Step ):
                          delete_original=False,
                          wait_interval=60,
                          max_retries=5,
-                         logger=self.glogger
+                         logger=self.glogger,
+                         change_owner=1000 # set owner to gid 1000 => ojs-group
                          )
 
 
@@ -104,7 +106,8 @@ class UploadToOJS( Step ):
                          delete_original=False,
                          wait_interval=60,
                          max_retries=5,
-                         logger=self.glogger
+                         logger=self.glogger,
+                         change_owner=1000 # set owner to gid 1000 => ojs-group
                          )
 
 if __name__ == '__main__':

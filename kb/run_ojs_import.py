@@ -6,13 +6,14 @@ import tools.goobi.metadata as goobi_tools
 import tools.tools as tools
 from tools.mets import mets_tools
 from tools.errors import DataError
-from kb.tools.processing import processing
+from tools.processing import processing
 
 
 
 class RunOJSImport( Step ):
 
     def setup(self):
+        self.step_name = 'Publicer på www.tidsskrift.dk'
         self.config_main_section = 'ojs'
         self.essential_config_sections = set( ['ojs'] )
         self.essential_commandlines = {
@@ -91,11 +92,11 @@ class RunOJSImport( Step ):
         cmd = 'ssh {0} sudo php {1} NativeImportExportPlugin import {2} {3} {4}'
         cmd = cmd.format(login,self.tool_path,self.xml_path, self.volume_title, self.ojs_app_user)
         result = processing.run_cmd(cmd,shell=True,print_output=False,raise_errors=False)
-        if result['erred']:
+        if result['erred'] or 'error' in str(result['stderr']):
             err = ('Der opstod en fejl ved import af OJS-xml-filen på '
                    ' www.tidsskrift.dk ved kørsel af kommandoen: {0}. '
                    'Fejlen er: {1}.')
-            err = err.format(cmd,result['output'])
+            err = err.format(cmd,('stderr:'+result['output']+' output:'+result['output']))
             raise RuntimeError(err)
         #subprocess.check_call(['ssh', login, 'sudo', 'php', self.tool_path, 
         #    'NativeImportExportPlugin', 'import', self.xml_path, self.volume_title, self.ojs_app_user])

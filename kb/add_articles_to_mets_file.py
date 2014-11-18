@@ -98,8 +98,9 @@ class AddArticlesToMetsFile( Step ):
         # Various checks of the toc-file
         #=======================================================================
         if self.toc_data.erroneousPages():
-            msg = ('Alle hæftets artikler har samme startside. Dette skal '
-                   'rettes manuelt i METS-editoren.')
+            msg = ('NB!!! En fejl i LIMB har medført, at alle hæftets artikler '
+                   'har samme startside. Dette skal rettes manuelt i '
+                   'METS-editoren for hver enkelt artikel. Suk!')
             self.error_message(msg)
         
     def writeXml(self):
