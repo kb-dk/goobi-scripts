@@ -13,7 +13,7 @@ from tools.processing import processing
 class RunOJSImport( Step ):
 
     def setup(self):
-        self.step_name = 'Publicer på www.tidsskrift.dk'
+        self.name = 'Publicer på www.tidsskrift.dk'
         self.config_main_section = 'ojs'
         self.essential_config_sections = set( ['ojs'] )
         self.essential_commandlines = {
