@@ -97,11 +97,18 @@ class AddArticlesToMetsFile( Step ):
         #=======================================================================
         # Various checks of the toc-file
         #=======================================================================
-        if self.toc_data.erroneousPages():
+        data_check = self.toc_data.erroneousPages()
+        if data_check == 1:
+            msg = ('NB!!! Der er kun en artikel for hæftet. Flere kan oprettes '
+                   ' via Goobis metadata-editor eller hæftet kan sendes '
+                   ' LIMB igen. Suk!')
+            self.error_message(msg)
+        elif data_check == 2:
             msg = ('NB!!! En fejl i LIMB har medført, at alle hæftets artikler '
                    'har samme startside. Dette skal rettes manuelt i '
                    'METS-editoren for hver enkelt artikel. Suk!')
             self.error_message(msg)
+
         
     def writeXml(self):
         '''

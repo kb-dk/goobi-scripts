@@ -365,15 +365,16 @@ class TOC(object):
     
     def erroneousPages(self):
         '''
-        Checks if all the pages are the same, usually error is all page numbers
-        are equal 1
+        Checks the condition of the number of articles and number of pages
         '''
         pages = set()
+        if len(self.allArticles) == 0: # only one article
+            return 1
         for a in self.allArticles():
             pages.add(a.start_page)
-        if len(pages) <= 1:
-            return True
-        return False
+        if len(pages) <= 1: # all pages have page 1 as start page
+            return 2
+        return 0
     
 
 class TOCSection(object):
