@@ -18,7 +18,7 @@ import shutil
 from tools import errors
 import hashlib
 
-def find_or_create_dir(path):
+def find_or_create_dir(path,change_owner=None):
     '''
     Given a folder path, check to see 
     if folder exists or create it
@@ -30,6 +30,11 @@ def find_or_create_dir(path):
             raise IOError(error)
     elif not os.path.exists(path):
         os.makedirs(path)
+        if change_owner is not None:
+            # Change the owner of the dir to "change_owner" (an integer)
+            # and set the correct rights for the dir
+            shutil.chown(path, group=change_owner)
+            os.chmod(path, 0o775)
 
 def move_file(file_path,dest_folder,logger=None):
     '''
@@ -377,7 +382,7 @@ def copy_files(source,dest,transit=None,delete_original=False,wait_interval=60,
                     # Change the owner of the dir to "change_owner" (an integer)
                     # and set the correct rights for the dir
                     shutil.chown(dest_dir, group=change_owner)
-                    os.chmod(dest_dir, 775)
+                    os.chmod(dest_dir, 0o775)
             i = 0
             for src_file in src_files:
                 i += 1
@@ -396,9 +401,10 @@ def copy_files(source,dest,transit=None,delete_original=False,wait_interval=60,
                         if change_owner is not None:
                             # Change the owner of the file to "change_owner" (an integer)
                             # and set the correct rights for the file
-                            temp_path = os.path.join(dest_dir,src_file[0])
+                            file_name = os.path.basename(src_file[0])
+                            temp_path = os.path.join(dest_dir,file_name)
                             shutil.chown(temp_path, group=change_owner)
-                            os.chmod(temp_path, 664)
+                            os.chmod(temp_path, 0o664)
                         src_file[1] = True
                     else:
                         #Remove elem so it doesn't count as a not yet copied file.

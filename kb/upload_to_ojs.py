@@ -78,10 +78,12 @@ class UploadToOJS( Step ):
         #volume_title = tools.parseTitle(issue_data['TitleDocMain'])
 
         ojs_journal_folder = os.path.join(ojs_mount, volume_title)
-        tools.find_or_create_dir(ojs_journal_folder)
+        # Create folder and set owner to gid 1000 => ojs-group
+        tools.find_or_create_dir(ojs_journal_folder,change_owner=1000)
         self.ojs_dest_dir = os.path.join(ojs_journal_folder,
                                          self.command_line.process_title)
-        tools.find_or_create_dir(self.ojs_dest_dir)
+        # Create folder and set owner to gid 1000 => ojs-group
+        tools.find_or_create_dir(self.ojs_dest_dir,change_owner=1000)
 
         tools.ensureDirsExist(self.ojs_metadata_dir,
                               self.pdf_input_dir,
