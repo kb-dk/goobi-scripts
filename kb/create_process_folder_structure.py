@@ -9,11 +9,11 @@ import os
 from tools import tools
 from goobi.goobi_step import Step
 
-class create_process_folder_structure( Step ) :
+class CreateProcessFolderStructure( Step ) :
 
     def setup(self):
     
-        self.name = "Create complete folder structure"
+        self.name = "Forbered Goobi-proces"
         self.config_main_section = "create_process_folder_structure"
         self.folder_structure_section = 'process_folder_structure'
         self.essential_config_sections.update([self.folder_structure_section, 
@@ -55,4 +55,4 @@ class create_process_folder_structure( Step ) :
             else:
                 self.debug_message('{0} already exists as {1}.'.format(name,path))
 if __name__ == '__main__' :
-    create_process_folder_structure().begin()
+    CreateProcessFolderStructure().begin()

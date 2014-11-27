@@ -368,7 +368,7 @@ class TOC(object):
         Checks the condition of the number of articles and number of pages
         '''
         pages = set()
-        if len(self.allArticles) == 0: # only one article
+        if len(self.allArticles) == 1: # only one article
             return 1
         for a in self.allArticles():
             pages.add(a.start_page)
