@@ -7,7 +7,7 @@ from tools import errors
 from tools.filesystem import fs
 import tools.limb as limb_tools
 
-class CopyToLimb( Step ):
+class CopyToOcr( Step ):
 
     def setup(self):
         self.name = 'Kopiering af billeder til OCR'
