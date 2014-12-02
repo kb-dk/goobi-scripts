@@ -35,7 +35,7 @@ class FileValidator( Step ) :
     def setup(self):
     
         self.name = "Validering af importerede filer"
-        self.config_main_section = "move_invalid_files"
+        self.config_main_section = "validate_image_files"
         self.essential_config_sections = set( [] )
         self.folder_structure_section = 'process_folder_structure'
         self.essential_config_sections.update([self.folder_structure_section, 
@@ -108,7 +108,7 @@ class FileValidator( Step ) :
                     error_level= 2
                     break
                 elif tools.getFileExt(f,remove_dot=True) not in valid_exts:
-                    if 'Thumbs.db' in f: # removing Thumbs.db is newer an error
+                    if 'Thumbs.db' in f: # removing Thumbs.db is never an error
                         msg = ('Filen "Thumbs.db" er blevet fjernet fra '
                                'billedmappe og lagt i invalid-mappen.')
                         self.info_message(msg)

@@ -12,12 +12,12 @@ class CopyToOcr( Step ):
     def setup(self):
         self.name = 'Kopiering af billeder til OCR'
         self.config_main_section = 'copy_to_ocr'
-        self.limb_output_section = 'limb_output'
+        self.ocr_output_section = 'copy_from_ocr'
         self.valid_exts_section = 'move_invalid_files'
         self.folder_structure_section = 'process_folder_structure'
         self.essential_config_sections.update([self.folder_structure_section, 
                                                self.folder_structure_section,
-                                               self.limb_output_section,
+                                               self.ocr_output_section,
                                                self.valid_exts_section] )
         self.essential_commandlines = {
             "process_id" : "number",
@@ -33,33 +33,29 @@ class CopyToOcr( Step ):
         
         process_title = self.command_line.process_title
         process_path = self.command_line.process_path
-        rel_master_image_path = self.getConfigItem('img_master_path',None,self.folder_structure_section) 
+        rel_master_image_path = self.getConfigItem('img_master_path',None,self.folder_structure_section)
+
+        # img_master_path = images/master_orig/
         self.source_folder = os.path.join(process_path,rel_master_image_path)
-        self.transit_dir = os.path.join(self.getConfigItem('limb_transit'),process_title)
+
+        # ======================================================================
+        # legr: Get the correct OCR server for the issue - antikva or fraktur
+        # ======================================================================
+        ocr_workflow_type = self.getSetting('ocr_workflow_type') # legr: how do I get this from Goobi?
+        if ocr_workflow_type == 'antikva':
+            # legr: currently antikva on ocr-01
+            ocr_transitfolder = self.getSetting('ocr_antikva_transit')
+            ocr_hotfolder = self.getSetting('ocr_antikva_hotfolder')
+        elif ocr_workflow_type == 'fraktur':
+            # legr: currently fraktur on ocr-02
+            ocr_transitfolder = self.getSetting('ocr_fraktur_transit')
+            ocr_hotfolder = self.getSetting('ocr_fraktur_hotfolder')
+        self.transit_dir = os.path.join(ocr_transitfolder,process_title)
+        self.hotfolder_dir = os.path.join(ocr_hotfolder,process_title)
+
         self.sleep_interval = int(self.getConfigItem('sleep_interval'))
         self.retries = int(self.getConfigItem('retries'))
         
-        #=======================================================================
-        # Variable to check if ALTO, PDF and TOC files already exists on Goobi
-        #=======================================================================
-        limb = self.getConfigItem('limb_output',None,self.limb_output_section)
-        alto = self.getConfigItem('alto',None,self.limb_output_section)
-        toc = self.getConfigItem('toc',None,self.limb_output_section)
-        pdf = self.getConfigItem('pdf',None,self.limb_output_section)
-        
-        # join paths to create absolute paths
-        self.limb_dir = os.path.join(limb, process_title)
-        self.alto_dir = os.path.join(self.limb_dir, alto)
-        self.toc_dir = os.path.join(self.limb_dir, toc)
-        self.pdf_input_dir = os.path.join(self.limb_dir, pdf)
-        
-        # Set destination for paths
-        
-        # Modified for Recognition Server, no altos, no toc - legr
-        #self.goobi_altos = os.path.join(process_path, 
-        #    self.getConfigItem('metadata_alto_path', None, 'process_folder_structure'))
-        #self.goobi_toc = os.path.join(process_path, 
-        #    self.getConfigItem('metadata_toc_path', None, 'process_folder_structure'))
         self.goobi_pdf = os.path.join(process_path, 
             self.getConfigItem('doc_limbpdf_path', None, 'process_folder_structure'))
         self.valid_exts = self.getConfigItem('valid_file_exts',None, self.valid_exts_section).split(';')
@@ -69,13 +65,12 @@ class CopyToOcr( Step ):
         #=======================================================================
         # Get the correct LIMB workflow hotfolder for the issue - BW or Color
         #=======================================================================
-        limb_workflow_type = self.getSetting('limb_workflow_type')
-        if limb_workflow_type == 'bw':
-            limb_hotfolder = self.getSetting('limb_bw_hotfolder')
-        elif limb_workflow_type == 'color':
-            limb_hotfolder = self.getSetting('limb_color_hotfolder')
-        self.hotfolder_dir = os.path.join(limb_hotfolder,process_title)
-        self.overwrite_destination_files = self.getSetting('overwrite_files', bool , default= False)
+        #limb_workflow_type = self.getSetting('limb_workflow_type')
+        #if limb_workflow_type == 'bw':
+        #    limb_hotfolder = self.getSetting('limb_bw_hotfolder')
+        #elif limb_workflow_type == 'color':
+        #    limb_hotfolder = self.getSetting('limb_color_hotfolder')
+        #self.hotfolder_dir = os.path.join(limb_hotfolder,process_title)
 
     def step(self):
         error = None
@@ -84,19 +79,12 @@ class CopyToOcr( Step ):
         msg = msg.format(self.source_folder, self.hotfolder_dir, self.transit_dir)
         self.debug_message(msg)
         try:
-            if not self.overwrite_destination_files:
-                # Modified for Recognition Server, no altos, no toc - legr
-                if limb_tools.alreadyMoved(self.goobi_pdf,
-                                           self.input_files,
-                                           self.valid_exts):     
-                # Original - legr
-                #if limb_tools.alreadyMoved(self.goobi_toc,self.goobi_pdf,
-                #                           self.input_files,self.goobi_altos,
-                #                           self.valid_exts):
-                    return error
-                if (tools.folderExist(self.hotfolder_dir) and
-                    fs.compareDirectories(self.source_folder, self.hotfolder_dir)):
-                    return error
+            """
+            legr:
+            source = {processpath} + "images/master_orig/"
+            transit = "/tmp/ocr-02/InputFolder/dod-transit/" + {processtitle} # tmp to replaced with mnt when prod-ready
+            dest =
+            """
             tools.copy_files(source = self.source_folder,
                              dest = self.hotfolder_dir,
                              transit = self.transit_dir,
@@ -113,4 +101,4 @@ class CopyToOcr( Step ):
         return error
 
 if __name__ == '__main__':    
-    CopyToLimb().begin()
+    CopyToOcr().begin()
