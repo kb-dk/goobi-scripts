@@ -14,11 +14,11 @@ class CopyToOcr( Step ):
     def setup(self):
         self.name = 'Kopiering af billeder til OCR'
         self.config_main_section = 'copy_to_ocr'
+
         self.ocr_output_section = 'copy_from_ocr'
         self.valid_exts_section = 'valid_file_exts'
         self.folder_structure_section = 'process_folder_structure'
         self.essential_config_sections.update([self.folder_structure_section, 
-                                               self.folder_structure_section,
                                                self.ocr_output_section,
                                                self.valid_exts_section] )
         self.essential_commandlines = {
@@ -26,6 +26,7 @@ class CopyToOcr( Step ):
             "process_path" : "folder",
             "process_title" : "string"
         }
+
 
     def getVariables(self):
         '''
@@ -42,8 +43,13 @@ class CopyToOcr( Step ):
 
         # ======================================================================
         # legr: Get the correct OCR server for the issue - antikva or fraktur
+        # Break if argument somehow is missing or have an invalid name
         # ======================================================================
-        ocr_workflow_type = self.getSetting('ocr_workflow_type')
+        try:
+            ocr_workflow_type = self.getSetting('ocr_workflow_type').lower()
+        except KeyError:
+            self.error_message('{0} er ikke givet med som variabel til scriptet.'.format('ocr_workflow_type'))
+
         if ocr_workflow_type == 'antikva':
             # legr: currently antikva on ocr-01
             ocr_transitfolder = self.getSetting('ocr_antikva_transit')
@@ -52,19 +58,26 @@ class CopyToOcr( Step ):
             # legr: currently fraktur on ocr-02
             ocr_transitfolder = self.getSetting('ocr_fraktur_transit')
             ocr_hotfolder = self.getSetting('ocr_fraktur_hotfolder')
+        else:
+            err = ('Variablen "{0}" fra kaldet af "{1}" skal enten være '
+                   '"fraktur" eller "antikva", men er pt. "{2}".')
+            err = err.format('ocr_workflow_type',self.name,ocr_workflow_type)
+            self.error_message(err)
 
         self.transit_dir = os.path.join(ocr_transitfolder,process_title)
         self.hotfolder_dir = os.path.join(ocr_hotfolder,process_title)
 
         self.sleep_interval = int(self.getConfigItem('sleep_interval'))
         self.retries = int(self.getConfigItem('retries'))
-        
-        # legr: 'doc_pdf_color_path' for now, we also have defined a path for bw
-        self.goobi_pdf = os.path.join(process_path, 
-            self.getConfigItem('doc_pdf_color_path', None, 'process_folder_structure'))
-        self.valid_exts = self.getConfigItem('valid_file_exts',None, self.valid_exts_section).split(';')
-        input_files = self.getConfigItem('img_master_path',None, self.folder_structure_section) 
-        self.input_files = os.path.join(process_path,input_files)
+        # legr:
+        # We could define pdf, inputfile and ext-variables for use if we want to test if files already is present:
+        # self.goobi_pdf_color = os.path.join(process_path, 
+        #    self.getConfigItem('doc_pdf_color_path', None, 'process_folder_structure'))
+        # self.goobi_pdf_bw = os.path.join(process_path, 
+        #    self.getConfigItem('doc_pdf_bw_path', None, 'process_folder_structure'))
+        # self.valid_exts = self.getConfigItem('valid_file_exts',None, self.valid_exts_section).split(';')
+        # input_files = self.getConfigItem('img_master_path',None, self.folder_structure_section) 
+        # self.input_files = os.path.join(process_path,input_files)
 
 
     def step(self):
