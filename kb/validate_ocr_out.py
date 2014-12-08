@@ -30,21 +30,19 @@ class ValidateOcrOutput( Step ):
         process_title = self.command_line.process_title
         # set ocr to current outputfolder - antikva or fraktur         
         try:
-            ocr = self.getSetting('ocr_workflow_type').lower()
+            ocr_workflow_type = self.getSetting('ocr_workflow_type').lower()
         except KeyError:
-            self.error_message('{0} er ikke givet med som variabel til scriptet.'.format('ocr'))
-        if ocr == 'antikva':
+            self.error_message('{0} er ikke givet med som variabel til scriptet.'.format('ocr_workflow_type'))
+        if ocr_workflow_type == 'antikva':
             # legr: currently antikva on ocr-01
-            ocr_transitfolder = self.getSetting('ocr_antikva_transit')
-            ocr_hotfolder = self.getSetting('ocr_antikva_hotfolder')
-        elif ocr == 'fraktur':
+            ocr = self.getSetting('ocr_antikva_outputfolder')
+        elif ocr_workflow_type == 'fraktur':
             # legr: currently fraktur on ocr-02
-            ocr_transitfolder = self.getSetting('ocr_fraktur_transit')
-            ocr_hotfolder = self.getSetting('ocr_fraktur_hotfolder')
+            ocr = self.getSetting('ocr_fraktur_outputfolder')
         else:
             err = ('Variablen "{0}" fra kaldet af "{1}" skal enten være '
                    '"fraktur" eller "antikva", men er pt. "{2}".')
-            err = err.format('ocr',self.name,ocr)
+            err = err.format('ocr_workflow_type',self.name,ocr_workflow_type)
             self.error_message(err)
 
         alto = self.getConfigItem('alto')
