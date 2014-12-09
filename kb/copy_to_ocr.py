@@ -67,8 +67,8 @@ class CopyToOcr( Step ):
         self.transit_dir = os.path.join(ocr_transitfolder,process_title)
         self.hotfolder_dir = os.path.join(ocr_hotfolder,process_title)
 
-        self.sleep_interval = int(self.getConfigItem('sleep_interval'))
-        self.retries = int(self.getConfigItem('retries'))
+        self.retry_wait = int(self.getConfigItem('retry_wait'))
+        self.retry_num = int(self.getConfigItem('retry_num'))
         # legr:
         # We could define pdf, inputfile and ext-variables for use if we want to test if files already is present:
         # self.goobi_pdf_color = os.path.join(process_path, 
@@ -91,8 +91,8 @@ class CopyToOcr( Step ):
                              dest = self.hotfolder_dir,
                              transit = self.transit_dir,
                              delete_original = False,
-                             wait_interval = self.sleep_interval,
-                             max_retries = self.retries,
+                             wait_interval = self.retry_wait,
+                             max_retries = self.retry_num,
                              logger = self.glogger)
         except errors.TransferError as e:
             error = e.strerror
