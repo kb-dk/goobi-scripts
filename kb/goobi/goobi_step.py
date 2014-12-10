@@ -196,7 +196,7 @@ class Step( object ):
         self.goobi_com = GoobiCommunicate(self.config.goobi.host,
                                           self.config.goobi.passcode,
                                           self.debug,
-                                          process_id = self.command_line.get(self.cli_process_id_arg)
+                                          process_id = self.process_id
                                           )
             #
         # Check Commandline parameters
@@ -239,9 +239,10 @@ class Step( object ):
             error = self.step()
         except Exception as e:
             try:
+                emsg = str(e)
                 trace = traceback.format_exc()
                 self.error_message('Exception occured in ' + str(self.name) +\
-                                   ' :- ' + e.message + ". Trace: " + trace )
+                                   ' :- ' + emsg + ". Trace: " + trace )
             except TypeError:
                 self.error_message('Exception occured in ' + str(self.name) +\
                                    ' :- ' + str(e) + ". Trace: " + trace )

@@ -36,10 +36,11 @@ class FileValidator( Step ) :
     
         self.name = "Validering af importerede filer"
         self.config_main_section = "validate_image_files"
+        self.valid_file_exts_section = 'valid_file_exts'
         self.essential_config_sections = set( [] )
         self.folder_structure_section = 'process_folder_structure'
         self.essential_config_sections.update([self.folder_structure_section, 
-                                               self.folder_structure_section] )
+                                               self.valid_file_exts_section] )
         self.essential_commandlines = {
             "process_path":"folder"
         }
@@ -47,8 +48,12 @@ class FileValidator( Step ) :
     def step(self):
         error = None
         self.getVariables()
-        error_level, message = self.checkForErrors(self.image_path,
-                                                   self.valid_exts)
+        try:
+            error_level, message = self.checkForErrors(self.image_path,
+                                                       self.valid_exts)
+        except Exception as e:
+            error = str(e.with_traceback)
+            return error
         if error_level > self.break_level:
             error = message
             self.debug_message(error)
@@ -63,7 +68,8 @@ class FileValidator( Step ) :
         and confirm their existence.
         '''
         self.break_level = self.getBreakLevel()
-        self.valid_exts = self.getConfigItem('valid_file_exts').split(';')
+        self.valid_exts = self.getConfigItem('valid_file_exts',None,
+                                             self.valid_file_exts_section).split(';')
         # TODO: Generalize this to take input from its own config section        
         rel_invalid_path = self.getConfigItem('img_invalid_path',
                                                None,

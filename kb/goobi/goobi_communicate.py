@@ -84,15 +84,16 @@ class GoobiCommunicate() :
                       }
         return self._send( "reportProblem", additional )
     
-    def addProperty( self, process_id, name, value,overwrite=False ):
+    def addProperty( self, name, value,overwrite=False, process_id=None ):
         '''
         TODO: Document method
         '''
-        if process_id is None and self.process_id is not None:
-            process_id = self.process_id
-        else:
-            raise ValueError('Process id is missing')
-        
+        if process_id is None:
+            if self.process_id is None:
+                raise ValueError('Process id is missing')
+            else:
+                process_id = self.process_id
+                    
         additional = {
             "processId" : process_id,  
             "property" : name,

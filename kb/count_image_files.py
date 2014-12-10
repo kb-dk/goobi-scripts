@@ -17,10 +17,9 @@ class CountImageFiles( Step ):
     def setup(self):
         self.name = 'Find antal billeder og skriv resultat i Goobi'
         self.config_main_section = 'count_image_files'
-        self.valid_exts_section = 'move_invalid_files'
+        self.valid_exts_section = 'valid_file_exts'
         self.folder_structure_section = 'process_folder_structure'
-        self.essential_config_sections.update([self.folder_structure_section, 
-                                               self.count_image_files_section,
+        self.essential_config_sections.update([self.folder_structure_section,
                                                self.valid_exts_section] )
         self.essential_commandlines = {
             "process_path" : "folder",
@@ -35,15 +34,13 @@ class CountImageFiles( Step ):
             # count the number of valid images
             number_of_images = tools.getFileCountWithExtension(self.image_path, self.valid_exts)
             # write the number of images to the current process in Goobi
-            self.goobi_com.addProperty(self.process_id, self.property_name, number_of_images, True)
+            self.goobi_com.addProperty(self.property_name, number_of_images, True)
         except Exception as e:
             error = str(e.with_traceback)
         return error
 
 
     def getVariables(self):
-        # Get process id from command line 
-        self.process_id = self.command_line.process_id
         # Get process root folder from command line
         process_path_root_folder = self.command_line.process_path
         # Get relative path to images from config.ini

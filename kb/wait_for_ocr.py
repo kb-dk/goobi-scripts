@@ -10,7 +10,7 @@ class WaitForOcr( Step ):
 
     def setup(self):
         self.name = 'Vent på output-filer fra OCR'
-        self.config_main_section = 'copy_from_ocr'
+        self.config_main_section = 'wait_for_ocr'
         self.folder_structure_section = 'process_folder_structure'
         self.valid_exts_section = 'move_invalid_files'
         self.essential_config_sections.update([self.folder_structure_section, 
@@ -28,7 +28,6 @@ class WaitForOcr( Step ):
         or if our retry vals are not numbers
         '''
         process_title = self.command_line.process_title
-        self.has_alto = False
 
         # set ocr to current outputfolder - antikva or fraktur         
         try:
@@ -37,35 +36,27 @@ class WaitForOcr( Step ):
             self.error_message('{0} er ikke givet med som variabel til scriptet.'.format('ocr_workflow_type'))
         if ocr_workflow_type == 'antikva':
             # legr: currently antikva on ocr-01
-            ocr = self.getSetting('ocr_antikva_outputfolder')
+            ocr = self.getConfigItem('ocr_antikva_outputfolder')
         elif ocr_workflow_type == 'fraktur':
             # legr: currently fraktur on ocr-02
-            ocr = self.getSetting('ocr_fraktur_outputfolder')
-            self.has_alto = True
+            ocr = self.getConfigItem('ocr_fraktur_outputfolder')
         else:
             err = ('Variablen "{0}" fra kaldet af "{1}" skal enten være '
                    '"fraktur" eller "antikva", men er pt. "{2}".')
             err = err.format('ocr_workflow_type',self.name,ocr_workflow_type)
             self.error_message(err)
-
-        alto = self.getConfigItem('alto')
-        pdf = self.getConfigItem('pdf')
         
         # join paths to create absolute paths
-        self.ocr_dir = os.path.join(ocr, process_title)
-        self.alto_dir = os.path.join(self.ocr_dir, alto)
-        self.pdf_input_dir = os.path.join(self.ocr_dir, pdf)
+        self.pdf_input_dir = os.path.join(ocr, process_title)
         
         # Set destination for paths
-        self.goobi_altos = os.path.join(self.command_line.process_path, 
-            self.getConfigItem('metadata_alto_path', None, 'process_folder_structure'))
         self.goobi_pdf = os.path.join(self.command_line.process_path, 
-            self.getConfigItem('doc_pdf_bw_path', None, 'process_folder_structure'))
+            self.getConfigItem('doc_pdf_bw_path', None, self.folder_structure_section))
         self.valid_exts = self.getConfigItem('valid_file_exts',None, self.valid_exts_section).split(';')
         # Get path for input-files in process folder
         process_path = self.command_line.process_path
         input_files = self.getConfigItem('img_pre_processed_path',
-                                         section= self.folder_structure_section) 
+                                         section=self.folder_structure_section) 
         self.input_files = os.path.join(process_path,input_files)
         
         # Get retry number and retry-wait time
@@ -120,11 +111,7 @@ class WaitForOcr( Step ):
         '''
         try: 
             # raises error if one of our directories is missing
-            if self.has_alto:
-                tools.ensureDirsExist(self.ocr_dir, self.alto_dir, 
-                                  self.pdf_input_dir, self.input_files)
-            else:
-                tools.ensureDirsExist(self.ocr_dir, self.pdf_input_dir, self.input_files)
+            tools.ensureDirsExist(self.ocr_dir, self.pdf_input_dir, self.input_files)
         except IOError as e:
             msg = ('One of the output folder from OCR is not yet created.'
                    ' Waiting for OCR to be ready. Error: {0}')
@@ -134,10 +121,7 @@ class WaitForOcr( Step ):
         # legr: we can use limb_tools generally - they are not Limb specific
         # we should rename them someday
         pdf_ok = limb_tools.pageCountMatches(self.pdf_input_dir, self.input_files, self.valid_exts)
-        alto_ok = False
-        if self.has_alto:
-            alto_ok = limb_tools.altoFileCountMatches(self.alto_dir, self.input_files)
-        if pdf_ok and (not self.has_alto or (self.has_alto and alto_ok)):
+        if pdf_ok:
             return True
         return False
 
