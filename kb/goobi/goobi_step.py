@@ -249,7 +249,7 @@ class Step( object ):
                 self.error_message( 'Exception occured in ' + str(self.name)  )
             raise e
         if not error :
-            self.info_message(str(self.name) +' afsluttet korrekt.')
+            self.debug_message(str(self.name) +' afsluttet korrekt.')
             if self.auto_complete:
                 self.closeStep()
         else:

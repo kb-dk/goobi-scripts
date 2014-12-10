@@ -40,7 +40,8 @@ class MoveFromOcrToGoobi( Step ):
                         return error
 
             tools.ensureDirsExist(self.ocr_pdf)
-            self.moveFiles(self.ocr_pdf, self.goobi_pdf)
+            self.moveFiles(self.ocr_pdf, self.goobi_pdf_color)
+            print('moveFrom ', self.ocr_pdf ,' moveTo ', self.goobi_pdf_color)
 
             if self.has_alto:
                 tools.ensureDirsExist(self.ocr_altos)
@@ -72,7 +73,9 @@ class MoveFromOcrToGoobi( Step ):
         '''
 
         self.has_alto = False
-        # legr: Set "ocr_process_root" to correct server (antikva or fraktur), and flag for alto's if it's fraktur
+        # legr: Choose correct ocr server, and flag for alto's if it's fraktur
+        # Antikva server: /mnt/ocr-01/OutFolder/dod-output/(process_title)
+        # Fraktur server: /mnt/ocr-02/OutFolder/dod-output/(process_title)
         try:
             ocr_workflow_type = self.getSetting('ocr_workflow_type').lower()
         except KeyError:
@@ -92,12 +95,13 @@ class MoveFromOcrToGoobi( Step ):
 
         # legr: if we do have alto's, define their paths on ocr and goobi server
         if self.has_alto:
-            self.ocr_altos = os.path.join(self.ocr_process_root, self.getConfigItem('alto'))
+            self.ocr_altos = os.path.join(self.ocr_process_root, self.getConfigItem('alto', None, 'copy_from_ocr'))
             self.goobi_altos = os.path.join(self.command_line.process_path, 
                 self.getConfigItem('metadata_alto_path', None, 'process_folder_structure'))
 
         # legr: path to pdf's on correct ocr-server
-        self.ocr_pdf = os.path.join(self.ocr_process_root, self.getConfigItem('pdf'))
+        # /mnt/ocr-0x/OutFolder/dod-output/(process_title).pdf
+        self.ocr_pdf = os.path.join(self.ocr_process_root, self.getConfigItem('pdf'), None, 'copy_from_ocr')
 
         # legr: paths to optimized bw pdf's and normal color pdf's on goobi-server
         self.goobi_pdf_bw = os.path.join(self.command_line.process_path, 
