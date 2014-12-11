@@ -45,27 +45,16 @@ class ValidateOcrOutput( Step ):
             err = err.format('ocr_workflow_type',self.name,ocr_workflow_type)
             self.error_message(err)
 
-        alto = self.getConfigItem('alto')
-        pdf = self.getConfigItem('pdf')
-        
         # join paths to create absolute paths on ocr-server
-        self.ocr_dir = os.path.join(ocr, process_title)
-        self.alto_dir = os.path.join(self.ocr_dir, alto)
-        self.pdf_input_dir = os.path.join(self.ocr_dir, pdf)
+        self.bw_pdf_input_dir = os.path.join(ocr, process_title)
+        self.color_pdf_input_dir = os.path.join(self.command_line.process_path, 
+            self.getConfigItem(self.folder_structure_section, None, 'doc_pdf_color_path'))
         
-        # get paths for output folder on goobi-server
-        self.goobi_altos = os.path.join(self.command_line.process_path, 
-            self.getConfigItem('metadata_alto_path', None, 'process_folder_structure'))
-        self.goobi_pdf = os.path.join(self.command_line.process_path, 
-            self.getConfigItem('doc_pdf_color_path', None, 'process_folder_structure'))
         self.valid_exts = self.getConfigItem('valid_file_exts',None, self.valid_exts_section).split(';')
-        # Set flag for ignore if files already have been copied to goobi
-        self.ignore_goobi_folder = self.getSetting('ignore_goobi_folder', bool, default=False)
         
         # Get path for input-files in process folder
         process_path = self.command_line.process_path
-        input_files = self.getConfigItem('img_master_path',
-                                         section= self.folder_structure_section) 
+        input_files = self.getConfigItem('img_master_path',section= self.folder_structure_section) 
         self.input_files_dir = os.path.join(process_path,input_files)
         
         # throw Error if one of our directories is missing
@@ -83,17 +72,16 @@ class ValidateOcrOutput( Step ):
         error = None
         try:
             self.getVariables()
-            # Check files on goobi-server, if they already have been moved
-            if (not self.ignore_goobi_folder and 
-                limb_tools.alreadyMoved(self.goobi_toc,self.goobi_pdf,
-                                        self.input_files_dir,self.goobi_altos,
-                                          self.valid_exts)):
-                return error
-            tools.ensureDirsExist(self.ocr_dir, self.alto_dir,
-                                  self.pdf_input_dir,self.input_files_dir)
-            limb_tools.performValidations(self.pdf_input_dir,
-                                          self.input_files_dir,self.alto_dir,
-                                          self.valid_exts)
+            tools.ensureDirsExist(self.bw_pdf_input_dir,
+                                  self.color_pdf_input_dir,self.input_files_dir)
+            # Check if color pdf is ok
+            if not pageCountMatches(self.color_pdf_input_dir,self.input_files_dir,self.valid_exts):
+                raise DataError('PDF page count does not match input picture count in "{0}"!'.format(self.color_pdf_input_dir))
+            # Check if bw pdf is ok
+            if not pageCountMatches(self.bw_pdf_input_dir,self.input_files_dir,self.valid_exts):
+                raise DataError('PDF page count does not match input picture count in "{0}"!'.format(self.bw_pdf_input_dir))
+
+
             return None
         except IOError as e:
             return "IOError - {0}".format(e.strerror)

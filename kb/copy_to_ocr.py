@@ -14,12 +14,9 @@ class CopyToOcr( Step ):
     def setup(self):
         self.name = 'Kopiering af billeder til OCR'
         self.config_main_section = 'copy_to_ocr'
-
-        self.ocr_output_section = 'copy_from_ocr'
         self.valid_exts_section = 'valid_file_exts'
         self.folder_structure_section = 'process_folder_structure'
-        self.essential_config_sections.update([self.folder_structure_section, 
-                                               self.ocr_output_section,
+        self.essential_config_sections.update([self.folder_structure_section,
                                                self.valid_exts_section] )
         self.essential_commandlines = {
             "process_id" : "number",
