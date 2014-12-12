@@ -112,6 +112,14 @@ def _compareDirectories(dir1, dir2):
     return True
 
     
+
+def getFileSize(path,mb=True):
+    size = int(os.stat(path).st_size)
+    if mb:
+        return round(float(size)/float(1024*1024),2)
+    else:
+        return round(size,2)
+    
 def checkDirectoriesExist(*args):
     """
     Given a variable number of directories

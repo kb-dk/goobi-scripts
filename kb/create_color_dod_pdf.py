@@ -1,0 +1,89 @@
+#!/usr/bin/env python
+# -*- coding: utf-8
+'''
+Created on 26/03/2014
+
+@author: jeel
+'''
+
+from tools import tools
+import os
+import time
+from goobi.goobi_step import Step
+import tools.image_tools.convert_folder as convert
+from tools.image_tools import misc as image_tools
+from tools.filesystem import fs
+
+
+class CreateColorPdf( Step ) :
+
+    def setup(self):
+    
+        self.name = "Opret farve-pdf ud fra skannede billeder"
+        self.config_main_section = "create_color_pdf"
+        self.essential_config_sections = set( [] )
+        self.folder_structure_section = 'process_folder_structure'
+        self.valid_file_exts_section = 'valid_file_exts'
+        self.essential_config_sections.update([self.folder_structure_section,
+                                               self.valid_file_exts_section] )
+        self.essential_commandlines = {
+            "process_path":"folder",
+            "auto_complete":"string"
+        }
+    
+    def step(self):
+        error = None
+        self.getVariables()
+        try:
+            
+            t = time.time()
+            convert.createPdfFromFolder(input_folder    = self.input_folder, 
+                                        file_destination= self.color_pdf_path, 
+                                        temp_folder_root= self.temp_folder, 
+                                        quality         = self.quality, 
+                                        resize_pct      = self.resize, 
+                                        valid_exts      = self.valid_exts)
+            time_used = tools.get_delta_time(time.time()-t)
+            self.debug_message('Color PDF of images for process {0} '
+                               'created in {1}'.format(self.process_id,time_used))
+        except image_tools.ConvertError as e:
+            error = str(e)
+        except Exception as e:
+            self.glogger.exception(e)
+            error = str(e)
+        return error
+
+    def getVariables(self):
+        '''
+        Get all required vars from command line + config
+        and confirm their existence.
+        '''
+        root = self.command_line.process_path
+        self.process_title = self.command_line.process_title
+        # Set path to input folder
+        master_img_rel = self.getConfigItem('img_master_path',
+                                            section = self.folder_structure_section) 
+        self.input_folder = os.path.join(root, master_img_rel)
+        # Get/set path for the master bw pdf
+        doc_pdf_color_path = self.getConfigItem('doc_pdf_color_path',
+                                            section = self.folder_structure_section)
+        doc_pdf_color_path = os.path.join(root,doc_pdf_color_path)
+        #=======================================================================
+        # Set the name for the output color pdf file
+        # Assumed process title: [barcode]_[Antiqkva/Fraktur]
+        # Required name: [barcode]_color.pdf
+        #=======================================================================
+        if '_' in self.process_title:
+            color_pdf_name = self.process_title.split('')[0]
+        else:
+            color_pdf_name = self.process_title
+        self.color_pdf_path = os.path.join(doc_pdf_color_path,color_pdf_name)
+        # Get quality and resize options for image conversion
+        self.quality = self.getConfigItem('quality') 
+        self.resize = self.getConfigItem('resize')
+        self.valid_exts = self.getConfigItem('valid_file_exts',
+                                             section = self.valid_file_exts_section).split(';')
+        self.temp_folder = self.getConfigItem('temp_folder')
+
+if __name__ == '__main__' :
+    CreateColorPdf().begin()

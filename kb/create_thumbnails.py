@@ -8,8 +8,10 @@ Created on 26/03/2014
 
 from tools import tools
 import os
+import time
 from goobi.goobi_step import Step
-import tools.img_convert.convert_folder as convert
+import tools.image_tools.convert_folder as convert
+from tools.image_tools import misc as image_tools
 from tools.filesystem import fs
 
 
@@ -21,9 +23,9 @@ class CreateThumbnails( Step ) :
         self.config_main_section = "create_thumbnails"
         self.essential_config_sections = set( [] )
         self.folder_structure_section = 'process_folder_structure'
-        self.move_invalid_files= 'move_invalid_files'
+        self.valid_file_exts_section = 'valid_file_exts'
         self.essential_config_sections.update([self.folder_structure_section,
-                                               self.move_invalid_files] )
+                                               self.valid_file_exts_section] )
         self.essential_commandlines = {
             "process_path":"folder",
             "auto_complete":"string"
@@ -34,15 +36,17 @@ class CreateThumbnails( Step ) :
         self.getVariables()
         try:
             image_ext = fs.detectImagesExts(self.input_folder,self.valid_exts)
-            converttime= convert.convert_folder(input_folder    = self.input_folder,
-                                                output_folder   = self.output_folder,
-                                                quality         = self.quality,
-                                                resize_type     = self.resize_type,
-                                                resize          = self.resize,
-                                                input_ext       = image_ext)
+            t = time.time()
+            convert.convertFolder(input_folder    = self.input_folder,
+                                  output_folder   = self.output_folder,
+                                  quality         = self.quality,
+                                  resize_type     = self.resize_type,
+                                  resize          = self.resize,
+                                  input_ext       = image_ext)
+            time_used = tools.get_delta_time(time.time()-t)
             self.debug_message('Thumbsnails of images for process {0} '
-                               'converted in {1}'.format(self.process_id,converttime))
-        except convert.ConvertError as e:
+                               'converted in {1}'.format(self.process_id,time_used))
+        except image_tools.ConvertError as e:
             error = str(e)
         except Exception as e:
             self.glogger.exception(e)
@@ -71,7 +75,7 @@ class CreateThumbnails( Step ) :
         self.resize_type = self.getConfigItem('resize_type')
         self.resize = self.getConfigItem('resize')
         self.valid_exts = self.getConfigItem('valid_file_exts',
-                                             section = self.move_invalid_files).split(';')
+                                             section = self.valid_file_exts_section).split(';')
 
 if __name__ == '__main__' :
     CreateThumbnails().begin()

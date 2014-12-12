@@ -136,7 +136,7 @@ def folderExist(folder):
         raise e
 
 def check_folder(folder):
-    if not folder:
+    if folder is None:
         raise NameError('Argument "folder" not set.')
     elif not os.path.exists( folder ) :
         raise IOError('Folder "' + folder + '" does not exist.')
