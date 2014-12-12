@@ -13,21 +13,23 @@ from tools.image_tools import misc as image_tools
 from tools.filesystem import fs
 
 class ImagePreprocessor():
-    def __init__(self,src,settings,debug=False):
+    def __init__(self,src,settings,logger,debug=False):
         self.settings = settings
         self.debug = debug
+        self.logger = logger
         if self.debug: pprint.pprint(self.settings)
         self.source_folder = src.rstrip(os.sep) # remove tailing / or \
-        self.source_name = os.path.basename(self.source_folder)
-        self.output_image_location = self.settings['output_image_location']
+        process_title = self.settings['process_title']
         temp_root = self.settings['temp_location']
-        self.temp_folder = os.path.join(temp_root,self.source_name)
-        self.pdf_dest = os.path.join(self.output_image_location,self.source_name+'.pdf')
-        self.dest_folder = os.path.join(temp_root,self.source_name+'_output')
+
+        self.output_image_location = self.settings['output_image_location']
+        self.temp_folder = os.path.join(temp_root,process_title)
+        self.pdf_dest = os.path.join(self.output_image_location,process_title+'.pdf')
+        self.temp_pdf_folder = os.path.join(temp_root,process_title+'_output')
         # Create output and working folders
         self.createFolders(self.output_image_location,
                            self.temp_folder,
-                           self.dest_folder)
+                           self.temp_pdf_folder)
         if self.settings['output_images']: self.createFolders(self.output_image_location)
         
         #=======================================================================
@@ -40,10 +42,10 @@ class ImagePreprocessor():
         
         # Change working dir so innercrop and imagemagick will use ramdisk for temp files
         innercrop_location = self.settings['innercrop_location']
-        innercrop_exe_path = self.settings['innercrop_exe_path']
-        if not os.path.exists(innercrop_exe_path):
-            shutil.copy2(innercrop_location, innercrop_exe_path)
-        innercrop_exe_dir = os.path.dirname(innercrop_exe_path)
+        self.innercrop_exe_path = self.settings['innercrop_exe_path']
+        if not os.path.exists(self.innercrop_exe_path):
+            shutil.copy2(innercrop_location, self.innercrop_exe_path)
+        innercrop_exe_dir = os.path.dirname(self.innercrop_exe_path)
         os.chdir(innercrop_exe_dir)
         ## Varaibles for the individual images
         self.img_proc_info = {'avg_time_stat': {},'images':{}}
@@ -59,7 +61,7 @@ class ImagePreprocessor():
     
     def deleteWorkingFolders(self):
         fs.clear_folder(self.temp_folder, also_folder=True)
-        fs.clear_folder(self.dest_folder, also_folder=True)
+        fs.clear_folder(self.temp_pdf_folder, also_folder=True)
     
     def processFolder(self):
         if self.settings['skip_if_pdf_exists']:
@@ -104,7 +106,7 @@ class ImagePreprocessor():
         pprint.pprint(self.img_proc_info)
         if self.debug: print(str(datetime.datetime.now())+': '+'Merge pdf files to one pdf')
         if self.settings['output_pdf']:
-            pdf_tools.mergePdfFilesInFolder(self.dest_folder,self.pdf_dest)
+            pdf_tools.mergePdfFilesInFolder(self.temp_pdf_folder,self.pdf_dest)
     
     def processFiles(self):
         file_paths = sorted(self.img_proc_info['images'].keys())
@@ -116,7 +118,7 @@ class ImagePreprocessor():
         if self.settings['has_binding'] and not self.settings['remove_binding']:
             for b in self.bindings:
                 file_name,_ = os.path.splitext(os.path.basename(b.rstrip(os.sep)))
-                b_pdf_dest = os.path.join(self.dest_folder,file_name+'.pdf')
+                b_pdf_dest = os.path.join(self.temp_pdf_folder,file_name+'.pdf')
                 if self.settings['output_images']: shutil.copy2(b,self.output_image_location)
                 if self.settings['output_pdf']: image_tools.compressFile(b,b_pdf_dest,resize=50,quality=33)
     
@@ -149,7 +151,7 @@ class ImagePreprocessor():
         t = time.time()
         if self.settings['output_images']: shutil.copy2(file_path,self.output_image_location)
         if self.settings['output_pdf']:
-            output_pdf = os.path.join(self.dest_folder,file_name+'.pdf')
+            output_pdf = os.path.join(self.temp_pdf_folder,file_name+'.pdf')
             image_tools.compressFile(file_path,output_pdf)
         time_stat['Convert to pdf'] = time.time()-t
         return time_stat
@@ -159,7 +161,7 @@ class ImagePreprocessor():
         # Get paths to all images
         file_paths = [os.path.join(self.source_folder,f) 
                       for f in sorted(os.listdir(self.source_folder))
-                      if os.path.splitext(f)[-1] in valid_exts]
+                      if os.path.splitext(f)[-1].strip('.') in valid_exts]
         # break if no images in folder
         if len(file_paths) == 0: return
         # place binding in a separate list
@@ -222,7 +224,7 @@ class ImagePreprocessor():
             t = time.time()
             if self.settings['bw_for_innercrop']:
                 threshold = self.settings['innercrop_bw_src_threshold']
-                file_name,_ = os.path.splitext(os.path.basename(src))
+                file_name,_ = os.path.splitext(os.path.basename(image_path))
                 dest = os.path.join(self.temp_folder,file_name+'_bw_for_innercrop.tif')
                 src = image_tools.convertToBw(image_path,dest,threshold=threshold)
             else:
@@ -232,7 +234,7 @@ class ImagePreprocessor():
             fuzzval = self.settings['innercrop_fuzzval']
             mode = self.settings['innercrop_mode']
             _,coordinates = image_tools.inner_crop(src,self.temp_folder,w=w,h=h,
-                                                   self.innercrop_exe_path,
+                                                   innercrop_path=self.innercrop_exe_path,
                                                    mode=mode,fuzzval=fuzzval)
             self.img_proc_info['images'][image_path]['crop_coordinates'] = coordinates
             time_stat['Get cropImage coordinates'] = time.time()-t

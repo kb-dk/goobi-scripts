@@ -30,6 +30,7 @@ class PreprocessDodImageFiles( Step ) :
             "process_path":"folder",
             "auto_complete":"string",
             "step_id":"number",
+            'process_title':'string'
         }
     
     def step(self):
@@ -39,6 +40,7 @@ class PreprocessDodImageFiles( Step ) :
             t = time.time()
             ip = image_preprocessor.ImagePreprocessor(self.img_master_path,
                                                       self.settings,
+                                                      self.glogger,
                                                       self.debug)
             ip.processFolder()
             time_used = tools.get_delta_time(time.time()-t)
@@ -58,6 +60,8 @@ class PreprocessDodImageFiles( Step ) :
         and confirm their existence.
         '''
         process_root = self.command_line.process_path
+        process_title = self.command_line.process_title
+
         # Set path to input folder
         master_img_rel = self.getConfigItem('img_master_path',
                                             section = self.folder_structure_section) 
@@ -79,8 +83,7 @@ class PreprocessDodImageFiles( Step ) :
         v_exts = self.getConfigItem('valid_file_exts',
                                     section=self.valid_file_exts_section)
         self.settings['valid_exts'] = v_exts.split(';')
-        
-        
+        self.settings['process_title'] = process_title
         
         # temp_location: where to tempoarily store data -> absolute path
         self.settings['temp_location'] = self.getSetting('temp_location')
@@ -147,5 +150,11 @@ class PreprocessDodImageFiles( Step ) :
         # skip_if_pdf_exists: skip if pdf exists?
         self.settings['skip_if_pdf_exists'] = self.getSetting('skip_if_pdf_exists',
                                                               var_type=bool)
+        # innercrop_location: the relative path to where the innercrop script is placed
+        innercrop_loc = self.getSetting('innercrop_location')
+        self.settings['innercrop_location'] = os.path.join(process_root,innercrop_loc)
+        # innercrop_exe_path: the absolute path to where the innercrop script should be executed from
+        self.settings['innercrop_exe_path'] = self.getSetting('innercrop_exe_path')
+        
 if __name__ == '__main__' :
     PreprocessDodImageFiles().begin()
