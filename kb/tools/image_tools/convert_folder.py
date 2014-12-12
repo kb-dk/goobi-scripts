@@ -52,11 +52,11 @@ def convertFolder(input_folder, output_folder,quality=50,resize_type='width',
     set to keep aspect ratio
     '''
     images = sorted([f for f in os.listdir(input_folder) if f.endswith(input_ext)])
-    for image in images:
+    for index, image in enumerate(images):
         input_path = os.path.join(input_folder,image)
-        #output_file_name = input_folder_name+'-'+str(index).zfill(8)+'.'+output_ext
-        file_name,_ = os.path.splitext(image)
-        output_file_name = file_name+'.'+output_ext
+        #file_name,_ = os.path.splitext(image)
+        #output_file_name = file_name+'.'+output_ext
+        output_file_name = str(index).zfill(8)+'.'+output_ext
         output_path = os.path.join(output_folder,output_file_name)
         image_tools.compressFile(input_path,output_path,quality,resize,resize_type)
 

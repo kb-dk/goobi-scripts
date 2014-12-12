@@ -19,19 +19,32 @@ class ImagePreprocessor():
         if self.debug: pprint.pprint(self.settings)
         self.source_folder = src.rstrip(os.sep) # remove tailing / or \
         self.source_name = os.path.basename(self.source_folder)
-        self.source_root = os.path.dirname(self.source_folder)
-        self.output_root_location = self.settings['output_image_location']
-        self.temp_folder = os.path.join(self.settings['temp_location'],self.source_name)
+        self.output_image_location = self.settings['output_image_location']
+        temp_root = self.settings['temp_location']
+        self.temp_folder = os.path.join(temp_root,self.source_name)
         self.pdf_dest = os.path.join(self.output_image_location,self.source_name+'.pdf')
-        self.dest_folder = os.path.join(self.source_root,self.source_name+'_output')
+        self.dest_folder = os.path.join(temp_root,self.source_name+'_output')
         # Create output and working folders
         self.createFolders(self.output_image_location,
                            self.temp_folder,
                            self.dest_folder)
         if self.settings['output_images']: self.createFolders(self.output_image_location)
         
+        #=======================================================================
+        # When innercrop runs it creates some large cache files in the directory
+        # from where it is run. 
+        # Below the innercrop-file is copied to a location from where it is run
+        # later on. To be sure that the script are run correctly the current
+        # working dir is changed to where the innercrop-file is placed.
+        #=======================================================================
+        
         # Change working dir so innercrop and imagemagick will use ramdisk for temp files
-        os.chdir('/tmp/ramdisk/')
+        innercrop_location = self.settings['innercrop_location']
+        innercrop_exe_path = self.settings['innercrop_exe_path']
+        if not os.path.exists(innercrop_exe_path):
+            shutil.copy2(innercrop_location, innercrop_exe_path)
+        innercrop_exe_dir = os.path.dirname(innercrop_exe_path)
+        os.chdir(innercrop_exe_dir)
         ## Varaibles for the individual images
         self.img_proc_info = {'avg_time_stat': {},'images':{}}
         self.bindings = []
@@ -218,7 +231,9 @@ class ImagePreprocessor():
             t = time.time()
             fuzzval = self.settings['innercrop_fuzzval']
             mode = self.settings['innercrop_mode']
-            _,coordinates = image_tools.inner_crop(src,self.temp_folder,w=w,h=h,mode=mode,fuzzval=fuzzval)
+            _,coordinates = image_tools.inner_crop(src,self.temp_folder,w=w,h=h,
+                                                   self.innercrop_exe_path,
+                                                   mode=mode,fuzzval=fuzzval)
             self.img_proc_info['images'][image_path]['crop_coordinates'] = coordinates
             time_stat['Get cropImage coordinates'] = time.time()-t
             fs.clear_folder(self.temp_folder)

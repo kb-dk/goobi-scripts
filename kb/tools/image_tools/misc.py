@@ -23,14 +23,14 @@ class InnerCropError(Exception):
         return repr(self.value)
 
 
-def inner_crop(src,dest_folder,w,h,mode='cropImage',fuzzval=75):
+def inner_crop(src,dest_folder,w,h,innercrop_path,mode='cropImage',fuzzval=75):
     file_name,ext = os.path.splitext(os.path.basename(src))
     if mode == 'box':
         dest = os.path.join(dest_folder,file_name+'_innercrop.jpg')
     else:
         dest = os.path.join(dest_folder,file_name+'_innercrop'+ext)
-    cmd = '/tmp/ramdisk/innercrop -f {0} -m {1} {2} {3}'
-    cmd = cmd.format(fuzzval,mode,src,dest)
+    cmd = '{0} -f {1} -m {2} {3} {4}'
+    cmd = cmd.format(innercrop_path,fuzzval,mode,src,dest)
     output = processing.run_cmd(cmd,shell=True)
     if output['erred'] or 'error' in str(output['stderr']).lower():
         raise InnerCropError(output['stderr'].decode("utf-8"))

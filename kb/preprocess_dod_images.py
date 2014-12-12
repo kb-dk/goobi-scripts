@@ -72,6 +72,7 @@ class PreprocessDodImageFiles( Step ) :
         #=======================================================================
         # Get and set settings for ImagePreprocessor
         #=======================================================================
+        self.settings = dict()
         # output_image_location
         self.settings['output_image_location'] = self.img_pre_processed_path
         # valid_exts: which file types to process
