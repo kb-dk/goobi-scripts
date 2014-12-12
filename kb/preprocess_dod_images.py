@@ -135,7 +135,7 @@ class PreprocessDodImageFiles( Step ) :
         # deskew_select_limit_type: which method to use to calculate the limit
         # for selecting deskew angles. Valid: ['mean','avg']
         self.settings['deskew_select_limit_type'] = self.getSetting('deskew_select_limit_type')
-        # deskew_select_abs_limit: If an absolute deskewImage angle is below 
+        # deskew_select_abs_limit: If an absolute deskew angle is below 
         # this, don't deskew image
         self.settings['deskew_select_abs_limit'] = self.getSetting('deskew_select_abs_limit',
                                                                    var_type=float)

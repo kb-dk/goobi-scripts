@@ -22,8 +22,16 @@ class InnerCropError(Exception):
     def __str__(self):
         return repr(self.value)
 
-
-def inner_crop(src,dest_folder,w,h,innercrop_path,mode='cropImage',fuzzval=75):
+def innercrop(src,dest_folder,w,h,innercrop_path,mode='box',fuzzval=75):
+    '''
+    Returns the crop coordinates for src as a dictionary together with 
+    a path to a cropped version of src.
+    
+    Uses "innercrop" from Fred's ImageMagick Scripts to get coordinates for
+    cropping the image. "innercrop" also outputs a cropped image file.
+    
+    http://www.fmwconcepts.com/imagemagick/innercrop/index.php
+    '''
     file_name,ext = os.path.splitext(os.path.basename(src))
     if mode == 'box':
         dest = os.path.join(dest_folder,file_name+'_innercrop.jpg')
@@ -39,9 +47,8 @@ def inner_crop(src,dest_folder,w,h,innercrop_path,mode='cropImage',fuzzval=75):
 
 def getInnercropCoordinates(output,w,h):
     '''
-    Use "innercrop" from Fred's ImageMagick Scripts:
-    http://www.fmwconcepts.com/imagemagick/innercrop/index.php
-    
+    Returns a dictionary with cropping information from the output from 
+    "innercrop"
     
     '''
     nw_word = 'Upper Left Corner: '
@@ -70,12 +77,25 @@ def getInnercropCoordinates(output,w,h):
     return retval
 
 def convertToBw(src,dest,threshold=10):
+    '''
+    Converts src to a bitonal tif-file compressed with Group4
+    
+    '''
     cmd = 'convert {0} -threshold {1}% -compress Group4 {2}'
     cmd = cmd.format(src,threshold,dest)
     processing.run_cmd(cmd,shell=True)
     return dest
         
 def cropImage(src,dest_folder,info,dest=None,to_tif=False):
+    '''
+    Crops src and outputs it to dest_folder.
+    
+    :param src:
+    :param dest_folder:
+    :param info: contains the coordinates for cropping 
+    :param dest:
+    :param to_tif:
+    '''
     coordinates = info['crop_coordinates']
     w = info['image_width']
     h = info['image_height']
@@ -89,12 +109,21 @@ def cropImage(src,dest_folder,info,dest=None,to_tif=False):
     width = se_x-nw_x
     height = se_y-nw_y
     to_tif = '-threshold 60% -compress Group4' if to_tif else ''
-    settings = '-cropImage {0}x{1}+{2}+{3}'.format(width,height,nw_x,nw_y)
+    settings = '-crop {0}x{1}+{2}+{3}'.format(width,height,nw_x,nw_y)
     cmd = 'convert {0} {1} {2} {3}'.format(src,settings,to_tif,dest)
     processing.run_cmd(cmd,shell=True)
     return dest
 
 def deskewImage(src,dest_folder,angle,quality=None,resize=None):
+    '''
+    Deskews an image with a given angle.
+    
+    :param src: path to image to deskew
+    :param dest_folder: where to output deskewed image
+    :param angle: what to deskew image with
+    :param quality: what to compress output image with
+    :param resize: what to resize output image with (pct)
+    '''
     file_name,ext = os.path.splitext(os.path.basename(src))
     dest = os.path.join(dest_folder,file_name+'deskewed'+ext)
     if quality is not None:
@@ -126,7 +155,7 @@ def compressFile(input_file,output_file,quality=50,resize=None,resize_type='pct'
         raise ConvertError(err)
 
 def getDeskewAngle(src,deskew_pct=75):
-    cmd = "convert {0} -deskewImage {1} -format '%[deskewImage:angle]' info:".format(src,deskew_pct)
+    cmd = "convert {0} -deskew {1} -format '%[deskew:angle]' info:".format(src,deskew_pct)
     output = processing.run_cmd(cmd,shell=True)
 
 def getImageDimensions(image_path,hocr=None):

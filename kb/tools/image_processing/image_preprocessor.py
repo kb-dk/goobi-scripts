@@ -5,7 +5,11 @@ Created on 11/12/2014
 
 @author: jeel
 '''
-import os, datetime, sys,shutil
+import os
+import datetime
+import sys
+import shutil
+import stat
 import time
 import pprint
 from tools.pdf import misc as pdf_tools
@@ -17,7 +21,7 @@ class ImagePreprocessor():
         self.settings = settings
         self.debug = debug
         self.logger = logger
-        if self.debug: pprint.pprint(self.settings)
+        if self.debug: self.logger.debug(pprint.pformat(self.settings))
         self.source_folder = src.rstrip(os.sep) # remove tailing / or \
         process_title = self.settings['process_title']
         temp_root = self.settings['temp_location']
@@ -28,8 +32,8 @@ class ImagePreprocessor():
         self.temp_pdf_folder = os.path.join(temp_root,process_title+'_output')
         # Create output and working folders
         self.createFolders(self.output_image_location,
-                           self.temp_folder,
-                           self.temp_pdf_folder)
+                           self.temp_folder)
+        if self.settings['output_pdf']:self.createFolders(self.temp_pdf_folder)
         if self.settings['output_images']: self.createFolders(self.output_image_location)
         
         #=======================================================================
@@ -45,6 +49,9 @@ class ImagePreprocessor():
         self.innercrop_exe_path = self.settings['innercrop_exe_path']
         if not os.path.exists(self.innercrop_exe_path):
             shutil.copy2(innercrop_location, self.innercrop_exe_path)
+            # Set script to executable
+            st = os.stat(self.innercrop_exe_path)
+            os.chmod(self.innercrop_exe_path, st.st_mode | stat.S_IEXEC)
         innercrop_exe_dir = os.path.dirname(self.innercrop_exe_path)
         os.chdir(innercrop_exe_dir)
         ## Varaibles for the individual images
@@ -61,7 +68,8 @@ class ImagePreprocessor():
     
     def deleteWorkingFolders(self):
         fs.clear_folder(self.temp_folder, also_folder=True)
-        fs.clear_folder(self.temp_pdf_folder, also_folder=True)
+        if self.settings['output_pdf']:
+            fs.clear_folder(self.temp_pdf_folder, also_folder=True)
     
     def processFolder(self):
         if self.settings['skip_if_pdf_exists']:
@@ -71,7 +79,7 @@ class ImagePreprocessor():
         try:
             self._process()
         except image_tools.InnerCropError as e:
-            print('Innercrop erred for folder: {0}'.format(self.source_folder))
+            self.logger.error('Innercrop erred for folder: {0}'.format(self.source_folder))
             self.deleteWorkingFolders()
             raise(e)
         except KeyboardInterrupt as e:
@@ -88,23 +96,23 @@ class ImagePreprocessor():
         self.getImageInformation()
         # Overvej:
             # måske der skal hentes statistik for bøgernes størrelse, således
-            # at opslag ikke cropImage'es og deskewImage'es
+            # at opslag ikke crop'es og deskew'es
             # f.eks. tilføjelse 'spread': False -> 
         if self.settings['spread_detection']: self.locate_spreads()
         # Get all cropping coordinates and evaluate these
         self.getCropCoordinates()
-        # Select cropImage coordinates
+        # Select crop coordinates
         self.set_crop()
-        # Crop images e.g. with output to bw-image file on ramdisk -> smaller and bw may be better for deskewImage test?
+        # Crop images e.g. with output to bw-image file on ramdisk -> smaller and bw may be better for deskew test?
         self.create_temp_crops()
-        # Get all deskewImage
+        # Get all deskew
         self.get_deskew_angles()
-        # Select which images to deskewImage 
+        # Select which images to deskew 
         self.set_deskew()
         # Process files
         self.processFiles()
-        pprint.pprint(self.img_proc_info)
-        if self.debug: print(str(datetime.datetime.now())+': '+'Merge pdf files to one pdf')
+        if self.debug: self.logger.debug(pprint.pformat(self.img_proc_info))
+        if self.debug: self.logger.debug(str(datetime.datetime.now())+': '+'Merge pdf files to one pdf')
         if self.settings['output_pdf']:
             pdf_tools.mergePdfFilesInFolder(self.temp_pdf_folder,self.pdf_dest)
     
@@ -125,21 +133,21 @@ class ImagePreprocessor():
     def processFile(self,file_path,info):
         time_stat = {}
         file_name,_ = os.path.splitext(os.path.basename(file_path.rstrip(os.sep)))
-        if self.debug: print('File: {0}'.format(file_name))
-        # 1: cropImage image with coordinates
-        if self.debug: print('\tCrop image')
+        if self.debug: self.logger.debug('File: {0}'.format(file_name))
+        # 1: crop image with coordinates
+        if self.debug: self.logger.debug('\tCrop image')
         t = time.time()
         file_path = image_tools.cropImage(file_path,self.temp_folder,info)
         time_stat['Crop image'] = time.time()-t
-        # 2: deskewImage
-        if info['deskewImage']:
-            if self.debug: print('\tDeskew image')
+        # 2: deskew
+        if info['deskew']:
+            if self.debug: self.logger.debug('\tDeskew image')
             t = time.time()
             # Jeg har sat quality til 50% så de ikke fylder så meget når jeg skal gemme de resulterende jpgs til OCR
             file_path = image_tools.deskewImage(file_path,self.temp_folder,info['deskew_angle'],quality=50,resize=200)
             time_stat['Deskew image'] = time.time()-t
         else:
-            if self.debug: print('\tNo deskewing')
+            if self.debug: self.logger.debug('\tNo deskewing')
             t = time.time()
             file_name,_ = os.path.splitext(os.path.basename(file_path))
             dest = os.path.join(self.temp_folder,file_name+'compressed.jpg')
@@ -147,7 +155,7 @@ class ImagePreprocessor():
             file_path = dest
             time_stat['Compress/resize image'] = time.time()-t
         # 3: to pdf 
-        if self.debug: print('\tConvert image to pdf files')
+        if self.debug: self.logger.debug('\tConvert image to pdf files')
         t = time.time()
         if self.settings['output_images']: shutil.copy2(file_path,self.output_image_location)
         if self.settings['output_pdf']:
@@ -176,18 +184,18 @@ class ImagePreprocessor():
                                                'image_height':img_h,
                                                'file_size': img_size,
                                                'deskew_angle':0,
-                                               'r_crop':True, # right margin cropImage?
-                                               't_crop':True, # top margin cropImage?
-                                               'l_crop':True, # left margin cropImage?
-                                               'b_crop':True, # bottom margin cropImage?
-                                               'deskewImage':True, # deskewImage image?
+                                               'r_crop':True, # right margin crop?
+                                               't_crop':True, # top margin crop?
+                                               'l_crop':True, # left margin crop?
+                                               'b_crop':True, # bottom margin crop?
+                                               'deskew':True, # deskew image?
                                                'spread':False, # is image a spread (opslag)?
                                                }
     def locate_spreads(self):
         '''
         Detect whether an image is a spread (da: opslag) 
         '''
-        if self.debug: print('Locating spreads')
+        if self.debug: self.logger.debug('Locating spreads')
         heights = [x['image_height'] 
                    for x in self.img_proc_info['images'].values()
                    if isinstance(x['image_height'],int)]
@@ -208,15 +216,15 @@ class ImagePreprocessor():
             if height > height_mean_limit or width > width_mean_limit:
                 self.img_proc_info['images'][image_path]['spread'] = True
                 if self.debug:
-                    print('\t{0} detected as a spread.'.format(image_path))
+                    self.logger.debug('\t{0} detected as a spread.'.format(image_path))
                     msg = ('\tImage width: {0}, width limit: {1}, '
                            'image height: {2}, height limit: {3}.')
-                    print(msg.format(width,width_mean_limit,height,height_mean_limit))
+                    self.logger.debug(msg.format(width,width_mean_limit,height,height_mean_limit))
     
     def getCropCoordinates(self):
         image_paths = sorted(self.img_proc_info['images'].keys())
         debug_pivot = self.settings['debug_pivot']
-        if self.debug: print('Get cropImage coordinates')
+        if self.debug: self.logger.debug('Get crop coordinates')
         for image_path in image_paths:
             w = self.img_proc_info['images'][image_path]['image_width']
             h = self.img_proc_info['images'][image_path]['image_height']
@@ -229,30 +237,30 @@ class ImagePreprocessor():
                 src = image_tools.convertToBw(image_path,dest,threshold=threshold)
             else:
                 src = image_path
-            time_stat['BW to get cropImage coordinates'] = time.time()-t
+            time_stat['BW to get crop coordinates'] = time.time()-t
             t = time.time()
             fuzzval = self.settings['innercrop_fuzzval']
             mode = self.settings['innercrop_mode']
-            _,coordinates = image_tools.inner_crop(src,self.temp_folder,w=w,h=h,
+            _,coordinates = image_tools.innercrop(src,self.temp_folder,w=w,h=h,
                                                    innercrop_path=self.innercrop_exe_path,
                                                    mode=mode,fuzzval=fuzzval)
             self.img_proc_info['images'][image_path]['crop_coordinates'] = coordinates
-            time_stat['Get cropImage coordinates'] = time.time()-t
+            time_stat['Get crop coordinates'] = time.time()-t
             fs.clear_folder(self.temp_folder)
             self.add_to_avg_time_stat(time_stat)
             if self.debug:
-                count = self.img_proc_info['avg_time_stat']['Get cropImage coordinates'][1]
-                avg = self.img_proc_info['avg_time_stat']['Get cropImage coordinates'][2]
+                count = self.img_proc_info['avg_time_stat']['Get crop coordinates'][1]
+                avg = self.img_proc_info['avg_time_stat']['Get crop coordinates'][2]
                 if (count%debug_pivot) == 0: # log for every 10 processed iamges
                     left = len(image_paths)-count
                     time_used = get_delta_time(count*avg)
                     time_left = get_delta_time(left*avg)
                     msg = ('\t{0} images cropped, {1} images left, '
                            '{2} time elapsed, {3} est. time left.')
-                    print(msg.format(count,left,time_used,time_left))
+                    self.logger.debug(msg.format(count,left,time_used,time_left))
 
     def set_crop(self):
-        if self.debug: print('Setting cropImage for images')
+        if self.debug: self.logger.debug('Setting crop for images')
         c_list = [x['crop_coordinates'] 
                   for x in self.img_proc_info['images'].values()
                   if 'l_crop' in x['crop_coordinates']]
@@ -260,7 +268,7 @@ class ImagePreprocessor():
         #type = self.settings['crop_select_limit_type']
         # get sorted lists of all the margin crops to get median
         # only take into consideration crops with more than 5 px
-        # (for some reason no cropImage can be set to 1px - less than 0 is err anyway)
+        # (for some reason no crop can be set to 1px - less than 0 is err anyway)
         l_crops = sorted([x['l_crop'] for x in c_list if x['l_crop'] >5])
         if len(l_crops) > 0:
             l_crop_avg = round(sum(l_crops)/len(l_crops),3)
@@ -272,8 +280,8 @@ class ImagePreprocessor():
         else:
             l_crop_limit = 0
         if self.debug:
-            msg = '\tLeft cropImage limit: {0}. Mean: {1}({2}). Avg: {3}({4})'
-            print(msg.format(l_crop_limit,l_crop_mean,l_crop_mean_adj,l_crop_avg,l_crop_avg_adj))
+            msg = '\tLeft crop limit: {0}. Mean: {1}({2}). Avg: {3}({4})'
+            self.logger.debug(msg.format(l_crop_limit,l_crop_mean,l_crop_mean_adj,l_crop_avg,l_crop_avg_adj))
 
         t_crops = sorted([x['t_crop'] for x in c_list if x['t_crop'] >5])
         if len(t_crops) > 0:
@@ -286,8 +294,8 @@ class ImagePreprocessor():
         else:
             t_crop_limit = 0
         if self.debug:
-            msg = '\tTop cropImage limit: {0}. Mean: {1}({2}). Avg: {3}({4})'
-            print(msg.format(t_crop_limit,t_crop_mean,t_crop_mean_adj,t_crop_avg,t_crop_avg_adj))
+            msg = '\tTop crop limit: {0}. Mean: {1}({2}). Avg: {3}({4})'
+            self.logger.debug(msg.format(t_crop_limit,t_crop_mean,t_crop_mean_adj,t_crop_avg,t_crop_avg_adj))
 
         r_crops = sorted([x['r_crop'] for x in c_list if x['r_crop'] >5])
         if len(r_crops) > 0:
@@ -300,8 +308,8 @@ class ImagePreprocessor():
         else:
             r_crop_limit = 0
         if self.debug:
-            msg = '\tRight cropImage limit: {0}. Mean: {1}({2}). Avg: {3}({4})'
-            print(msg.format(r_crop_limit,r_crop_mean,r_crop_mean_adj,r_crop_avg,r_crop_avg_adj))
+            msg = '\tRight crop limit: {0}. Mean: {1}({2}). Avg: {3}({4})'
+            self.logger.debug(msg.format(r_crop_limit,r_crop_mean,r_crop_mean_adj,r_crop_avg,r_crop_avg_adj))
 
         b_crops = sorted([x['b_crop'] for x in c_list if x['b_crop'] >5])
         if len(b_crops) > 0:
@@ -314,12 +322,12 @@ class ImagePreprocessor():
         else:
             b_crop_limit = 0
         if self.debug:
-            msg = '\tBottom cropImage limit: {0}. Mean: {1}({2}). Avg: {3}({4})'
-            print(msg.format(b_crop_limit,b_crop_mean,b_crop_mean_adj,b_crop_avg,b_crop_avg_adj))
+            msg = '\tBottom crop limit: {0}. Mean: {1}({2}). Avg: {3}({4})'
+            self.logger.debug(msg.format(b_crop_limit,b_crop_mean,b_crop_mean_adj,b_crop_avg,b_crop_avg_adj))
 
         image_paths = sorted(self.img_proc_info['images'].keys())
         for image_path in image_paths:
-            if self.debug: print('\tSelect crops for: {0}'.format(os.path.basename(image_path)))
+            if self.debug: self.logger.debug('\tSelect crops for: {0}'.format(os.path.basename(image_path)))
             if (self.settings['spread_detection'] and
                 self.img_proc_info['images'][image_path]['spread']):
                 # Spread (da: opslag) -> no cropping
@@ -327,61 +335,61 @@ class ImagePreprocessor():
                 self.img_proc_info['images'][image_path]['t_crop'] = False
                 self.img_proc_info['images'][image_path]['r_crop'] = False
                 self.img_proc_info['images'][image_path]['b_crop'] = False
-                if self.debug: print('\t\tImage is a spread, no cropImage')
+                if self.debug: self.logger.debug('\t\tImage is a spread, no crop')
                 continue
             width = self.img_proc_info['images'][image_path]['image_width']
             height = self.img_proc_info['images'][image_path]['image_height']
             crop_info = self.img_proc_info['images'][image_path]['crop_coordinates']
-            if self.debug: print('\t\t{0}'.format(crop_info))
-            if self.debug: print('\t\tWidth: {0}, height: {1}'.format(width,height))
+            if self.debug: self.logger.debug('\t\t{0}'.format(crop_info))
+            if self.debug: self.logger.debug('\t\tWidth: {0}, height: {1}'.format(width,height))
             l_crop = self.img_proc_info['images'][image_path]['crop_coordinates']['l_crop']
             t_crop = self.img_proc_info['images'][image_path]['crop_coordinates']['t_crop']
             r_crop = self.img_proc_info['images'][image_path]['crop_coordinates']['r_crop']
             b_crop = self.img_proc_info['images'][image_path]['crop_coordinates']['b_crop']
-            # Heuristic: for each margin, if absolute cropImage if higher than 2 
-            # times the limit, then set it to the avgerage cropImage for that margin.
+            # Heuristic: for each margin, if absolute crop if higher than 2 
+            # times the limit, then set it to the avgerage crop for that margin.
             new_crop_limit_adjust = 1 
             if (l_crop > l_crop_limit or l_crop < 5):
                 if abs(l_crop) > (l_crop_limit*new_crop_limit_adjust):
                     # Recalculate nw_x: equal l_crop_avg
                     self.img_proc_info['images'][image_path]['crop_coordinates']['l_crop'] = l_crop_avg
                     self.img_proc_info['images'][image_path]['crop_coordinates']['nw_x'] = l_crop_avg
-                    if self.debug: print('\t\tAvg left cropImage chosen instead: {0}->{1}'.format(l_crop,int(l_crop_avg)))
+                    if self.debug: self.logger.debug('\t\tAvg left crop chosen instead: {0}->{1}'.format(l_crop,int(l_crop_avg)))
                 else:
                     self.img_proc_info['images'][image_path]['l_crop'] = False
-                    if self.debug: print('\t\tNo left cropImage')
+                    if self.debug: self.logger.debug('\t\tNo left crop')
             if (t_crop > t_crop_limit or t_crop < 5):
                 if abs(t_crop) > (t_crop_limit*new_crop_limit_adjust):
                     # Recalculate nw_y: equal t_crop_avg
                     self.img_proc_info['images'][image_path]['crop_coordinates']['nw_y'] = t_crop_avg
                     self.img_proc_info['images'][image_path]['crop_coordinates']['t_crop'] = t_crop_avg
-                    if self.debug: print('\t\tAvg top cropImage chosen instead: {0}->{1}'.format(t_crop,int(t_crop_avg)))
+                    if self.debug: self.logger.debug('\t\tAvg top crop chosen instead: {0}->{1}'.format(t_crop,int(t_crop_avg)))
                 else:
                     self.img_proc_info['images'][image_path]['t_crop'] = False
-                    if self.debug: print('\t\tNo top cropImage')
+                    if self.debug: self.logger.debug('\t\tNo top crop')
             if (r_crop > r_crop_limit or r_crop < 5):
                 if abs(r_crop) > (r_crop_limit*new_crop_limit_adjust):
                     # Recalculate se_x: equal width - r_crop_avg
                     self.img_proc_info['images'][image_path]['crop_coordinates']['se_x'] = width-r_crop_avg
                     self.img_proc_info['images'][image_path]['crop_coordinates']['r_crop'] = r_crop_avg
-                    if self.debug: print('\t\tAvg right cropImage chosen instead: {0}->{1}'.format(r_crop,int(r_crop_avg)))
+                    if self.debug: self.logger.debug('\t\tAvg right crop chosen instead: {0}->{1}'.format(r_crop,int(r_crop_avg)))
                 else:
                     self.img_proc_info['images'][image_path]['r_crop'] = False
-                    if self.debug: print('\t\tNo right cropImage')
+                    if self.debug: self.logger.debug('\t\tNo right crop')
             if (b_crop > b_crop_limit or b_crop < 5):
                 if abs(b_crop) > (b_crop_limit*new_crop_limit_adjust):
                     # Recalculate se_y: equal height - b_crop_avg
                     self.img_proc_info['images'][image_path]['crop_coordinates']['se_y'] = height - b_crop_avg
                     self.img_proc_info['images'][image_path]['crop_coordinates']['b_crop'] = b_crop_avg
-                    if self.debug: print('\t\tAvg bottom cropImage chosen instead: {0}->{1}'.format(b_crop,int(b_crop_avg)))
+                    if self.debug: self.logger.debug('\t\tAvg bottom crop chosen instead: {0}->{1}'.format(b_crop,int(b_crop_avg)))
                 else:
                     self.img_proc_info['images'][image_path]['b_crop'] = False
-                    if self.debug: print('\t\tNo bottom cropImage')
+                    if self.debug: self.logger.debug('\t\tNo bottom crop')
     
     def get_deskew_angles(self):
         debug_pivot = self.settings['debug_pivot']
         image_paths = self.img_proc_info['images'].keys()
-        if self.debug: print('Get deskewImage angles for {0} images'.format(len(image_paths)))
+        if self.debug: self.logger.debug('Get deskew angles for {0} images'.format(len(image_paths)))
         for image_path in image_paths:
             time_stat = {}
             # Use alternative image - cropped tif-files
@@ -389,26 +397,26 @@ class ImagePreprocessor():
             t = time.time()
             angle = image_tools.getDeskewAngle(src)
             self.img_proc_info['images'][image_path]['deskew_angle'] = angle
-            time_stat['Get deskewImage angle'] = time.time()-t
+            time_stat['Get deskew angle'] = time.time()-t
             self.add_to_avg_time_stat(time_stat)
             if self.debug:
-                count = self.img_proc_info['avg_time_stat']['Get deskewImage angle'][1]
-                avg = self.img_proc_info['avg_time_stat']['Get deskewImage angle'][2]
+                count = self.img_proc_info['avg_time_stat']['Get deskew angle'][1]
+                avg = self.img_proc_info['avg_time_stat']['Get deskew angle'][2]
                 if (count%debug_pivot) == 0: # log for every 10 processed iamges
                     left = len(image_paths)-count
                     time_used = get_delta_time(count*avg)
                     time_left = get_delta_time(left*avg)
                     msg = ('\t{0} images deskewed, {1} images left, '
                            '{2} time elapsed, {3} est. time left.')
-                    print(msg.format(count,left,time_used,time_left))
+                    self.logger.debug(msg.format(count,left,time_used,time_left))
 
     def set_deskew(self):
-        if self.debug: print('Set deskewImage for images')
+        if self.debug: self.logger.debug('Set deskew for images')
         limit_adjust = self.settings['deskew_select_limit_adjust']#1.75 # 75%
         image_paths = sorted(self.img_proc_info['images'].keys())
         
         #angles = sorted(list(map(lambda x: x['deskew_angle'],img_info['images'].values())))
-        # only find mean from the images that are actually set to deskewImage
+        # only find mean from the images that are actually set to deskew
         
         # Set the angles to absolute, so the mean wont be zero
         
@@ -422,45 +430,45 @@ class ImagePreprocessor():
         mean = angles[middle]
         mean_limit = mean * limit_adjust
         if self.debug: 
-            print('\tMean deskewImage: {0} - adjust with {1}% = {2}'.format(round(mean,3),limit_adjust*100,round(mean_limit,3)))
-            print('\tAvg deskewImage: {0} - adjust with {1}% = {2}'.format(round(avg,3),limit_adjust*100,round(avg_limit,3)))
+            self.logger.debug('\tMean deskew: {0} - adjust with {1}% = {2}'.format(round(mean,3),limit_adjust*100,round(mean_limit,3)))
+            self.logger.debug('\tAvg deskew: {0} - adjust with {1}% = {2}'.format(round(avg,3),limit_adjust*100,round(avg_limit,3)))
         for image_path in image_paths:
-            if self.debug: print('\tSelect deskewImage for {0}'.format(image_path))
+            if self.debug: self.logger.debug('\tSelect deskew for {0}'.format(image_path))
             if (self.settings['spread_detection'] and
                 self.img_proc_info['images'][image_path]['spread']):
-                self.img_proc_info['images'][image_path]['deskewImage'] = False
-                if self.debug: print('\t\tImage is a spread, no deskewImage')
+                self.img_proc_info['images'][image_path]['deskew'] = False
+                if self.debug: self.logger.debug('\t\tImage is a spread, no deskew')
                 continue
                 
             angle = round(self.img_proc_info['images'][image_path]['deskew_angle'],3)
             if self.debug:
                 l = mean_limit if self.settings['deskew_select_limit_type'] == 'mean' else avg_limit
                 l = round(l,3)
-                print('\t\tAngle: {0} ({1}<{2}?)'.format(angle,abs(angle),l))
+                self.logger.debug('\t\tAngle: {0} ({1}<{2}?)'.format(angle,abs(angle),l))
             if angle == 0:
-                self.img_proc_info['images'][image_path]['deskewImage'] = False
-                if self.debug: print('\t\tAngle zero, no deskewImage')
+                self.img_proc_info['images'][image_path]['deskew'] = False
+                if self.debug: self.logger.debug('\t\tAngle zero, no deskew')
             elif abs(angle) < self.settings['deskew_select_abs_limit']:
-                self.img_proc_info['images'][image_path]['deskewImage'] = False
-                if self.debug: print('\t\tAngle below margin value {0}, no deskewImage'.format(self.settings['deskew_select_abs_limit']))
+                self.img_proc_info['images'][image_path]['deskew'] = False
+                if self.debug: self.logger.debug('\t\tAngle below margin value {0}, no deskew'.format(self.settings['deskew_select_abs_limit']))
             else:
                 if (self.settings['deskew_select_limit_type'] == 'mean' and
                     (angle < -mean_limit or angle > mean_limit)):
-                    self.img_proc_info['images'][image_path]['deskewImage'] = False
-                    if self.debug: print('\t\tNo deskewImage, above limit')
+                    self.img_proc_info['images'][image_path]['deskew'] = False
+                    if self.debug: self.logger.debug('\t\tNo deskew, above limit')
                 elif (self.settings['deskew_select_limit_type'] == 'avg' and
                     (angle < -avg_limit or angle > avg_limit)):
-                    self.img_proc_info['images'][image_path]['deskewImage'] = False
-                    if self.debug: print('\t\tNo deskewImage, above limit')
-                elif self.debug: print('\t\tPerform deskewImage')
+                    self.img_proc_info['images'][image_path]['deskew'] = False
+                    if self.debug: self.logger.debug('\t\tNo deskew, above limit')
+                elif self.debug: self.logger.debug('\t\tPerform deskew')
                 
     def create_temp_crops(self):
         '''
-        This methods creates cropped tif-files for the deskewImage selector. This 
-        because the deskewImage may function better, if margins are removed beforehand.    
+        This methods creates cropped tif-files for the deskew selector. This 
+        because the deskew may function better, if margins are removed beforehand.    
         
         The cropped tif files are placed in the temp folder and the paths to these
-        are placed in the img_info for the deskewImage funtion to use.
+        are placed in the img_info for the deskew funtion to use.
         '''
         image_paths = sorted(self.img_proc_info['images'].keys())
         for image_path in image_paths:
@@ -526,7 +534,7 @@ if __name__ == '__main__':
                 'crop_select_limit_type': 'mean', #use: ['mean','avg']
                 'deskew_select_limit_adjust': 5.5, # experience tells that this one should be high
                 'deskew_select_limit_type': 'avg', #use: ['mean','avg']
-                'deskew_select_abs_limit': 0.1, # If an absolute deskewImage angle is below this, don't deskewImage
+                'deskew_select_abs_limit': 0.1, # If an absolute deskew angle is below this, don't deskew
                 'spread_detection': True, # detect spreads
                 'spread_select_limit_adjust': 1.25, # If width or height is N more than mean, image is a spread
                 'skip_if_pdf_exists': True
