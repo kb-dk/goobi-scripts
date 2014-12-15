@@ -106,10 +106,11 @@ class ImagePreprocessor():
         # Crop images e.g. with output to bw-image file on ramdisk -> smaller and bw may be better for deskew test?
         self.create_temp_crops()
         # Get all deskew
-        self.get_deskew_angles()
-        # Select which images to deskew 
-        self.set_deskew()
-        # Process files
+        if self.settings['deskew_images']:
+            self.get_deskew_angles()
+            # Select which images to deskew 
+            self.set_deskew()
+            # Process files
         self.processFiles()
         if self.debug: self.logger.debug(pprint.pformat(self.img_proc_info))
         if self.debug: self.logger.debug(str(datetime.datetime.now())+': '+'Merge pdf files to one pdf')
@@ -188,7 +189,7 @@ class ImagePreprocessor():
                                                't_crop':True, # top margin crop?
                                                'l_crop':True, # left margin crop?
                                                'b_crop':True, # bottom margin crop?
-                                               'deskew':True, # deskew image?
+                                               'deskew': self.settings['deskew_images'], # deskew image?
                                                'spread':False, # is image a spread (opslag)?
                                                }
     def locate_spreads(self):
@@ -241,6 +242,10 @@ class ImagePreprocessor():
             t = time.time()
             fuzzval = self.settings['innercrop_fuzzval']
             mode = self.settings['innercrop_mode']
+            #===================================================================
+            # TODO: Add an try-except here. If non-valid output, raise error
+            # except error and set crop to False (e.g. use mean/avg crops later)
+            #===================================================================
             _,coordinates = image_tools.innercrop(src,self.temp_folder,w=w,h=h,
                                                    innercrop_path=self.innercrop_exe_path,
                                                    mode=mode,fuzzval=fuzzval)
@@ -395,7 +400,14 @@ class ImagePreprocessor():
             # Use alternative image - cropped tif-files
             src = self.img_proc_info['images'][image_path]['image_for_deskew']
             t = time.time()
-            angle = image_tools.getDeskewAngle(src)
+            try:
+                angle = image_tools.getDeskewAngle(src)
+            except ValueError as e:
+                err = ('Could not get deskew angle for {0}. Error message: '
+                       '"{1}". Not deskewing image.')
+                err = err.format(image_path,str(e))
+                self.logger.info(err)
+                angle = None
             self.img_proc_info['images'][image_path]['deskew_angle'] = angle
             time_stat['Get deskew angle'] = time.time()-t
             self.add_to_avg_time_stat(time_stat)
@@ -434,13 +446,17 @@ class ImagePreprocessor():
             self.logger.debug('\tAvg deskew: {0} - adjust with {1}% = {2}'.format(round(avg,3),limit_adjust*100,round(avg_limit,3)))
         for image_path in image_paths:
             if self.debug: self.logger.debug('\tSelect deskew for {0}'.format(image_path))
-            if (self.settings['spread_detection'] and
-                self.img_proc_info['images'][image_path]['spread']):
+            angle = self.img_proc_info['images'][image_path]['deskew_angle']
+            is_spread = (self.settings['spread_detection'] and
+                         self.img_proc_info['images'][image_path]['spread'])
+            detect_deskew_failed = angle is None 
+            if is_spread or detect_deskew_failed:
                 self.img_proc_info['images'][image_path]['deskew'] = False
-                if self.debug: self.logger.debug('\t\tImage is a spread, no deskew')
+                if self.debug:
+                    if is_spread: self.logger.debug('\t\tImage is a spread, no deskew')
+                    if detect_deskew_failed: self.logger.debug('\t\tDeskew failed, no deskew')
                 continue
-                
-            angle = round(self.img_proc_info['images'][image_path]['deskew_angle'],3)
+            angle = round(angle,3)
             if self.debug:
                 l = mean_limit if self.settings['deskew_select_limit_type'] == 'mean' else avg_limit
                 l = round(l,3)

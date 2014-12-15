@@ -154,9 +154,10 @@ def compressFile(input_file,output_file,quality=50,resize=None,resize_type='pct'
         err = err.format(cmd,result['output'])
         raise ConvertError(err)
 
-def getDeskewAngle(src,deskew_pct=75):
-    cmd = "convert {0} -deskew {1} -format '%[deskew:angle]' info:".format(src,deskew_pct)
+def getDeskewAngle(src,threshold=75):
+    cmd = "convert {0} -deskew {1} -format '%[deskew:angle]' info:".format(src,threshold)
     output = processing.run_cmd(cmd,shell=True)
+    return float(output['stdout'])
 
 def getImageDimensions(image_path,hocr=None):
     '''
