@@ -76,7 +76,8 @@ class CreateColorPdf( Step ) :
             color_pdf_name = process_title.split('_')[0]
         else:
             color_pdf_name = process_title
-        self.color_pdf_path = os.path.join(doc_pdf_color_path,color_pdf_name+'.pdf')
+        color_pdf_name = color_pdf_name+'_color.pdf'
+        self.color_pdf_path = os.path.join(doc_pdf_color_path,color_pdf_name)
         # Get quality and resize options for image conversion
         self.quality = self.getConfigItem('quality') 
         self.resize = self.getConfigItem('resize')
