@@ -71,7 +71,9 @@ class RunAlpehUpdate( Step ):
         else:
             self.multivolumes = ''
 
-        # husk - hent aleph parameter
+        # get user and server from config to run the script
+        self.aleph_server_user = self.getSetting('aleph_server_user')
+        self.aleph_server = self.getSetting('aleph_server')
 
 
     def runImport(self):
