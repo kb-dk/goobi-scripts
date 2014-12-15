@@ -9,17 +9,14 @@ class ValidateOcrOutput( Step ):
 
     def setup(self):
         self.name = 'Validering af output-filer fra OCR'
-        self.config_main_section = 'copy_from_ocr'
+        self.config_main_section = 'move_from_ocr'
         self.folder_structure_section = 'process_folder_structure'
-        self.valid_exts_section = 'move_invalid_files'
+        self.valid_exts_section = 'valid_file_exts'
         self.essential_config_sections.update([self.folder_structure_section, 
-                                               self.folder_structure_section,
                                                self.valid_exts_section] )
         self.essential_commandlines = {
             'process_title' : 'string',
             'process_path' : 'folder',
-            'auto_report_problem' : 'string',
-            'step_id' : 'string'
         }
     
     def getVariables(self):
@@ -28,6 +25,7 @@ class ValidateOcrOutput( Step ):
         and confirm their existence.
         '''
         process_title = self.command_line.process_title
+        process_path = self.command_line.process_path
         # set ocr to current outputfolder - antikva or fraktur         
         try:
             ocr_workflow_type = self.getSetting('ocr_workflow_type').lower()
@@ -47,18 +45,23 @@ class ValidateOcrOutput( Step ):
 
         # join paths to create absolute paths on ocr-server
         self.bw_pdf_input_dir = os.path.join(ocr, process_title)
-        self.color_pdf_input_dir = os.path.join(self.command_line.process_path, 
-            self.getConfigItem(self.folder_structure_section, None, 'doc_pdf_color_path'))
+        
+        c_pdf = self.getConfigItem('doc_pdf_color_path',
+                                   section=self.folder_structure_section)
+        self.color_pdf_input_dir = os.path.join(process_path,c_pdf)
         
         self.valid_exts = self.getConfigItem('valid_file_exts',None, self.valid_exts_section).split(';')
         
         # Get path for input-files in process folder
         process_path = self.command_line.process_path
-        input_files = self.getConfigItem('img_master_path',section= self.folder_structure_section) 
+        input_files = self.getConfigItem('img_master_path',
+                                         section= self.folder_structure_section) 
         self.input_files_dir = os.path.join(process_path,input_files)
         
-        # throw Error if one of our directories is missing
-        
+        pp_img = self.getConfigItem('img_pre_processed_path',
+                                         section=self.folder_structure_section) 
+        self.preprocessed_input_files = os.path.join(process_path,pp_img)
+
     
     def step(self):
         '''
@@ -75,18 +78,16 @@ class ValidateOcrOutput( Step ):
             tools.ensureDirsExist(self.bw_pdf_input_dir,
                                   self.color_pdf_input_dir,self.input_files_dir)
             # Check if color pdf is ok
-            if not pageCountMatches(self.color_pdf_input_dir,self.input_files_dir,self.valid_exts):
+            if not limb_tools.pageCountMatches(self.color_pdf_input_dir,self.input_files_dir,self.valid_exts):
                 raise DataError('PDF page count does not match input picture count in "{0}"!'.format(self.color_pdf_input_dir))
             # Check if bw pdf is ok
-            if not pageCountMatches(self.bw_pdf_input_dir,self.input_files_dir,self.valid_exts):
+            if not limb_tools.pageCountMatches(self.bw_pdf_input_dir,self.preprocessed_input_files,self.valid_exts):
                 raise DataError('PDF page count does not match input picture count in "{0}"!'.format(self.bw_pdf_input_dir))
-
-
-            return None
         except IOError as e:
-            return "IOError - {0}".format(e.strerror)
+            error = "IOError - {0}".format(e.strerror)
         except DataError as e: 
-            return "Validation error - {0}.".format(e.strerror)
+            error = "Validation error - {0}.".format(e.strerror)
+        return error
         
 if __name__ == '__main__':
     

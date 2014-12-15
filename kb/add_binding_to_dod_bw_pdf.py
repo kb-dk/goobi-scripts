@@ -21,7 +21,9 @@ class AddBindingsToBwPdf( Step ) :
         self.config_main_section = "add_binding_to_bw_pdf"
         self.essential_config_sections = set( [] )
         self.folder_structure_section = 'process_folder_structure'
-        self.essential_config_sections.update([self.folder_structure_section] )
+        self.valid_exts_section = 'valid_file_exts'
+        self.essential_config_sections.update([self.folder_structure_section,
+                                               self.valid_exts_section] )
         self.essential_commandlines = {
             "process_path":"folder",
             'process_title':"string"
@@ -47,6 +49,8 @@ class AddBindingsToBwPdf( Step ) :
         '''
         root = self.command_line.process_path
         self.process_title = self.command_line.process_title
+        
+        self.valid_exts = self.getConfigItem('valid_file_exts',section=self.valid_exts_section).split(';')
         # Set path to input folder
         master_img_rel = self.getConfigItem('img_master_path',
                                             section = self.folder_structure_section) 
@@ -57,7 +61,7 @@ class AddBindingsToBwPdf( Step ) :
         doc_pdf_bw_path = os.path.join(root,doc_pdf_bw_path)
         self.pdf_bw_path = tools.getFirstFileWithExtension(doc_pdf_bw_path, 'pdf')
         # Get path for temp folder -> nb absolute
-        self.temp_root = self.getConfigItem('temp_root')
+        self.temp_root = self.getConfigItem('temp_folder')
         # Get quality for output pdfs
         self.quality = int(self.getConfigItem('quality'))
         # Get resize pct for output pdf
@@ -68,9 +72,9 @@ class AddBindingsToBwPdf( Step ) :
         temp_folder = os.path.join(self.temp_root,self.process_title)
         tools.create_folder(temp_folder)
         # Get path for first and last image
-        images = [os.path.join(self.img_master_path,f)
-                  for f in os.listdir(self.img_master_path)]
-        images = sorted(images)
+        images = fs.getFilesInFolderWithExts(self.img_master_path,
+                                             self.valid_exts,
+                                             absolute=True)
         # Create PDF of bindings (first and last image in master image folder)
         front_image_path = images[0]
         end_image_path = images[-1]

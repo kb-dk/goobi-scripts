@@ -22,8 +22,16 @@ class InnerCropError(Exception):
     def __str__(self):
         return repr(self.value)
 
-
-def inner_crop(src,dest_folder,w,h,innercrop_path,mode='cropImage',fuzzval=75):
+def innercrop(src,dest_folder,w,h,innercrop_path,mode='box',fuzzval=75):
+    '''
+    Returns the crop coordinates for src as a dictionary together with 
+    a path to a cropped version of src.
+    
+    Uses "innercrop" from Fred's ImageMagick Scripts to get coordinates for
+    cropping the image. "innercrop" also outputs a cropped image file.
+    
+    http://www.fmwconcepts.com/imagemagick/innercrop/index.php
+    '''
     file_name,ext = os.path.splitext(os.path.basename(src))
     if mode == 'box':
         dest = os.path.join(dest_folder,file_name+'_innercrop.jpg')
@@ -39,11 +47,14 @@ def inner_crop(src,dest_folder,w,h,innercrop_path,mode='cropImage',fuzzval=75):
 
 def getInnercropCoordinates(output,w,h):
     '''
-    Use "innercrop" from Fred's ImageMagick Scripts:
-    http://www.fmwconcepts.com/imagemagick/innercrop/index.php
+    Returns a dictionary with cropping information from the output from 
+    "innercrop". Also set distance from each border  
     
-    
+    :param output: stdout from running "innercrop"-script on an image
+    :param w: widht of the image
+    :param h: height of the image
     '''
+    
     nw_word = 'Upper Left Corner: '
     se_word = 'Lower Right Corner: '
     retval = {'r_crop':0,
@@ -70,12 +81,27 @@ def getInnercropCoordinates(output,w,h):
     return retval
 
 def convertToBw(src,dest,threshold=10):
+    '''
+    Converts src to a bitonal tif-file compressed with Group4
+    :param src: image file to convert/compress
+    :param dest: where to output file to
+    :param threshold: threshold for bitonal conversion
+    '''
     cmd = 'convert {0} -threshold {1}% -compress Group4 {2}'
     cmd = cmd.format(src,threshold,dest)
     processing.run_cmd(cmd,shell=True)
     return dest
         
 def cropImage(src,dest_folder,info,dest=None,to_tif=False):
+    '''
+    Crops src and outputs it to dest_folder or specified dest. Optionally
+    output cropped image as bitonal tif-file.
+    :param src: image to crop
+    :param dest_folder: folder to output cropped image
+    :param info: contains the coordinates for cropping 
+    :param dest: possible path to output iamge to
+    :param to_tif: output cropped as bitonal, group4 tif-file
+    '''
     coordinates = info['crop_coordinates']
     w = info['image_width']
     h = info['image_height']
@@ -89,12 +115,21 @@ def cropImage(src,dest_folder,info,dest=None,to_tif=False):
     width = se_x-nw_x
     height = se_y-nw_y
     to_tif = '-threshold 60% -compress Group4' if to_tif else ''
-    settings = '-cropImage {0}x{1}+{2}+{3}'.format(width,height,nw_x,nw_y)
+    settings = '-crop {0}x{1}+{2}+{3}'.format(width,height,nw_x,nw_y)
     cmd = 'convert {0} {1} {2} {3}'.format(src,settings,to_tif,dest)
     processing.run_cmd(cmd,shell=True)
     return dest
 
 def deskewImage(src,dest_folder,angle,quality=None,resize=None):
+    '''
+    Deskews an image with a given angle.
+    
+    :param src: path to image to deskew
+    :param dest_folder: where to output deskewed image
+    :param angle: what to deskew image with
+    :param quality: what to compress output image with
+    :param resize: what to resize output image with (pct)
+    '''
     file_name,ext = os.path.splitext(os.path.basename(src))
     dest = os.path.join(dest_folder,file_name+'deskewed'+ext)
     if quality is not None:
@@ -110,6 +145,16 @@ def deskewImage(src,dest_folder,angle,quality=None,resize=None):
     return dest
 
 def compressFile(input_file,output_file,quality=50,resize=None,resize_type='pct'):
+    '''
+    Converts an image file to jpeg. Resize image if selected. Compress image
+    to selected quality percentage.
+
+    :param input_file: image file to convert
+    :param output_file: location for converted image file
+    :param quality: percentage of compression
+    :param resize: width or percentage to resize image to 
+    :param resize_type: resize by width (keeping ratio) or by percentage
+    '''
     if resize is not None:
         if resize_type == 'width':
             resize = '-resize {0}'.format(resize)
@@ -125,13 +170,24 @@ def compressFile(input_file,output_file,quality=50,resize=None,resize_type='pct'
         err = err.format(cmd,result['output'])
         raise ConvertError(err)
 
-def getDeskewAngle(src,deskew_pct=75):
-    cmd = "convert {0} -deskewImage {1} -format '%[deskewImage:angle]' info:".format(src,deskew_pct)
-    output = processing.run_cmd(cmd,shell=True)
-
-def getImageDimensions(image_path,hocr=None):
+def getDeskewAngle(src,threshold=75):
     '''
-    Todo: document this
+    Get deskew angle for an image using ImageMagick's "deskew". Threshold is
+    suggested by ImageMagick to be set to 40, but I think I have experience
+    that 75 is better for books.
+      
+    :param src:
+    :param threshold:
+    '''
+    cmd = "convert {0} -deskew {1} -format '%[deskew:angle]' info:".format(src,threshold)
+    output = processing.run_cmd(cmd,shell=True)
+    return float(output['stdout'])
+
+def getImageDimensions(image_path):
+    '''
+    Use ImageMagicks "identify" to get the dimensions (width and height) of an 
+    image file.
+    :param image_path: image file to get dimensions for
     '''
     try:
         # Use identify instead

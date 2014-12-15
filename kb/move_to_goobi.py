@@ -12,9 +12,8 @@ class MoveToGoobi( Step ):
         self.name = 'Flyt filer fra LIMB til Goobi'
         self.config_main_section = 'limb_output'
         self.folder_structure_section = 'process_folder_structure'
-        self.valid_exts_section = 'move_invalid_files'
+        self.valid_exts_section = 'valid_file_exts'
         self.essential_config_sections.update([self.folder_structure_section, 
-                                               self.folder_structure_section,
                                                self.valid_exts_section] )
         self.essential_commandlines = {
             "process_id" : "number",

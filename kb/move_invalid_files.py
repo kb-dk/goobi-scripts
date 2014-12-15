@@ -6,25 +6,6 @@ Created on 26/03/2014
 @author: jeel
 '''
 
-'''
-    Tester
-    
-    Test the python step code.
-    
-    Command line:
-        needs: process_id,  and tiff_folder
-        optional: auto_complete, step_id, correction_step_name
-    
-    Relies on steps:
-        none
-    
-    Example run : 
-        In Goobi:  
-            /usr/bin/python /opt/digiverso/goobi/scripts/bdlss/step_tester.py process_id={processid} tiff_folder={tifpath}
-        From command line:
-            sudo -u tomcat6 python step_tester.py process_id=54 tiff_folder=/opt/digiverso/goobi/metadata/54/images/_7654321_tif
-
-'''
 from tools import tools
 import os
 from goobi.goobi_step import Step
@@ -37,8 +18,8 @@ class FileValidator( Step ) :
         self.name = "Validering af importerede filer"
         self.config_main_section = "validate_image_files"
         self.valid_file_exts_section = 'valid_file_exts'
-        self.essential_config_sections = set( [] )
         self.folder_structure_section = 'process_folder_structure'
+        self.essential_config_sections = set( [] )
         self.essential_config_sections.update([self.folder_structure_section, 
                                                self.valid_file_exts_section] )
         self.essential_commandlines = {
@@ -67,24 +48,21 @@ class FileValidator( Step ) :
         Get all required vars from command line + config
         and confirm their existence.
         '''
+        process_path = self.command_line.process_path
         self.break_level = self.getBreakLevel()
-        self.valid_exts = self.getConfigItem('valid_file_exts',None,
-                                             self.valid_file_exts_section).split(';')
+        v_exts = self.getConfigItem('valid_file_exts',
+                                    section = self.valid_file_exts_section)
+        self.valid_exts = v_exts.split(';')
         # TODO: Generalize this to take input from its own config section        
-        rel_invalid_path = self.getConfigItem('img_invalid_path',
-                                               None,
-                                               self.folder_structure_section)
-        self.invalid_path = os.path.join(self.command_line.process_path,
-                                         rel_invalid_path)
+        inv_path = self.getConfigItem('img_invalid_path',
+                                        section = self.folder_structure_section)
+        self.invalid_path = os.path.join(process_path,inv_path)
         tools.find_or_create_dir(self.invalid_path)
-        rel_image_path = self.getConfigItem('img_master_path',
-                                            None,
-                                            self.folder_structure_section) 
-        self.image_path = os.path.join(self.command_line.process_path,
-                                       rel_image_path)
+        img_path = self.getConfigItem('img_master_path',
+                                      section= self.folder_structure_section) 
+        self.image_path = os.path.join(process_path,img_path)
         # Set list for storing paths for invalid files to move
         self.invalid_files = []
-        
     
     def getBreakLevel(self):
         '''Our break level is used to figure out what errors to tolerate'''

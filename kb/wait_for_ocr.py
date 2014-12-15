@@ -12,7 +12,7 @@ class WaitForOcr( Step ):
         self.name = 'Vent på output-filer fra OCR'
         self.config_main_section = 'wait_for_ocr'
         self.folder_structure_section = 'process_folder_structure'
-        self.valid_exts_section = 'move_invalid_files'
+        self.valid_exts_section = 'valid_file_exts'
         self.essential_config_sections.update([self.folder_structure_section, 
                                                self.valid_exts_section] )
         self.essential_commandlines = {
@@ -111,7 +111,7 @@ class WaitForOcr( Step ):
         '''
         try: 
             # raises error if one of our directories is missing
-            tools.ensureDirsExist(self.ocr_dir, self.pdf_input_dir, self.input_files)
+            tools.ensureDirsExist(self.pdf_input_dir, self.input_files)
         except IOError as e:
             msg = ('One of the output folder from OCR is not yet created.'
                    ' Waiting for OCR to be ready. Error: {0}')
@@ -120,7 +120,9 @@ class WaitForOcr( Step ):
             return False
         # legr: we can use limb_tools generally - they are not Limb specific
         # we should rename them someday
-        pdf_ok = limb_tools.pageCountMatches(self.pdf_input_dir, self.input_files, self.valid_exts)
+        pdf_ok = limb_tools.pageCountMatches(self.pdf_input_dir,
+                                             self.input_files,
+                                             self.valid_exts)
         if pdf_ok:
             return True
         return False

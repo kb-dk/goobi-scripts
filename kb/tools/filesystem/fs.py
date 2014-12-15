@@ -44,21 +44,6 @@ def find_or_create_dir(*paths):
         elif not os.path.exists(path):
             os.makedirs(path)
 
-def detectImagesExts(folder,valid_exts):
-    images = [f for f in os.listdir(folder)
-              if f.split('.')[-1] in valid_exts]
-    ext = ''
-    for image in images:
-        img_ext = image.split('.')[-1]
-        if (not ext == '') and (not img_ext == ext):
-            raise ValueError('Multiple image extension in master folder not allowed.')
-        else:
-            ext = img_ext
-    if not ext == '':
-        return ext
-    else:
-        raise ValueError('No image file extensions found in master image folder.')
-
 def folderExists(folder):
     return os.path.isdir(folder)
 
@@ -148,3 +133,18 @@ def create_folder(path):
         raise IOError('Argument "path" not set.')
     elif not os.path.exists(path):
         os.makedirs(path)
+
+def getFilesInFolderWithExts(src_folder, valid_exts,absolute=False):
+    if absolute:
+        retval = [os.path.join(src_folder,f)
+                  for f in os.listdir(src_folder)
+                  if (os.path.isfile(os.path.join(src_folder,f)) and
+                      os.path.splitext(f)[-1].lstrip('.') in valid_exts)]
+    else:
+        retval = [f for f in os.listdir(src_folder)
+                  if (os.path.isfile(os.path.join(src_folder,f)) and
+                      os.path.splitext(f)[-1].lstrip('.') in valid_exts)]
+    retval = sorted(retval)
+    return retval
+
+
