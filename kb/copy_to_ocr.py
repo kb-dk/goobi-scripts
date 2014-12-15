@@ -66,13 +66,14 @@ class CopyToOcr( Step ):
 
         self.retry_wait = int(self.getConfigItem('retry_wait'))
         self.retry_num = int(self.getConfigItem('retry_num'))
+        self.valid_exts = self.getConfigItem('valid_file_exts',None, self.valid_exts_section).split(';')
+
         # legr:
         # We could define pdf, inputfile and ext-variables for use if we want to test if files already is present:
         # self.goobi_pdf_color = os.path.join(process_path, 
         #    self.getConfigItem('doc_pdf_color_path', None, 'process_folder_structure'))
         # self.goobi_pdf_bw = os.path.join(process_path, 
         #    self.getConfigItem('doc_pdf_bw_path', None, 'process_folder_structure'))
-        # self.valid_exts = self.getConfigItem('valid_file_exts',None, self.valid_exts_section).split(';')
         # input_files = self.getConfigItem('img_master_path',None, self.folder_structure_section) 
         # self.input_files = os.path.join(process_path,input_files)
 
@@ -84,13 +85,14 @@ class CopyToOcr( Step ):
         msg = msg.format(self.source_folder, self.hotfolder_dir, self.transit_dir)
         self.debug_message(msg)
         try:
-            tools.copy_files(source = self.source_folder,
-                             dest = self.hotfolder_dir,
-                             transit = self.transit_dir,
+            tools.copy_files(source          = self.source_folder,
+                             dest            = self.hotfolder_dir,
+                             transit         = self.transit_dir,
                              delete_original = False,
-                             wait_interval = self.retry_wait,
-                             max_retries = self.retry_num,
-                             logger = self.glogger)
+                             wait_interval   = self.retry_wait,
+                             max_retries     = self.retry_num,
+                             logger          = self.glogger,
+                             valid_exts      = self.valid_exts)
         except errors.TransferError as e:
             error = e.strerror
         except errors.TransferTimedOut as e:

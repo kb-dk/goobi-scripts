@@ -343,7 +343,7 @@ def pdfinfo(infile):
     return output
 
 def copy_files(source,dest,transit=None,delete_original=False,wait_interval=60,
-               max_retries=5,logger=None,change_owner=None):
+               max_retries=5,logger=None,change_owner=None,valid_exts=None):
     """
     Copies all file (non recursive) from 'source' directory to 'dest'.
     if 'trasit' directory is given then the files are first copied to this directory, which is then moved to 'dest' dir
@@ -356,12 +356,19 @@ def copy_files(source,dest,transit=None,delete_original=False,wait_interval=60,
     :param max_retries: int, how many times to retry copy
     :param logger: object, goobi-logger 
     :param change_owner: an integer to change the owner of dir or file to
+    :param valid_exts: optinal list of valid extensions of files to copy
     """
     dest_dir = dest
     if transit:
         dest_dir = transit
     if os.path.isdir(source):
-        src_files = [[os.path.join(source,l),False] for l in os.listdir(source)]
+        if valid_exts is not None:
+            src_files = [[os.path.join(source,l),False]
+                         for l in os.listdir(source)
+                         if os.path.splitext(l)[-1].lstrip('.') in valid_exts]
+        else:
+            src_files = [[os.path.join(source,l),False]
+                         for l in os.listdir(source)]
     elif os.path.isfile(source):
         src_files = [[str(source),False]]
     else:

@@ -12,6 +12,7 @@ import time
 from goobi.goobi_step import Step
 import tools.image_tools.convert_folder as convert
 from tools.image_tools import misc as image_tools
+from tools.filesystem import fs
 
 class CreateColorPdf( Step ) :
 
@@ -34,6 +35,7 @@ class CreateColorPdf( Step ) :
         try:
             
             t = time.time()
+            fs.create_folder(self.temp_folder)
             convert.createPdfFromFolder(src         = self.input_folder, 
                                         file_dest   = self.color_pdf_path, 
                                         temp_folder = self.temp_folder, 
@@ -74,7 +76,7 @@ class CreateColorPdf( Step ) :
             color_pdf_name = process_title.split('_')[0]
         else:
             color_pdf_name = process_title
-        self.color_pdf_path = os.path.join(doc_pdf_color_path,color_pdf_name)
+        self.color_pdf_path = os.path.join(doc_pdf_color_path,color_pdf_name+'.pdf')
         # Get quality and resize options for image conversion
         self.quality = self.getConfigItem('quality') 
         self.resize = self.getConfigItem('resize')
