@@ -50,8 +50,6 @@ class CreateThumbnails( Step ) :
             error = str(e)
         return error
     
-
-    
     def getVariables(self):
         '''
         Get all required vars from command line + config

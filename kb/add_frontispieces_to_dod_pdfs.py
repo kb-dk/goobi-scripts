@@ -62,7 +62,7 @@ class AddFrontispiecesToPdfs( Step ) :
         doc_pdf_color_path = os.path.join(root,doc_pdf_color_path)
         self.pdf_color_path = tools.getFirstFileWithExtension(doc_pdf_color_path, 'pdf')
         # Get path for temp folder -> nb absolute
-        self.temp_root = self.getConfigItem('temp_root')
+        self.temp_root = self.getConfigItem('temp_folder')
         # Get quality for output pdfs
         self.frontispieces = int(self.getConfigItem('frontispieces'))
 

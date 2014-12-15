@@ -12,8 +12,6 @@ import time
 from goobi.goobi_step import Step
 import tools.image_tools.convert_folder as convert
 from tools.image_tools import misc as image_tools
-from tools.filesystem import fs
-
 
 class CreateColorPdf( Step ) :
 
@@ -28,8 +26,7 @@ class CreateColorPdf( Step ) :
                                                self.valid_file_exts_section] )
         self.essential_commandlines = {
             "process_path":"folder",
-            "auto_complete":"string"
-        }
+            "auto_complete":"string"}
     
     def step(self):
         error = None
@@ -74,7 +71,7 @@ class CreateColorPdf( Step ) :
         # Required name: [barcode]_color.pdf
         #=======================================================================
         if '_' in process_title:
-            color_pdf_name = process_title.split('')[0]
+            color_pdf_name = process_title.split('_')[0]
         else:
             color_pdf_name = process_title
         self.color_pdf_path = os.path.join(doc_pdf_color_path,color_pdf_name)

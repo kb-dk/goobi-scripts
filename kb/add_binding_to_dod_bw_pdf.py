@@ -57,7 +57,7 @@ class AddBindingsToBwPdf( Step ) :
         doc_pdf_bw_path = os.path.join(root,doc_pdf_bw_path)
         self.pdf_bw_path = tools.getFirstFileWithExtension(doc_pdf_bw_path, 'pdf')
         # Get path for temp folder -> nb absolute
-        self.temp_root = self.getConfigItem('temp_root')
+        self.temp_root = self.getConfigItem('temp_folder')
         # Get quality for output pdfs
         self.quality = int(self.getConfigItem('quality'))
         # Get resize pct for output pdf
