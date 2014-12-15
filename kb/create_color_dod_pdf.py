@@ -37,12 +37,12 @@ class CreateColorPdf( Step ) :
         try:
             
             t = time.time()
-            convert.createPdfFromFolder(input_folder    = self.input_folder, 
-                                        file_destination= self.color_pdf_path, 
-                                        temp_folder_root= self.temp_folder, 
-                                        quality         = self.quality, 
-                                        resize_pct      = self.resize, 
-                                        valid_exts      = self.valid_exts)
+            convert.createPdfFromFolder(src         = self.input_folder, 
+                                        file_dest   = self.color_pdf_path, 
+                                        temp_folder = self.temp_folder, 
+                                        quality     = self.quality, 
+                                        resize_pct  = self.resize, 
+                                        valid_exts  = self.valid_exts)
             time_used = tools.get_delta_time(time.time()-t)
             self.debug_message('Color PDF of images for process {0} '
                                'created in {1}'.format(self.process_id,time_used))
@@ -59,7 +59,7 @@ class CreateColorPdf( Step ) :
         and confirm their existence.
         '''
         root = self.command_line.process_path
-        self.process_title = self.command_line.process_title
+        process_title = self.command_line.process_title
         # Set path to input folder
         master_img_rel = self.getConfigItem('img_master_path',
                                             section = self.folder_structure_section) 
@@ -73,17 +73,18 @@ class CreateColorPdf( Step ) :
         # Assumed process title: [barcode]_[Antiqkva/Fraktur]
         # Required name: [barcode]_color.pdf
         #=======================================================================
-        if '_' in self.process_title:
-            color_pdf_name = self.process_title.split('')[0]
+        if '_' in process_title:
+            color_pdf_name = process_title.split('')[0]
         else:
-            color_pdf_name = self.process_title
+            color_pdf_name = process_title
         self.color_pdf_path = os.path.join(doc_pdf_color_path,color_pdf_name)
         # Get quality and resize options for image conversion
         self.quality = self.getConfigItem('quality') 
         self.resize = self.getConfigItem('resize')
         self.valid_exts = self.getConfigItem('valid_file_exts',
                                              section = self.valid_file_exts_section).split(';')
-        self.temp_folder = self.getConfigItem('temp_folder')
+        temp_root = self.getConfigItem('temp_folder')
+        self.temp_folder = os.path.join(temp_root,process_title) 
 
 if __name__ == '__main__' :
     CreateColorPdf().begin()

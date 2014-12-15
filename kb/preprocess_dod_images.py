@@ -127,6 +127,9 @@ class PreprocessDodImageFiles( Step ) :
         # crop_select_limit_type: which method to use to calculate the limit
         # for selecting crop coordinates. Valid: ['mean','avg']
         self.settings['crop_select_limit_type'] = self.getSetting('crop_select_limit_type')
+        # deskew_images: turn mechanism to deskew images on/off.
+        self.settings['deskew_images'] = self.getSetting('deskew_images',
+                                                         var_type=bool)
         # deskew_select_limit_adjust: how much to adjust the calculated limit of 
         # deskews that are used to select deskew angles. 5.5 = 550%
         # experience tells that this one should be high

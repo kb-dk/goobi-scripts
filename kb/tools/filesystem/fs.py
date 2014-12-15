@@ -44,21 +44,6 @@ def find_or_create_dir(*paths):
         elif not os.path.exists(path):
             os.makedirs(path)
 
-def detectImagesExts(folder,valid_exts):
-    images = [f for f in os.listdir(folder)
-              if f.split('.')[-1] in valid_exts]
-    ext = ''
-    for image in images:
-        img_ext = image.split('.')[-1]
-        if (not ext == '') and (not img_ext == ext):
-            raise ValueError('Multiple image extension in master folder not allowed.')
-        else:
-            ext = img_ext
-    if not ext == '':
-        return ext
-    else:
-        raise ValueError('No image file extensions found in master image folder.')
-
 def folderExists(folder):
     return os.path.isdir(folder)
 

@@ -17,7 +17,7 @@ from tools.filesystem import fs
 from tools.pdf import misc as pdf_misc
 from tools.image_tools import misc as image_tools
 
-def createPdfFromFolder(input_folder, file_destination,temp_folder_root, 
+def createPdfFromFolder(src, file_dest,temp_folder,
                         quality=50,resize_pct=50,valid_exts=['jpg','tif']):
     '''
     Use ImageMagick to create one pdf from all the images in a folder and 
@@ -27,51 +27,43 @@ def createPdfFromFolder(input_folder, file_destination,temp_folder_root,
     to pdf-dest and remove temp folder.
     
     '''
-    folder_name = os.path.basename(input_folder.rstrip(os.sep))
-    temp_folder = os.path.join(temp_folder_root,folder_name)
-    images = sorted([f for f in os.listdir(input_folder)
+    image_paths = sorted([f for f in os.listdir(src)
                      if os.path.splitext(f)[1] in valid_exts])
-    t = time.time()
-    for image in images:
-        input_path = os.path.join(input_folder,image)
+    for image in image_paths:
+        input_path = os.path.join(src,image)
         file_name,_ = os.path.splitext(image)
         output_file_name = file_name+'.pdf'
         output_path = os.path.join(temp_folder,output_file_name)
         image_tools.compressFile(input_path, output_path, quality, resize_pct)
-    pdf_misc.mergePdfFilesInFolder(temp_folder,file_destination)
+    pdf_misc.mergePdfFilesInFolder(temp_folder,file_dest)
     fs.clear_folder(temp_folder,also_folder=True)
-    dt = time.time()-t  
-    print('Time used to create a pdf from {0}: {1}'.format(folder_name,tools.get_delta_time(dt)))
-        
 
 def convertFolder(input_folder, output_folder,quality=50,resize_type='width',
-                   resize=700,input_ext='tif',output_ext='jpeg'):
+                   resize=700,valid_exts=['tif','jpg']):
     '''
-    TODO: document
-    default resize is the desired width of the output image. Height will be
-    set to keep aspect ratio
+    Resizes and compresses images in a folder to jpegs in another folder. Used
+    to create thumbnails. 
+    
+    The method is used to create thumbnails for Goobi. As KBs Boobi is 
+    configured to only look for images of the form NNNNNNN.jpg, images are named
+    after this sequence.
+    
+    :param input_folder: Folder containing images to convert
+    :param output_folder: Destination folder
+    :param quality: % to compress output jpeg as
+    :param resize_type: Resize by percentage or width. Default resize is the 
+        desired width of the output image. Height will be set to keep aspect 
+        ratio
+    :param resize: the height or percentage to resize after.
+    :param valid_exts: Only convert images with extensions in this list
     '''
-    images = sorted([f for f in os.listdir(input_folder) if f.endswith(input_ext)])
+    images = sorted([f for f in os.listdir(input_folder)
+                     if os.path.splitext(f)[-1].lstrip('.') in valid_exts])
     for index, image in enumerate(images):
         input_path = os.path.join(input_folder,image)
-        #file_name,_ = os.path.splitext(image)
-        #output_file_name = file_name+'.'+output_ext
-        output_file_name = str(index).zfill(8)+'.'+output_ext
+        output_file_name = str(index).zfill(8)+'.jpg'
         output_path = os.path.join(output_folder,output_file_name)
         image_tools.compressFile(input_path,output_path,quality,resize,resize_type)
-
-
-def splitSetEqually(input_set, chunks=2):
-    #http://enginepewpew.blogspot.dk/2012/03/splitting-dictionary-into-equal-chunks.html
-    return_list = [set() for idx in range(chunks)]
-    idx = 0
-    for elem in input_set:
-        return_list[idx].add(elem)
-        if idx < chunks-1: # indexes start at 0
-            idx += 1
-        else:
-            idx = 0
-    return return_list
 
    
 if __name__ == '__main__':

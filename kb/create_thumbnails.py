@@ -12,8 +12,6 @@ import time
 from goobi.goobi_step import Step
 import tools.image_tools.convert_folder as convert
 from tools.image_tools import misc as image_tools
-from tools.filesystem import fs
-
 
 class CreateThumbnails( Step ) :
 
@@ -35,14 +33,13 @@ class CreateThumbnails( Step ) :
         error = None
         self.getVariables()
         try:
-            image_ext = fs.detectImagesExts(self.input_folder,self.valid_exts)
             t = time.time()
             convert.convertFolder(input_folder    = self.input_folder,
                                   output_folder   = self.output_folder,
                                   quality         = self.quality,
                                   resize_type     = self.resize_type,
                                   resize          = self.resize,
-                                  input_ext       = image_ext)
+                                  valid_exts      = self.valid_exts)
             time_used = tools.get_delta_time(time.time()-t)
             self.debug_message('Thumbsnails of images for process {0} '
                                'converted in {1}'.format(self.process_id,time_used))
@@ -74,8 +71,8 @@ class CreateThumbnails( Step ) :
         self.quality = self.getConfigItem('quality') 
         self.resize_type = self.getConfigItem('resize_type')
         self.resize = self.getConfigItem('resize')
-        self.valid_exts = self.getConfigItem('valid_file_exts',
-                                             section = self.valid_file_exts_section).split(';')
+        exts = self.getConfigItem('valid_file_exts',section = self.valid_file_exts_section)
+        self.valid_exts = exts.split(';')
 
 if __name__ == '__main__' :
     CreateThumbnails().begin()
