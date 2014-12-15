@@ -33,10 +33,10 @@ class CopyToOcr( Step ):
         
         process_title = self.command_line.process_title
         process_path = self.command_line.process_path
-        rel_master_image_path = self.getConfigItem('img_master_path',None,self.folder_structure_section)
-
         # img_master_path = images/master_orig/
-        self.source_folder = os.path.join(process_path,rel_master_image_path)
+        pp_img = self.getConfigItem('img_pre_processed_path',
+                                    section = self.folder_structure_section)
+        self.source_folder = os.path.join(process_path,pp_img)
 
         # ======================================================================
         # legr: Get the correct OCR server for the issue - antikva or fraktur

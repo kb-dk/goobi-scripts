@@ -9,9 +9,9 @@ class ValidateOcrOutput( Step ):
 
     def setup(self):
         self.name = 'Validering af output-filer fra OCR'
-        self.config_main_section = 'copy_from_ocr'
+        self.config_main_section = 'move_from_ocr'
         self.folder_structure_section = 'process_folder_structure'
-        self.valid_exts_section = 'move_invalid_files'
+        self.valid_exts_section = 'valid_file_exts'
         self.essential_config_sections.update([self.folder_structure_section, 
                                                self.folder_structure_section,
                                                self.valid_exts_section] )
@@ -75,13 +75,11 @@ class ValidateOcrOutput( Step ):
             tools.ensureDirsExist(self.bw_pdf_input_dir,
                                   self.color_pdf_input_dir,self.input_files_dir)
             # Check if color pdf is ok
-            if not pageCountMatches(self.color_pdf_input_dir,self.input_files_dir,self.valid_exts):
+            if not limb_tools.pageCountMatches(self.color_pdf_input_dir,self.input_files_dir,self.valid_exts):
                 raise DataError('PDF page count does not match input picture count in "{0}"!'.format(self.color_pdf_input_dir))
             # Check if bw pdf is ok
-            if not pageCountMatches(self.bw_pdf_input_dir,self.input_files_dir,self.valid_exts):
+            if not limb_tools.pageCountMatches(self.bw_pdf_input_dir,self.input_files_dir,self.valid_exts):
                 raise DataError('PDF page count does not match input picture count in "{0}"!'.format(self.bw_pdf_input_dir))
-
-
             return None
         except IOError as e:
             return "IOError - {0}".format(e.strerror)
