@@ -14,7 +14,8 @@ class StepJobClient( Step ) :
     
     def setup(self):
         self.config_main_section = 'step_server'
-        self.essential_commandlines = {
+        self.essential_commandlines = {'add_auto_complete':'string',
+                                       'step_id': 'string'
         }
         
     def step(self):

@@ -134,15 +134,15 @@ def create_folder(path):
     elif not os.path.exists(path):
         os.makedirs(path)
 
-def getFilesInFolderWithExts(src_folder, valid_exts,absolute=False):
+def getFilesInFolderWithExts(src, valid_exts,absolute=False):
     if absolute:
-        retval = [os.path.join(src_folder,f)
-                  for f in os.listdir(src_folder)
-                  if (os.path.isfile(os.path.join(src_folder,f)) and
+        retval = [os.path.join(src,f)
+                  for f in os.listdir(src)
+                  if (os.path.isfile(os.path.join(src,f)) and
                       os.path.splitext(f)[-1].lstrip('.') in valid_exts)]
     else:
-        retval = [f for f in os.listdir(src_folder)
-                  if (os.path.isfile(os.path.join(src_folder,f)) and
+        retval = [f for f in os.listdir(src)
+                  if (os.path.isfile(os.path.join(src,f)) and
                       os.path.splitext(f)[-1].lstrip('.') in valid_exts)]
     retval = sorted(retval)
     return retval

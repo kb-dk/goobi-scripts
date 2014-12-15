@@ -144,7 +144,8 @@ def deskewImage(src,dest_folder,angle,quality=None,resize=None):
     processing.run_cmd(cmd,shell=True)
     return dest
 
-def compressFile(input_file,output_file,quality=50,resize=None,resize_type='pct'):
+def compressFile(input_file,output_file,quality=50,resize=None,resize_type='pct',
+                 density=None):
     '''
     Converts an image file to jpeg. Resize image if selected. Compress image
     to selected quality percentage.
@@ -162,7 +163,11 @@ def compressFile(input_file,output_file,quality=50,resize=None,resize_type='pct'
             resize = '-resize {0}%'.format(resize)
     else:
         resize = ''
-    cmd = 'gm convert {0} {1} -quality {2} {3}'.format(input_file,resize,quality,output_file)
+    if density is not None: # Scale image correctly
+        density = '-units PixelsPerInch -density {0}'.format(density)
+    else:
+        density = ''
+    cmd = 'gm convert {0} {1} -quality {2} {3} {4}'.format(input_file,resize,quality,density,output_file)
     result = processing.run_cmd(cmd,shell=True,print_output=False,raise_errors=False)
     if result['erred']:
         err = ('An error occured when converting files with command {0}. '

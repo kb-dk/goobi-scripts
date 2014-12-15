@@ -6,8 +6,9 @@ Created on 26/03/2014
 @author: jeel
 '''
 
-from tools import tools
 import os
+import shutil
+from tools import tools
 from goobi.goobi_step import Step
 from tools.image_tools import misc as image_tools
 from tools.pdf import misc as pdf_tools
@@ -36,9 +37,6 @@ class AddBindingsToBwPdf( Step ) :
             self.addBindingsToPdf()
         except image_tools.ConvertError as e:
             error = str(e)
-        except Exception as e:
-            self.glogger.exception(e)
-            error = str(e)
         return error
 
     
@@ -50,7 +48,8 @@ class AddBindingsToBwPdf( Step ) :
         root = self.command_line.process_path
         self.process_title = self.command_line.process_title
         
-        self.valid_exts = self.getConfigItem('valid_file_exts',section=self.valid_exts_section).split(';')
+        self.valid_exts = self.getConfigItem('valid_file_exts',
+                                             section=self.valid_exts_section).split(';')
         # Set path to input folder
         master_img_rel = self.getConfigItem('img_master_path',
                                             section = self.folder_structure_section) 
@@ -59,7 +58,12 @@ class AddBindingsToBwPdf( Step ) :
         doc_pdf_bw_path = self.getConfigItem('doc_pdf_bw_path',
                                             section = self.folder_structure_section)
         doc_pdf_bw_path = os.path.join(root,doc_pdf_bw_path)
-        self.pdf_bw_path = tools.getFirstFileWithExtension(doc_pdf_bw_path, 'pdf')
+        if '_' in self.process_title:
+            bw_pdf_name = self.process_title.split('_')[0]
+        else:
+            bw_pdf_name = self.process_title
+        bw_pdf_name = bw_pdf_name+'_bw.pdf'
+        self.pdf_bw_path = os.path.join(doc_pdf_bw_path,bw_pdf_name)
         # Get path for temp folder -> nb absolute
         self.temp_root = self.getConfigItem('temp_folder')
         # Get quality for output pdfs
@@ -68,6 +72,10 @@ class AddBindingsToBwPdf( Step ) :
         self.resize = int(self.getConfigItem('resize'))
 
     def addBindingsToPdf(self):
+        #=======================================================================
+        # Get density for bw-pdf
+        #=======================================================================
+        density = pdf_tools.getDensity(src=self.pdf_bw_path,layer=0)
         # Create temp folder for temp pdf-files
         temp_folder = os.path.join(self.temp_root,self.process_title)
         tools.create_folder(temp_folder)
@@ -84,16 +92,18 @@ class AddBindingsToBwPdf( Step ) :
         image_tools.compressFile(input_file     = front_image_path, 
                                  output_file    = front_pdf_path,
                                  quality        = self.quality,
-                                 resize         = self.resize)
+                                 resize         = self.resize,
+                                 density        = density)
         image_tools.compressFile(input_file     = end_image_path, 
                                  output_file    = end_pdf_path,
                                  quality        = self.quality,
-                                 resize         = self.resize)
+                                 resize         = self.resize,
+                                 density        = density)
         # Add back-binding to pdf
         pdf_list = [front_pdf_path,self.pdf_bw_path,end_pdf_path]
         temp_dest = os.path.join(temp_folder,self.process_title+'.pdf')
         pdf_tools.joinPdfFiles(pdf_list, temp_dest)
-        os.rename(temp_dest, self.pdf_bw_path)
+        shutil.move(temp_dest, self.pdf_bw_path)
         # Delete temp_folder
         fs.clear_folder(temp_folder, also_folder=True)
 

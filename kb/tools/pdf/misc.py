@@ -33,6 +33,29 @@ def joinPdfFiles(pdf_list,dest_path):
     pdfs = ' '.join(pdf_list)
     cmd = 'pdftk {0} cat output {1}'.format(pdfs, dest_path)
     output = processing.run_cmd(cmd,shell=True)
-    if output['erred'] or 'error' in output['stdout']:
+    if output['erred'] or 'error' in str(output['stdout']):
         raise OSError('An error occured when converting files to pdf with ' 
                       'command {0}. Error: {1}.'.format(cmd,output))
+
+def getDensity(src, layer):
+    '''
+    Use identify to get information about a pdf-file. Use some simple text
+    search to get resolution fra raw identify-output
+    :param src:
+    :param layer:
+    '''
+    
+    cmd = 'identify -verbose {0}[{1}]'.format(src,layer)
+    output = processing.run_cmd(cmd,shell=True)
+    if output['erred'] or 'error' in str(output['stdout']):
+        raise OSError('An error occured when identifying pdf-file with ' 
+                      'command {0}. Error: {1}.'.format(cmd,output))
+    txt = output.splitlines()
+    res_s = 'Resolution: '
+    res_e = 'x'
+    rl = [l for l in txt if res_s in l][0]
+    res = rl[rl.find(res_s)+len(res_s):rl.find(res_e)]
+    return res
+    
+
+
