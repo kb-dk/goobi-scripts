@@ -4,6 +4,7 @@ from goobi.goobi_step import Step
 import os
 from tools import tools
 from tools.errors import TransferError, TransferTimedOut
+import shutil
 
 class MoveFromOcrToGoobi( Step ):
 
@@ -37,17 +38,9 @@ class MoveFromOcrToGoobi( Step ):
             #===================================================================
             # A: get path for existing bw pdf just moved to Goobi
             old_bw_pdf_path = tools.getFirstFileWithExtension(self.goobi_pdf_bw, 'pdf')
+            old_bw_pdf_path = os.path.join(self.goobi_pdf_bw,old_bw_pdf_path)
             # B: Rename to new path created in "getVariables"
-            os.rename(old_bw_pdf_path, self.new_bw_pdf_path)
-            #===================================================================
-            # Delete empty and now unused output folder on OCR-server 
-            #===================================================================
-            try:
-                os.rmdir(self.ocr_pdf)
-            except OSError:
-                msg = 'Process folder "{0}" on ocr could not be deleted.'
-                msg = msg.format(self.ocr_pdf)
-                self.info_message(msg)
+            shutil.move(old_bw_pdf_path, self.new_bw_pdf_path)
         except ValueError as e:
             error = str(e)
             #return "Could not convert string to int - check config file."

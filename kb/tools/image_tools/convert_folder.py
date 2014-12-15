@@ -27,8 +27,7 @@ def createPdfFromFolder(src, file_dest,temp_folder,
     to pdf-dest and remove temp folder.
     
     '''
-    image_paths = sorted([f for f in os.listdir(src)
-                     if os.path.splitext(f)[1].lstrip('.') in valid_exts])
+    image_paths = fs.getFilesInFolderWithExts(src, valid_exts)
     for image in image_paths:
         input_path = os.path.join(src,image)
         file_name,_ = os.path.splitext(image)

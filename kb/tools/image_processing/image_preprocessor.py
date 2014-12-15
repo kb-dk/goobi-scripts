@@ -556,10 +556,6 @@ if __name__ == '__main__':
                 'skip_if_pdf_exists': True
                 }
     src = sys.argv[1]
-    #folders = [os.path.join(src,f) 
-    #           for f in os.listdir(src)
-    #           if os.path.isdir(os.path.join(src,f))]
-    #for src in sorted(folders):#[src]:#
     folders = [(os.path.join(src,f),len(os.listdir(os.path.join(src,f)))) 
                for f in os.listdir(src)
                if os.path.isdir(os.path.join(src,f))]

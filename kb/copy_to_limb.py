@@ -13,10 +13,9 @@ class CopyToLimb( Step ):
         self.name = 'Kopiering af billeder til LIMB'
         self.config_main_section = 'copy_to_limb'
         self.limb_output_section = 'limb_output'
-        self.valid_exts_section = 'move_invalid_files'
+        self.valid_exts_section = 'valid_file_exts'
         self.folder_structure_section = 'process_folder_structure'
         self.essential_config_sections.update([self.folder_structure_section, 
-                                               self.folder_structure_section,
                                                self.limb_output_section,
                                                self.valid_exts_section] )
         self.essential_commandlines = {
@@ -40,7 +39,7 @@ class CopyToLimb( Step ):
         self.retries = int(self.getConfigItem('retries'))
         
         #=======================================================================
-        # Variavle to check if ALTO, PDF and TOC files already exists on Goobi
+        # Variable to check if ALTO, PDF and TOC files already exists on Goobi
         #=======================================================================
         limb = self.getConfigItem('limb_output',None,self.limb_output_section)
         alto = self.getConfigItem('alto',None,self.limb_output_section)
