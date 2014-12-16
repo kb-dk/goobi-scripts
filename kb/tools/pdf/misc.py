@@ -50,11 +50,16 @@ def getDensity(src, layer):
     if output['erred'] or 'error' in str(output['stdout']):
         raise OSError('An error occured when identifying pdf-file with ' 
                       'command {0}. Error: {1}.'.format(cmd,output))
-    txt = output.splitlines()
+    txt = (output['stdout'].decode('utf-8')).splitlines()
     res_s = 'Resolution: '
     res_e = 'x'
-    rl = [l for l in txt if res_s in l][0]
+    rl = [l for l in txt if res_s in l]
+    error = ('Resolusion could not be found with identify. Cmd: '
+             '"{0}". Output: "{1}"'.format(cmd,txt))
+    if len(rl) == 0: raise ValueError(error)
     res = rl[rl.find(res_s)+len(res_s):rl.find(res_e)]
+    if not res.isdigit(): raise ValueError(error)
+    res = int(res)
     return res
     
 

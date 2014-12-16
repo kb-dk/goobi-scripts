@@ -8,6 +8,7 @@ Created on 26/03/2014
 
 from tools import tools
 import os
+import shutil
 from goobi.goobi_step import Step
 from tools.image_tools import misc as image_tools
 from tools.pdf import misc as pdf_tools
@@ -51,20 +52,35 @@ class AddFrontispiecesToPdfs( Step ) :
         master_img_rel = self.getConfigItem('img_master_path',
                                             section = self.folder_structure_section) 
         self.img_master_path = os.path.join(root, master_img_rel)
+        #=======================================================================
         # Get/set path for the master bw pdf
+        #=======================================================================
         doc_pdf_bw_path = self.getConfigItem('doc_pdf_bw_path',
                                             section = self.folder_structure_section)
         doc_pdf_bw_path = os.path.join(root,doc_pdf_bw_path)
-        self.pdf_bw_path = tools.getFirstFileWithExtension(doc_pdf_bw_path, 'pdf')
-        # Get/set path for the master bw pdf
+        if '_' in self.process_title:
+            bw_pdf_name = self.process_title.split('_')[0]
+        else:
+            bw_pdf_name = self.process_title
+        bw_pdf_name = bw_pdf_name+'_bw.pdf'
+        self.pdf_bw_path = os.path.join(doc_pdf_bw_path,bw_pdf_name)
+        #=======================================================================
+        # Get/set path for the master color pdf
+        #=======================================================================
         doc_pdf_color_path = self.getConfigItem('doc_pdf_color_path',
-                                            section = self.folder_structure_section)
+                                                section = self.folder_structure_section)
         doc_pdf_color_path = os.path.join(root,doc_pdf_color_path)
-        self.pdf_color_path = tools.getFirstFileWithExtension(doc_pdf_color_path, 'pdf')
+        if '_' in self.process_title:
+            color_pdf_name = self.process_title.split('_')[0]
+        else:
+            color_pdf_name = self.process_title
+        color_pdf_name = color_pdf_name+'_color.pdf'
+        self.pdf_color_path = os.path.join(doc_pdf_color_path,color_pdf_name)
+        
         # Get path for temp folder -> nb absolute
         self.temp_root = self.getConfigItem('temp_folder')
         # Get quality for output pdfs
-        self.frontispieces = int(self.getConfigItem('frontispieces'))
+        self.frontispieces = self.getConfigItem('frontispieces')
 
     def addFrontispiecesToPdfs(self):
         # Create temp folder for temp pdf-files
@@ -79,7 +95,7 @@ class AddFrontispiecesToPdfs( Step ) :
         pdf_list = [self.frontispieces,pdf]
         temp_dest = os.path.join(temp_folder,self.process_title+'.pdf')
         pdf_tools.joinPdfFiles(pdf_list, temp_dest)
-        os.rename(temp_dest, pdf)
+        shutil.move(temp_dest, pdf)
         
 
 if __name__ == '__main__' :
