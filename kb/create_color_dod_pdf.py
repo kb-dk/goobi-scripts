@@ -26,8 +26,7 @@ class CreateColorPdf( Step ) :
         self.essential_config_sections.update([self.folder_structure_section,
                                                self.valid_file_exts_section] )
         self.essential_commandlines = {
-            "process_path":"folder",
-            "auto_complete":"string"}
+            "process_path":"folder"}
     
     def step(self):
         error = None
