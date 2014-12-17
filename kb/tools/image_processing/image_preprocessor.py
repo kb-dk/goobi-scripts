@@ -18,6 +18,14 @@ from tools.filesystem import fs
 
 class ImagePreprocessor():
     def __init__(self,src,settings,logger,debug=False):
+        '''
+        Initialize object with settings, paths etc
+        
+        :param src: folder with image files to preprocess
+        :param settings: dictionary with settings and paths for preprocessing
+        :param logger: logger to log to
+        :param debug: debug with logger?
+        '''
         self.settings = settings
         self.debug = debug
         self.logger = logger
@@ -62,22 +70,39 @@ class ImagePreprocessor():
         # temp_location = '/tmp/ramdisk/'
     
     def createFolders(self,*folders):
+        '''
+        Create one or more folders given by argument
+        
+        :param *folders: one or more folders divided by comma, e.g. f1,f2,f3 
+        '''
         for folder in folders:
             if not os.path.exists(folder):
                 os.mkdir(folder)
     
     def deleteWorkingFolders(self):
+        '''
+        Delete tempoary folders.
+        '''
         fs.clear_folder(self.temp_folder, also_folder=True)
         if self.settings['output_pdf']:
             fs.clear_folder(self.temp_pdf_folder, also_folder=True)
     
     def processFolder(self):
+        '''
+        Process the folder
+        '''
         if self.settings['skip_if_pdf_exists']:
             if os.path.exists(self.pdf_dest):
                 self.deleteWorkingFolders()
                 return
+        #=======================================================================
+        # Run process of the files
+        #=======================================================================
         try:
             self._process()
+        #=======================================================================
+        # Handle errors and delete temporary folders
+        #=======================================================================
         except image_tools.InnerCropError as e:
             self.logger.error('Innercrop erred for folder: {0}'.format(self.source_folder))
             self.deleteWorkingFolders()
@@ -91,33 +116,61 @@ class ImagePreprocessor():
         self.deleteWorkingFolders()
         
     def _process(self):
+        '''
+        Run the different methods to preprocess the images in source folder
+        '''
               
-        # Initialize dictionary for image processing information
+        #=======================================================================
+        # # Initialize dictionary for image processing information
+        #=======================================================================
         self.getImageInformation()
-        # Overvej:
-            # måske der skal hentes statistik for bøgernes størrelse, således
-            # at opslag ikke crop'es og deskew'es
-            # f.eks. tilføjelse 'spread': False -> 
+        #=======================================================================
+        # If 'spread_detection' is True, get size of all images and set
+        # them as spreads if they are statistically large (larger than mean or
+        # avg adjusted with some constant)
+        # A spread is exclude from cropping and deskewing 
+        #=======================================================================
         if self.settings['spread_detection']: self.locate_spreads()
+        #=======================================================================
         # Get all cropping coordinates and evaluate these
+        #=======================================================================
         self.getCropCoordinates()
+        #=======================================================================
         # Select crop coordinates
+        #=======================================================================
         self.set_crop()
-        # Crop images e.g. with output to bw-image file on ramdisk -> smaller and bw may be better for deskew test?
+        #=======================================================================
+        # Crop images e.g. with output to bw-image file on ramdisk -> smaller 
+        # and bw may be better for deskew test?
+        #=======================================================================
         self.create_temp_crops()
+        #=======================================================================
         # Get all deskew
+        #=======================================================================
         if self.settings['deskew_images']:
             self.get_deskew_angles()
+            #===================================================================
             # Select which images to deskew 
+            #===================================================================
             self.set_deskew()
+            #===================================================================
             # Process files
+            #===================================================================
         self.processFiles()
         if self.debug: self.logger.debug(pprint.pformat(self.img_proc_info))
         if self.debug: self.logger.debug(str(datetime.datetime.now())+': '+'Merge pdf files to one pdf')
+        #=======================================================================
+        # If output to pdf is set to True, merge output pdfs for each page to
+        # one pdf
+        # NB: only used for testing purposes
+        #=======================================================================
         if self.settings['output_pdf']:
             pdf_tools.mergePdfFilesInFolder(self.temp_pdf_folder,self.pdf_dest)
     
     def processFiles(self):
+        '''
+        Process all the files
+        '''
         file_paths = sorted(self.img_proc_info['images'].keys())
         for file_path in file_paths:
             info = self.img_proc_info['images'][file_path]

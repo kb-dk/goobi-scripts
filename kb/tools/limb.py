@@ -40,8 +40,21 @@ def pageCountMatches(pdf_input_dir,input_files_dir,valid_exts):
     return numPages == numInputFiles
 
 def alreadyMoved(toc_dir,pdf_input_dir,input_files_dir,alto_dir,valid_exts):
+    '''
+    Validate that the following files are present and valid
+    :param toc_dir:
+    :param pdf_input_dir:
+    :param input_files_dir:
+    :param alto_dir:
+    :param valid_exts:
+    '''
+    
     try:
-        performValidations(toc_dir,pdf_input_dir,input_files_dir,alto_dir,valid_exts)
+        performValidations(toc_dir,
+                           pdf_input_dir,
+                           input_files_dir,
+                           alto_dir,
+                           valid_exts)
     except DataError:
         return False
     return True

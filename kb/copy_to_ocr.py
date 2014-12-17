@@ -27,7 +27,6 @@ class CopyToOcr( Step ):
         Get all required vars from command line + config
         and confirm their existence.
         '''
-        
         process_title = self.command_line.process_title
         process_path = self.command_line.process_path
         #=======================================================================
@@ -68,9 +67,14 @@ class CopyToOcr( Step ):
 
         self.transit_dir = os.path.join(ocr_transitfolder,process_title)
         self.hotfolder_dir = os.path.join(ocr_hotfolder,process_title)
-
+        #=======================================================================
+        # Set retry wait time and retry count for copying files
+        #=======================================================================
         self.retry_wait = int(self.getConfigItem('retry_wait'))
         self.retry_num = int(self.getConfigItem('retry_num'))
+        #=======================================================================
+        # Set valid extensions for image files to check as preprocessed
+        #=======================================================================
         self.valid_exts = self.getConfigItem('valid_file_exts',None, self.valid_exts_section).split(';')
         #=======================================================================
         # Set variables for waiting for preprocessed images to be ready
@@ -78,27 +82,37 @@ class CopyToOcr( Step ):
         self.pp_retry_wait = int(self.getConfigItem('preprocess_retry_wait'))
         self.pp_retry_num = int(self.getConfigItem('preprocess_retry_num'))
         img_list = fs.getFilesInFolderWithExts(self.master_folder, self.valid_exts)
-        self.excepted_image_count = len(img_list-2) # Source images miunus first and last image
+        self.excepted_image_count = len(img_list)-2 # Source images miunus first and last image
 
     def waitForPreprocessedImages(self):
         retry = 0
         while retry <= self.pp_retry_num:
+            #===================================================================
             # Get current number of preprocessed images
+            #===================================================================
             pp_files = fs.getFilesInFolderWithExts(self.source_folder, self.valid_exts)
-            # Check if all files are preprocessed
+            #===================================================================
+            # Break loop if all files are preprocessed 
+            #===================================================================
             if len(pp_files) == self.excepted_image_count:
+                #===============================================================
+                # Wait 30 sec to make sure files are completely copied
+                #===============================================================
+                time.sleep(30)
                 break
+            #===================================================================
             # Wait "self.pp_retry_wait" seconds
+            #===================================================================
             time.sleep(self.pp_retry_wait)
             retry += 1
     
     def step(self):
         error = None
-        msg = ('Copying files from {0} to {1} via transit {2}.')
-        msg = msg.format(self.source_folder, self.hotfolder_dir, self.transit_dir)
-        self.debug_message(msg)
         try:
             self.getVariables()
+            msg = ('Copying files from {0} to {1} via transit {2}.')
+            msg = msg.format(self.source_folder, self.hotfolder_dir, self.transit_dir)
+            self.debug_message(msg)
             #===================================================================
             # Wait for preprocessed images to be ready 
             #===================================================================

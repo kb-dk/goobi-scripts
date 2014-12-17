@@ -47,14 +47,21 @@ class AddBindingsToBwPdf( Step ) :
         '''
         root = self.command_line.process_path
         self.process_title = self.command_line.process_title
-        
+        #=======================================================================
+        # Get valid image files extensions to select the correct first and last
+        # image
+        #=======================================================================
         self.valid_exts = self.getConfigItem('valid_file_exts',
                                              section=self.valid_exts_section).split(';')
+        #=======================================================================
         # Set path to input folder
+        #=======================================================================
         master_img_rel = self.getConfigItem('img_master_path',
                                             section = self.folder_structure_section) 
         self.img_master_path = os.path.join(root, master_img_rel)
+        #=======================================================================
         # Get/set path for the master bw pdf
+        #=======================================================================
         doc_pdf_bw_path = self.getConfigItem('doc_pdf_bw_path',
                                             section = self.folder_structure_section)
         doc_pdf_bw_path = os.path.join(root,doc_pdf_bw_path)
@@ -64,11 +71,17 @@ class AddBindingsToBwPdf( Step ) :
             bw_pdf_name = self.process_title
         bw_pdf_name = bw_pdf_name+'_bw.pdf'
         self.pdf_bw_path = os.path.join(doc_pdf_bw_path,bw_pdf_name)
+        #=======================================================================
         # Get path for temp folder -> nb absolute
+        #=======================================================================
         self.temp_root = self.getConfigItem('temp_folder')
+        #=======================================================================
         # Get quality for output pdfs
+        #=======================================================================
         self.quality = int(self.getConfigItem('quality'))
+        #=======================================================================
         # Get resize pct for output pdf
+        #=======================================================================
         self.resize = int(self.getConfigItem('resize'))
 
     def addBindingsToPdf(self):
@@ -76,17 +89,22 @@ class AddBindingsToBwPdf( Step ) :
         # Get density for bw-pdf (i.e. DPI/PixelsPerInch)
         #=======================================================================
         density = pdf_tools.getDensity(src=self.pdf_bw_path,layer=0)
+        #=======================================================================
         # Create temp folder for temp pdf-files
+        #=======================================================================
         temp_folder = os.path.join(self.temp_root,self.process_title)
         tools.create_folder(temp_folder)
+        #=======================================================================
         # Get path for first and last image
+        #=======================================================================
         images = fs.getFilesInFolderWithExts(self.img_master_path,
                                              self.valid_exts,
                                              absolute=True)
+        #=======================================================================
         # Create PDF of bindings (first and last image in master image folder)
+        #=======================================================================
         front_image_path = images[0]
         end_image_path = images[-1]
-        # Add front-binding to pdf
         front_pdf_path = os.path.join(temp_folder,'front.pdf')
         end_pdf_path = os.path.join(temp_folder,'end.pdf') 
         image_tools.compressFile(input_file     = front_image_path, 
@@ -99,12 +117,19 @@ class AddBindingsToBwPdf( Step ) :
                                  quality        = self.quality,
                                  resize         = self.resize,
                                  density        = density)
-        # Add back-binding to pdf
+        #=======================================================================
+        # Add front and back-binding to pdf
+        #=======================================================================
         pdf_list = [front_pdf_path,self.pdf_bw_path,end_pdf_path]
         temp_dest = os.path.join(temp_folder,self.process_title+'.pdf')
         pdf_tools.joinPdfFiles(pdf_list, temp_dest)
+        #=======================================================================
+        # Move new pdf from temp to bw-pdf location (overwrite)
+        #=======================================================================
         shutil.move(temp_dest, self.pdf_bw_path)
+        #=======================================================================
         # Delete temp_folder
+        #=======================================================================
         fs.clear_folder(temp_folder, also_folder=True)
 
 if __name__ == '__main__' :

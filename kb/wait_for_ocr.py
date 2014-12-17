@@ -21,10 +21,6 @@ class WaitForOcr( Step ):
             'auto_report_problem' : 'string',
             'process_title' : 'string'
         }
-
-
-
-    
     
     def step(self):
         '''
@@ -46,7 +42,7 @@ class WaitForOcr( Step ):
             #===================================================================
             # Wait for PDF-file to be ready on OCR-server
             #===================================================================
-            self.waitForOcr()
+            error = self.waitForOcr()
         except IOError as e:
             # if we get an IO error we need to crash
             error = ('Error reading from directory {0}')
@@ -58,9 +54,12 @@ class WaitForOcr( Step ):
             error = error.format(e.strerror)
             return error
         # if we've gotten this far, we've timed out and need to go back to the previous step
-        return "Timed out waiting for ocr output."
+        return error
 
     def waitForOcr(self):
+        '''
+        Wait for the PDF-file on the OCR-server is ready.
+        '''
         retry_counter = 0
         while retry_counter < self.retry_num:
             if self.ocrIsReady():
@@ -74,13 +73,13 @@ class WaitForOcr( Step ):
                 self.debug_message(msg)
                 retry_counter += 1
                 time.sleep(self.retry_wait)
+        return "Timed out waiting for ocr output."
 
     def getVariables(self):
         '''
-        We need the ocr_output folder,
-        the location of the toc file
-        Throws error if any directories are missing
-        or if our retry vals are not numbers
+        We need the ocr_output folder, the location of the toc file
+        Throws error if any directories are missing or if our retry vals are 
+        not numbers
         '''
         process_title = self.command_line.process_title
         process_path = self.command_line.process_path

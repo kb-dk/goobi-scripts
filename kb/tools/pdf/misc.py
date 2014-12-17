@@ -43,6 +43,9 @@ def getDensity(src, layer):
     search to get resolution fra raw identify-output
     :param src:
     :param layer:
+    
+    Notes: consider to output a default density (DPI), e.g. 72, if using 
+    "identify" fails.
     '''
     
     cmd = 'identify -verbose {0}[{1}]'.format(src,layer)
@@ -57,6 +60,7 @@ def getDensity(src, layer):
     error = ('Resolusion could not be found with identify. Cmd: '
              '"{0}". Output: "{1}"'.format(cmd,txt))
     if len(rl) == 0: raise ValueError(error)
+    rl = rl[0]
     res = rl[rl.find(res_s)+len(res_s):rl.find(res_e)]
     if not res.isdigit(): raise ValueError(error)
     res = int(res)
