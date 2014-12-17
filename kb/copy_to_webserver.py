@@ -37,6 +37,7 @@ class CopyToWebServer( Step ):
         # retry variables
         self.retry_wait = int(self.getConfigItem('retry_wait'))
         self.retry_num = int(self.getConfigItem('retry_num'))
+        #self.apache_owner = self.getSetting('apache_owner',var_type=int)
 
     def step(self):
         '''

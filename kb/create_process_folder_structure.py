@@ -36,7 +36,8 @@ class CreateProcessFolderStructure( Step ) :
     
     def setVariables(self):
         self.folder_structure = self.getConfigSection(self.folder_structure_section)
-        titleself.process_path = self.command_line.process_path
+        self.process_path = self.command_line.process_path
+        # titleself.process_path = self.command_line.process_path
                 
     def createFolders(self,root,folderStructure):
         '''
