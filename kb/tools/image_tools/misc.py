@@ -156,15 +156,17 @@ def compressFile(input_file,output_file,quality=50,resize=None,resize_type='pct'
     :param resize: width or percentage to resize image to 
     :param resize_type: resize by width (keeping ratio) or by percentage
     '''
-    resize = ''
-    density = ''
     if resize is not None:
         if resize_type == 'width':
             resize = '-resize {0}'.format(resize)
         elif resize != 100: # resize by percentage, only if it is set to anything else than 100 (=no resize)
             resize = '-resize {0}%'.format(resize)
+    else:
+        resize = ''
     if density is not None: # Scale image correctly
         density = '-units PixelsPerInch -density {0}'.format(density)
+    else:
+        density = ''
     cmd = 'gm convert {0} {1} -quality {2} {3} {4}'.format(input_file,resize,quality,density,output_file)
     result = processing.run_cmd(cmd,shell=True,print_output=False,raise_errors=False)
     if result['erred']:
