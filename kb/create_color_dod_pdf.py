@@ -46,6 +46,12 @@ class CreateColorPdf( Step ) :
             #===================================================================
             # Convert input images to one pdf
             #===================================================================
+            msg = ('Creating PDF-file from images in "{0}". Outputting to temp '
+                   'folder "{1}" and creates one PDF with path "{2}". Resize '
+                   'PDF to {3}% and compress with quality {4}%')
+            msg = msg.format(self.input_folder,self.temp_folder,
+                             self.color_pdf_path,self.resize,self.quality)
+            self.debug_message(msg)
             convert.createPdfFromFolder(src         = self.input_folder, 
                                         file_dest   = self.color_pdf_path, 
                                         temp_folder = self.temp_folder, 

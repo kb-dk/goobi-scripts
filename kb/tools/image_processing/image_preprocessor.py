@@ -207,7 +207,7 @@ class ImagePreprocessor():
             # Jeg har sat quality til 50% så de ikke fylder så meget når jeg skal gemme de resulterende jpgs til OCR
             file_path = image_tools.deskewImage(file_path,self.temp_folder,
                                                 info['deskew_angle'],quality=50,
-                                                resize=self.settings['resize_output'])
+                                                resize=self.settings['output_resize'])
             time_stat['Deskew image'] = time.time()-t
         else:
             if self.debug: self.logger.debug('\tNo deskewing')
@@ -215,7 +215,7 @@ class ImagePreprocessor():
             file_name,_ = os.path.splitext(os.path.basename(file_path))
             dest = os.path.join(self.temp_folder,file_name+'compressed.jpg')
             image_tools.compressFile(file_path,dest,quality=50,
-                                     resize=self.settings['resize_output'])
+                                     resize=self.settings['output_resize'])
             file_path = dest
             time_stat['Compress/resize image'] = time.time()-t
         # 3: to pdf 
