@@ -26,7 +26,6 @@ class PreprocessDodImageFiles( Step ) :
                                                self.valid_file_exts_section] )
         self.essential_commandlines = {
             "process_path":"folder",
-            "auto_complete":"string",
             "step_id":"number",
             'process_title':'string'
         }

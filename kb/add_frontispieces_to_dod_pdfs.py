@@ -79,20 +79,22 @@ class AddFrontispiecesToPdfs( Step ) :
         
         # Get path for temp folder -> nb absolute
         self.temp_root = self.getConfigItem('temp_folder')
-        # Get quality for output pdfs
+        # Get path to frontispieces
         self.frontispieces = self.getConfigItem('frontispieces')
+        # Get path to frontispieces for 600 DPI pdf (bw)
+        self.frontispieces_bw = self.getConfigItem('frontispieces_600dpi')
 
     def addFrontispiecesToPdfs(self):
         # Create temp folder for temp pdf-files
         temp_folder = os.path.join(self.temp_root,self.process_title)
         tools.create_folder(temp_folder)
-        self.addFrontispiecesToPdf(self.pdf_bw_path,temp_folder)
-        self.addFrontispiecesToPdf(self.pdf_color_path,temp_folder)
+        self.addFrontispiecesToPdf(self.pdf_bw_path,temp_folder,self.frontispieces)
+        self.addFrontispiecesToPdf(self.pdf_color_path,temp_folder,self.frontispieces_bw)
         # Delete temp_folder
         fs.clear_folder(temp_folder, also_folder=True)
 
-    def addFrontispiecesToPdf(self,pdf,temp_folder):
-        pdf_list = [self.frontispieces,pdf]
+    def addFrontispiecesToPdf(self,add_pdf,pdf,temp_folder):
+        pdf_list = [add_pdf,pdf]
         temp_dest = os.path.join(temp_folder,self.process_title+'.pdf')
         pdf_tools.joinPdfFiles(pdf_list, temp_dest)
         shutil.move(temp_dest, pdf)
