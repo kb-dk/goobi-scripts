@@ -9,16 +9,14 @@ from tools.errors import DataError
 from tools.processing import processing
 
 
-class RunAlpehUpdate( Step ):
+class RunAlephUpdate( Step ):
 
     def setup(self):
         self.name = 'Kald Aleph script'
         self.config_main_section = 'aleph'
         self.valid_exts_section = 'valid_file_exts'
-        self.valid_exts_section = 'move_invalid_files'
         self.folder_structure_section = 'process_folder_structure'
         self.essential_config_sections.update([self.folder_structure_section,
-                                               self.aleph,
                                                self.valid_exts_section] )
         self.essential_commandlines = {
             "process_id" : "number",
@@ -49,19 +47,19 @@ class RunAlpehUpdate( Step ):
             self.barcode = process_title
 
         # get color_pdf
-        self.color_pdf = str.join(self.barcode, '_color', '.pdf')
+        self.color_pdf = self.barcode+'_color'+'.pdf'
         
         # get color pdf size
         c_pdf_path = self.getConfigItem('doc_pdf_color_path',section=self.folder_structure_section)
-        color_pdf_file = os.path.join(process_path, c_pdf_path)
+        color_pdf_file = os.path.join(process_path, c_pdf_path)+color_pdf
         self.color_pdf_size = fs.getFileSize(color_pdf_file,mb=True)
 
         # get bw_pdf
-        self.bw_pdf = str.join(self.barcode, '_bw', '.pdf')
+        self.bw_pdf = self.barcode+'_bw'+'.pdf'
         
         # get bw_pdf_size
         bw_pdf_path = self.getConfigItem('doc_pdf_bw_path',section=self.folder_structure_section)
-        bw_pdf_file = os.path.join(process_path, bw_pdf_path)
+        bw_pdf_file = os.path.join(process_path, bw_pdf_path)+bw_pdf
         self.bw_pdf_size = fs.getFileSize(bw_pdf_file,mb=True)
 
         # Get multivolume - assume no if error or different from 'Ja/ja'
@@ -91,7 +89,7 @@ class RunAlpehUpdate( Step ):
         multivolumes = '[{0}]'.format(self.multivolumes) 
         login        = "{0}@{1}".format(self.aleph_server_user, self.aleph_server)
         script_path  = '/kb/bin/digitization_item.csh'
-        parameters   = str.join(barcode, color, blackwhite, multivolumes)
+        parameters   = barcode+color+blackwhite+multivolumes
         # cmd: ssh goobi-test@aleph-test-00.kb.dk sudo /kb/bin/digitization_item.csh (parameters)
         cmd          = 'ssh {0} sudo {1} {2}'.format(login,script_path,parameters)
 
@@ -110,4 +108,4 @@ class RunAlpehUpdate( Step ):
 
 if __name__ == '__main__':
     
-    RunAlpehUpdate().begin()
+    RunAlephUpdate().begin()
