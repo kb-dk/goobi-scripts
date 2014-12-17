@@ -6,13 +6,11 @@ Created on 26/03/2014
 @author: jeel
 '''
 
-from tools import tools
 import os
 from goobi.goobi_step import Step
 from tools.image_processing import image_preprocessor
 from tools.image_tools import misc as image_tools
 from tools.filesystem import fs
-import time
 
 
 class PreprocessDodImageFiles( Step ) :
@@ -35,21 +33,24 @@ class PreprocessDodImageFiles( Step ) :
     
     def step(self):
         error = None
-        self.getVariables()
         try:
-            t = time.time()
+            #===================================================================
+            # Get and set variables
+            #===================================================================
+            self.getVariables()
+            #===================================================================
+            # Remove previously preprocessed images
+            #===================================================================
+            fs.clear_folder(self.img_pre_processed_path)
+            #===================================================================
+            # Preprocess images
+            #===================================================================
             ip = image_preprocessor.ImagePreprocessor(self.img_master_path,
                                                       self.settings,
                                                       self.glogger,
                                                       self.debug)
             ip.processFolder()
-            time_used = tools.get_delta_time(time.time()-t)
-            self.debug_message('Images for process {0} preprocessed in '
-                               '{1}'.format(self.process_id,time_used))
         except image_tools.ConvertError as e:
-            error = str(e)
-        except Exception as e:
-            self.glogger.exception(e)
             error = str(e)
         return error
 
@@ -66,7 +67,7 @@ class PreprocessDodImageFiles( Step ) :
         master_img_rel = self.getConfigItem('img_master_path',
                                             section = self.folder_structure_section) 
         self.img_master_path = os.path.join(process_root, master_img_rel)
-        # Set destination path to output pdf-files
+        # Set destination path to output preprocessed images
         img_pre_processed_path = self.getConfigItem('img_pre_processed_path',
                                             section = self.folder_structure_section)
         self.img_pre_processed_path = os.path.join(process_root,

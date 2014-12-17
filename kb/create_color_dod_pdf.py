@@ -31,24 +31,29 @@ class CreateColorPdf( Step ) :
     
     def step(self):
         error = None
-        self.getVariables()
         try:
-            
-            t = time.time()
+            #===================================================================
+            # Get and set variables
+            #===================================================================
+            self.getVariables()
+            #===================================================================
+            # Create folder for temporary pdf-files
+            #===================================================================
             fs.create_folder(self.temp_folder)
+            #===================================================================
+            # Delete previously created color pdf
+            #===================================================================
+            fs.clear_folder(self.pdf_color_folder_path)
+            #===================================================================
+            # Convert input images to one pdf
+            #===================================================================
             convert.createPdfFromFolder(src         = self.input_folder, 
                                         file_dest   = self.color_pdf_path, 
                                         temp_folder = self.temp_folder, 
                                         quality     = self.quality, 
                                         resize_pct  = self.resize, 
                                         valid_exts  = self.valid_exts)
-            time_used = tools.get_delta_time(time.time()-t)
-            self.debug_message('Color PDF of images for process {0} '
-                               'created in {1}'.format(self.process_id,time_used))
         except image_tools.ConvertError as e:
-            error = str(e)
-        except Exception as e:
-            self.glogger.exception(e)
             error = str(e)
         return error
 
@@ -66,7 +71,7 @@ class CreateColorPdf( Step ) :
         # Get/set path for the master bw pdf
         doc_pdf_color_path = self.getConfigItem('doc_pdf_color_path',
                                             section = self.folder_structure_section)
-        doc_pdf_color_path = os.path.join(root,doc_pdf_color_path)
+        self.pdf_color_folder_path = os.path.join(root,doc_pdf_color_path)
         #=======================================================================
         # Set the name for the output color pdf file
         # Assumed process title: [barcode]_[Antiqkva/Fraktur]
@@ -77,7 +82,7 @@ class CreateColorPdf( Step ) :
         else:
             color_pdf_name = process_title
         color_pdf_name = color_pdf_name+'_color.pdf'
-        self.color_pdf_path = os.path.join(doc_pdf_color_path,color_pdf_name)
+        self.color_pdf_path = os.path.join(self.pdf_color_folder_path,color_pdf_name)
         # Get quality and resize options for image conversion
         self.quality = self.getConfigItem('quality') 
         self.resize = self.getConfigItem('resize')

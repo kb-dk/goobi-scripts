@@ -5,6 +5,7 @@ from goobi.goobi_step import Step
 import tools.tools as tools
 import tools.limb as limb_tools
 import os, time
+from tools.filesystem import fs
 
 class WaitForOcr( Step ):
 
@@ -20,6 +21,60 @@ class WaitForOcr( Step ):
             'auto_report_problem' : 'string',
             'process_title' : 'string'
         }
+
+
+
+    
+    
+    def step(self):
+        '''
+        This script's role is to wait until
+        ocr processing is complete before finishing.
+        In the event of a timeout, it reports back to 
+        previous step before exiting.
+        '''
+        error = None
+        try:
+            #===================================================================
+            # Get and set variables
+            #===================================================================
+            self.getVariables()
+            #===================================================================
+            # Delete existing bw-pdf file
+            #===================================================================
+            fs.clear_folder(self.goobi_pdf)
+            #===================================================================
+            # Wait for PDF-file to be ready on OCR-server
+            #===================================================================
+            self.waitForOcr()
+        except IOError as e:
+            # if we get an IO error we need to crash
+            error = ('Error reading from directory {0}')
+            error = error.format(e.strerror)
+            return error
+        except ValueError as e:
+            # caused by conversion of non-numeric strings in config to nums
+            error = "Invalid config data supplied, error: {0}"
+            error = error.format(e.strerror)
+            return error
+        # if we've gotten this far, we've timed out and need to go back to the previous step
+        return "Timed out waiting for ocr output."
+
+    def waitForOcr(self):
+        retry_counter = 0
+        while retry_counter < self.retry_num:
+            if self.ocrIsReady():
+                msg = ('ocr output is ready - exiting.')
+                self.debug_message(msg)
+                return None # this is the only successful exit possible
+            else:
+                # if they haven't arrived, sit and wait for a while
+                msg = ('ocr output not ready - sleeping for {0} seconds...')
+                msg = msg.format(self.retry_wait)
+                self.debug_message(msg)
+                retry_counter += 1
+                time.sleep(self.retry_wait)
+
     def getVariables(self):
         '''
         We need the ocr_output folder,
@@ -28,7 +83,7 @@ class WaitForOcr( Step ):
         or if our retry vals are not numbers
         '''
         process_title = self.command_line.process_title
-
+        process_path = self.command_line.process_path
         # set ocr to current outputfolder - antikva or fraktur         
         try:
             ocr_workflow_type = self.getSetting('ocr_workflow_type').lower()
@@ -45,64 +100,33 @@ class WaitForOcr( Step ):
                    '"fraktur" eller "antikva", men er pt. "{2}".')
             err = err.format('ocr_workflow_type',self.name,ocr_workflow_type)
             self.error_message(err)
-        
-        # join paths to create absolute paths
+        #=======================================================================
+        # Join paths to create absolute paths
+        #=======================================================================
         self.pdf_input_dir = os.path.join(ocr, process_title)
-        
+        #=======================================================================
         # Set destination for paths
-        self.goobi_pdf = os.path.join(self.command_line.process_path, 
-            self.getConfigItem('doc_pdf_bw_path', None, self.folder_structure_section))
-        self.valid_exts = self.getConfigItem('valid_file_exts',None, self.valid_exts_section).split(';')
+        #=======================================================================
+        bw_path = self.getConfigItem('doc_pdf_bw_path',
+                                     section = self.folder_structure_section)
+        self.goobi_pdf = os.path.join(process_path, bw_path)
+        #=======================================================================
         # Get path for input-files in process folder
-        process_path = self.command_line.process_path
+        #=======================================================================
         input_files = self.getConfigItem('img_pre_processed_path',
                                          section=self.folder_structure_section) 
         self.input_files = os.path.join(process_path,input_files)
-        
+        #=======================================================================
         # Get retry number and retry-wait time
+        #=======================================================================
         self.retry_num = int(self.getConfigItem('retry_num'))
         self.retry_wait = int(self.getConfigItem('retry_wait'))
-        
-    def step(self):
-        '''
-        This script's role is to wait until
-        ocr processing is complete before finishing.
-        In the event of a timeout, it reports back to 
-        previous step before exiting.
-        '''
-        error = None
-        retry_counter = 0
-        try:
-            self.getVariables()
-  
-            # keep on retrying for the given number of attempts
-            while retry_counter < self.retry_num:
-                
-                if self.ocrIsReady():
-                    msg = ('ocr output is ready - exiting.')
-                    self.debug_message(msg)
-                    return None # this is the only successful exit possible
-                else:
-                    # if they haven't arrived, sit and wait for a while
-                    msg = ('ocr output not ready - sleeping for {0} seconds...')
-                    msg = msg.format(self.retry_wait)
-                    self.debug_message(msg)
-                    retry_counter += 1
-                    time.sleep(self.retry_wait)
-        except IOError as e:
-            # if we get an IO error we need to crash
-            error = ('Error reading from directory {0}')
-            error = error.format(e.strerror)
-            return error
-        except ValueError as e:
-            # caused by conversion of non-numeric strings in config to nums
-            error = "Invalid config data supplied, error: {0}"
-            error = error.format(e.strerror)
-            return error
-        # if we've gotten this far, we've timed out and need to go back to the previous step
-        return "Timed out waiting for ocr output."
-
-
+        #=======================================================================
+        # Get valid extension for image files
+        #=======================================================================
+        v_exts = self.getConfigItem('valid_file_exts',
+                                    section = self.valid_exts_section)
+        self.valid_exts = v_exts.split(';')
         
     def ocrIsReady(self):
         '''

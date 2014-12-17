@@ -5,9 +5,7 @@ import os
 from tools import tools
 from tools import errors
 from tools.filesystem import fs
-import tools.limb as limb_tools
-
-
+import time
 
 class CopyToOcr( Step ):
 
@@ -24,7 +22,6 @@ class CopyToOcr( Step ):
             "process_title" : "string"
         }
 
-
     def getVariables(self):
         '''
         Get all required vars from command line + config
@@ -33,11 +30,19 @@ class CopyToOcr( Step ):
         
         process_title = self.command_line.process_title
         process_path = self.command_line.process_path
+        #=======================================================================
+        # Path to folder with master image files
+        #=======================================================================
         # img_master_path = images/master_orig/
+        mi_img = self.getConfigItem('img_master_path',
+                                    section = self.folder_structure_section)
+        self.master_folder = os.path.join(process_path,mi_img)
+        #=======================================================================
+        # Path to folder with preprocessed files
+        #=======================================================================
         pp_img = self.getConfigItem('img_pre_processed_path',
                                     section = self.folder_structure_section)
         self.source_folder = os.path.join(process_path,pp_img)
-
         # ======================================================================
         # legr: Get the correct OCR server for the issue - antikva or fraktur
         # Break if argument somehow is missing or have an invalid name
@@ -46,7 +51,7 @@ class CopyToOcr( Step ):
             ocr_workflow_type = self.getSetting('ocr_workflow_type').lower()
         except KeyError:
             self.error_message('{0} er ikke givet med som variabel til scriptet.'.format('ocr_workflow_type'))
-
+            
         if ocr_workflow_type == 'antikva':
             # legr: currently antikva on ocr-01
             ocr_transitfolder = self.getSetting('ocr_antikva_transit')
@@ -67,24 +72,40 @@ class CopyToOcr( Step ):
         self.retry_wait = int(self.getConfigItem('retry_wait'))
         self.retry_num = int(self.getConfigItem('retry_num'))
         self.valid_exts = self.getConfigItem('valid_file_exts',None, self.valid_exts_section).split(';')
+        #=======================================================================
+        # Set variables for waiting for preprocessed images to be ready
+        #=======================================================================
+        self.pp_retry_wait = int(self.getConfigItem('preprocess_retry_wait'))
+        self.pp_retry_num = int(self.getConfigItem('preprocess_retry_num'))
+        img_list = fs.getFilesInFolderWithExts(self.master_folder, self.valid_exts)
+        self.excepted_image_count = len(img_list-2) # Source images miunus first and last image
 
-        # legr:
-        # We could define pdf, inputfile and ext-variables for use if we want to test if files already is present:
-        # self.goobi_pdf_color = os.path.join(process_path, 
-        #    self.getConfigItem('doc_pdf_color_path', None, 'process_folder_structure'))
-        # self.goobi_pdf_bw = os.path.join(process_path, 
-        #    self.getConfigItem('doc_pdf_bw_path', None, 'process_folder_structure'))
-        # input_files = self.getConfigItem('img_master_path',None, self.folder_structure_section) 
-        # self.input_files = os.path.join(process_path,input_files)
-
-
+    def waitForPreprocessedImages(self):
+        retry = 0
+        while retry <= self.pp_retry_num:
+            # Get current number of preprocessed images
+            pp_files = fs.getFilesInFolderWithExts(self.source_folder, self.valid_exts)
+            # Check if all files are preprocessed
+            if len(pp_files) == self.excepted_image_count:
+                break
+            # Wait "self.pp_retry_wait" seconds
+            time.sleep(self.pp_retry_wait)
+            retry += 1
+    
     def step(self):
         error = None
-        self.getVariables()
         msg = ('Copying files from {0} to {1} via transit {2}.')
         msg = msg.format(self.source_folder, self.hotfolder_dir, self.transit_dir)
         self.debug_message(msg)
         try:
+            self.getVariables()
+            #===================================================================
+            # Wait for preprocessed images to be ready 
+            #===================================================================
+            self.waitForPreprocessedImages()
+            #===================================================================
+            # Copy files to OCR-server
+            #===================================================================
             tools.copy_files(source          = self.source_folder,
                              dest            = self.hotfolder_dir,
                              transit         = self.transit_dir,

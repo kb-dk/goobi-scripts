@@ -73,7 +73,7 @@ class AddBindingsToBwPdf( Step ) :
 
     def addBindingsToPdf(self):
         #=======================================================================
-        # Get density for bw-pdf
+        # Get density for bw-pdf (i.e. DPI/PixelsPerInch)
         #=======================================================================
         density = pdf_tools.getDensity(src=self.pdf_bw_path,layer=0)
         # Create temp folder for temp pdf-files
