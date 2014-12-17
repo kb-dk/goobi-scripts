@@ -51,7 +51,7 @@ class RunAlephUpdate( Step ):
         
         # get color pdf size
         c_pdf_path = self.getConfigItem('doc_pdf_color_path',section=self.folder_structure_section)
-        color_pdf_file = os.path.join(process_path, c_pdf_path)+color_pdf
+        color_pdf_file = os.path.join(process_path, c_pdf_path)+self.color_pdf
         self.color_pdf_size = fs.getFileSize(color_pdf_file,mb=True)
 
         # get bw_pdf
@@ -59,7 +59,7 @@ class RunAlephUpdate( Step ):
         
         # get bw_pdf_size
         bw_pdf_path = self.getConfigItem('doc_pdf_bw_path',section=self.folder_structure_section)
-        bw_pdf_file = os.path.join(process_path, bw_pdf_path)+bw_pdf
+        bw_pdf_file = os.path.join(process_path, bw_pdf_path)+self.bw_pdf
         self.bw_pdf_size = fs.getFileSize(bw_pdf_file,mb=True)
 
         # Get multivolume - assume no if error or different from 'Ja/ja'
@@ -93,17 +93,13 @@ class RunAlephUpdate( Step ):
         # cmd: ssh goobi-test@aleph-test-00.kb.dk sudo /kb/bin/digitization_item.csh (parameters)
         cmd          = 'ssh {0} sudo {1} {2}'.format(login,script_path,parameters)
 
-        testcode = True
-        if testcode:
-            print(cmd)
-        else:
-            result = processing.run_cmd(cmd,shell=True,print_output=False,raise_errors=False)
-            if result['erred'] or 'error' in str(result['stderr']):
-                err = ('Der opstod en fejl ved kald af aleph-scriptet '
-                       ' ved kørsel af kommandoen: {0}. '
-                       'Fejlen er: {1}.')
-                err = err.format(cmd,('stderr:'+result['output']+' output:'+result['output']))
-                raise RuntimeError(err)
+        result = processing.run_cmd(cmd,shell=True,print_output=False,raise_errors=False)
+        if result['erred'] or 'error' in str(result['stderr']):
+            err = ('Der opstod en fejl ved kald af aleph-scriptet '
+                    ' ved kørsel af kommandoen: {0}. '
+                    'Fejlen er: {1}.')
+            err = err.format(cmd,('stderr:'+result['output']+' output:'+result['output']))
+            raise RuntimeError(err)
       
 
 if __name__ == '__main__':
