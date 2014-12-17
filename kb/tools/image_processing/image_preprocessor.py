@@ -131,23 +131,24 @@ class ImagePreprocessor():
         # A spread is exclude from cropping and deskewing 
         #=======================================================================
         if self.settings['spread_detection']: self.locate_spreads()
-        #=======================================================================
-        # Get all cropping coordinates and evaluate these
-        #=======================================================================
-        self.getCropCoordinates()
-        #=======================================================================
-        # Select crop coordinates
-        #=======================================================================
-        self.set_crop()
-        #=======================================================================
-        # Crop images e.g. with output to bw-image file on ramdisk -> smaller 
-        # and bw may be better for deskew test?
-        #=======================================================================
-        self.create_temp_crops()
-        #=======================================================================
-        # Get all deskew
-        #=======================================================================
+        if self.settings['crop_images']:
+            #=======================================================================
+            # Get all cropping coordinates and evaluate these
+            #=======================================================================
+            self.getCropCoordinates()
+            #=======================================================================
+            # Select crop coordinates
+            #=======================================================================
+            self.set_crop()
+            #=======================================================================
+            # Crop images e.g. with output to bw-image file in temp folder ->  
+            # smaller and bw may be better for deskew test?
+            #=======================================================================
+            if self.settings['deskew_images']: self.create_temp_crops()
         if self.settings['deskew_images']:
+            #=======================================================================
+            # Get all deskew
+            #=======================================================================
             self.get_deskew_angles()
             #===================================================================
             # Select which images to deskew 
@@ -188,24 +189,33 @@ class ImagePreprocessor():
         time_stat = {}
         file_name,_ = os.path.splitext(os.path.basename(file_path.rstrip(os.sep)))
         if self.debug: self.logger.debug('File: {0}'.format(file_name))
-        # 1: crop image with coordinates
-        if self.debug: self.logger.debug('\tCrop image')
-        t = time.time()
-        file_path = image_tools.cropImage(file_path,self.temp_folder,info)
-        time_stat['Crop image'] = time.time()-t
-        # 2: deskew
+        if info['crop']:
+            #===================================================================
+            # Crop image with coordinates, if cropping is turned on
+            #===================================================================
+            if self.debug: self.logger.debug('\tCrop image')
+            t = time.time()
+            file_path = image_tools.cropImage(file_path,self.temp_folder,info)
+            time_stat['Crop image'] = time.time()-t
+        
         if info['deskew']:
+            #===================================================================
+            # Deskew image, if deskew is turned on
+            #===================================================================
             if self.debug: self.logger.debug('\tDeskew image')
             t = time.time()
             # Jeg har sat quality til 50% så de ikke fylder så meget når jeg skal gemme de resulterende jpgs til OCR
-            file_path = image_tools.deskewImage(file_path,self.temp_folder,info['deskew_angle'],quality=50,resize=200)
+            file_path = image_tools.deskewImage(file_path,self.temp_folder,
+                                                info['deskew_angle'],quality=50,
+                                                resize=self.settings['resize_output'])
             time_stat['Deskew image'] = time.time()-t
         else:
             if self.debug: self.logger.debug('\tNo deskewing')
             t = time.time()
             file_name,_ = os.path.splitext(os.path.basename(file_path))
             dest = os.path.join(self.temp_folder,file_name+'compressed.jpg')
-            image_tools.compressFile(file_path,dest,quality=50,resize=200)
+            image_tools.compressFile(file_path,dest,quality=50,
+                                     resize=self.settings['resize_output'])
             file_path = dest
             time_stat['Compress/resize image'] = time.time()-t
         # 3: to pdf 
@@ -243,6 +253,7 @@ class ImagePreprocessor():
                                                'l_crop':True, # left margin crop?
                                                'b_crop':True, # bottom margin crop?
                                                'deskew': self.settings['deskew_images'], # deskew image?
+                                               'crop': self.settings['crop_images'], # deskew image?
                                                'spread':False, # is image a spread (opslag)?
                                                }
     def locate_spreads(self):
@@ -450,8 +461,11 @@ class ImagePreprocessor():
         if self.debug: self.logger.debug('Get deskew angles for {0} images'.format(len(image_paths)))
         for image_path in image_paths:
             time_stat = {}
-            # Use alternative image - cropped tif-files
-            src = self.img_proc_info['images'][image_path]['image_for_deskew']
+            if self.settings['crop_images']:
+                # Use alternative image - cropped tif-files
+                src = self.img_proc_info['images'][image_path]['image_for_deskew']
+            else:
+                src = image_path
             t = time.time()
             try:
                 angle = image_tools.getDeskewAngle(src)

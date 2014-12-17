@@ -22,7 +22,9 @@ class AddFrontispiecesToPdfs( Step ) :
         self.config_main_section = "add_frontispieces_to_pdfs"
         self.essential_config_sections = set( [] )
         self.folder_structure_section = 'process_folder_structure'
-        self.essential_config_sections.update([self.folder_structure_section] )
+        self.preprocessing_section = 'preprocess_images'
+        self.essential_config_sections.update([self.folder_structure_section,
+                                               self.preprocessing_section] )
         self.essential_commandlines = {
             "process_path":"folder",
             'process_title':"string"
@@ -81,9 +83,18 @@ class AddFrontispiecesToPdfs( Step ) :
         self.temp_root = self.getConfigItem('temp_folder')
         # Get path to frontispieces
         self.frontispieces = self.getConfigItem('frontispieces')
-        # Get path to frontispieces for 600 DPI pdf (bw)
-        self.frontispieces_bw = self.getConfigItem('frontispieces_600dpi')
-
+        #=======================================================================
+        # Select a large frontispiece for bw, if the bw-images are resized
+        #=======================================================================
+        bw_resize = self.getSetting(var_name = 'output_resize',
+                                    var_type = 'int',
+                                    conf_sec = self.preprocessing_section)
+        if bw_resize > 100:
+            # Get path to frontispieces for 600 DPI pdf (bw)
+            self.frontispieces_bw = self.getConfigItem('frontispieces_600dpi')
+        else:
+            self.frontispieces_bw = self.frontispieces
+        
     def addFrontispiecesToPdfs(self):
         # Create temp folder for temp pdf-files
         temp_folder = os.path.join(self.temp_root,self.process_title)

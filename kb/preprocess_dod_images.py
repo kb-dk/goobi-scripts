@@ -124,6 +124,11 @@ class PreprocessDodImageFiles( Step ) :
         self.settings['remove_binding'] = self.getSetting('remove_binding',
                                                           var_type=bool)
         #=======================================================================
+        # # crop_images: turn mechanism to crop images on/off.
+        #=======================================================================
+        self.settings['crop_images'] = self.getSetting('crop_images',
+                                                       var_type=bool)
+        #=======================================================================
         # # bw_for_innercrop: create a bw image of original to get crop
         # # coordinates from?
         #=======================================================================
@@ -193,6 +198,12 @@ class PreprocessDodImageFiles( Step ) :
         #=======================================================================
         self.settings['spread_select_limit_adjust'] = self.getSetting('spread_select_limit_adjust',
                                                                       var_type=float)
+        #=======================================================================
+        # # output_resize: resize the output images, e.g. 200% fra 300DPI to 600DPI
+        # # if = 100, no resize
+        #=======================================================================
+        self.settings['output_resize'] = self.getSetting('output_resize',
+                                                         var_type=int)
         #=======================================================================
         # # skip_if_pdf_exists: skip if pdf exists?
         #=======================================================================
