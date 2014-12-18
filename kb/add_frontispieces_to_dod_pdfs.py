@@ -99,8 +99,8 @@ class AddFrontispiecesToPdfs( Step ) :
         # Create temp folder for temp pdf-files
         temp_folder = os.path.join(self.temp_root,self.process_title)
         tools.create_folder(temp_folder)
-        self.addFrontispiecesToPdf(self.frontispieces,self.pdf_bw_path,temp_folder)
-        self.addFrontispiecesToPdf(self.frontispieces_bw,self.pdf_color_path,temp_folder)
+        self.addFrontispiecesToPdf(self.frontispieces_bw,self.pdf_bw_path,temp_folder)
+        self.addFrontispiecesToPdf(self.frontispieces,self.pdf_color_path,temp_folder)
         # Delete temp_folder
         fs.clear_folder(temp_folder, also_folder=True)
 
