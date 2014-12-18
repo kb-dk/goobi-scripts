@@ -90,7 +90,7 @@ class AddFrontispiecesToPdfs( Step ) :
                                     var_type = int,
                                     conf_sec = self.preprocessing_section)
         if bw_resize > 100:
-            # Get path to frontispieces for 600 DPI pdf (bw)
+            # Get path to frontispieces for 600 DPI pdf (bw)  
             self.frontispieces_bw = self.getConfigItem('frontispieces_600dpi')
         else:
             self.frontispieces_bw = self.frontispieces
