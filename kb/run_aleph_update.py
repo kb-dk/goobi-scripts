@@ -82,15 +82,16 @@ class RunAlephUpdate( Step ):
         '''
 
         # call to alehp script
-        # digitization_item.csh barcode=xxxxxxxxxxx [color=xxxxxxxxxxx.pdf,size] [blackwhite=xxxxxxxxxxx.pdf,size] [multivolumes]
+        # digitization_item.csh 
         barcode      = 'barcode={0} '.format(self.barcode)
-        color        = '[color={0},{1}] '.format(self.color_pdf, self.color_pdf_size)
-        blackwhite   = '[blackwhite={0},{1}] '.format(self.bw_pdf, self.bw_pdf_size)
-        multivolumes = '[{0}]'.format(self.multivolumes) 
+        color        = 'color={0},{1} '.format(self.color_pdf, self.color_pdf_size)
+        blackwhite   = 'blackwhite={0},{1} '.format(self.bw_pdf, self.bw_pdf_size)
+        multivolumes = '{0}'.format(self.multivolumes) 
         login        = "{0}@{1}".format(self.aleph_server_user, self.aleph_server)
         script_path  = '/kb/bin/digitization_item.csh'
         parameters   = barcode+color+blackwhite+multivolumes
-        # cmd: ssh goobi-test@aleph-test-00.kb.dk sudo /kb/bin/digitization_item.csh (parameters)
+        # ssh goobi-test@aleph-test-00.kb.dk sudo /kb/bin/digitization_item.csh barcode=xxxxxxxxxxx color=xxxxxxxxxxx.pdf,size blackwhite=xxxxxxxxxxx.pdf,size multivolumes
+
         cmd          = 'ssh {0} sudo {1} {2}'.format(login,script_path,parameters)
 
         result = processing.run_cmd(cmd,shell=True,print_output=False,raise_errors=False)
