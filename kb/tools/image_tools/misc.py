@@ -161,6 +161,8 @@ def compressFile(input_file,output_file,quality=50,resize=None,resize_type='pct'
             resize = '-resize {0}'.format(resize)
         elif resize != 100: # resize by percentage, only if it is set to anything else than 100 (=no resize)
             resize = '-resize {0}%'.format(resize)
+        else:
+            resize = ''
     else:
         resize = ''
     if density is not None: # Scale image correctly

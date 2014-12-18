@@ -33,7 +33,11 @@ class ConvertServer():
     
     def __init__(self,config_path=None):
         '''
-        Todo: Document this
+        Initialize step server.
+        
+        NB: confGet not yet implemented. Consider using 
+        kb/config/config_reader.py and thus use the settings in 
+        kb/workflows/system/config.ini
         
         ''' 
         def confGet(config, var,default):
@@ -59,7 +63,7 @@ class ConvertServer():
         # queue, and the others always from the shared.
         # I.e. if multiple threads call a program with multithreading built-in
         # the system will heavily loaded. 
-        self.core_num = confGet(config,'core_num',2)
+        self.core_num = confGet(config,'core_num',1)
         self.step_job_processors = []
         
         self.job_queue = StepJobQueue(self.logger)

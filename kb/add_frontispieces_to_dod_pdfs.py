@@ -87,7 +87,7 @@ class AddFrontispiecesToPdfs( Step ) :
         # Select a large frontispiece for bw, if the bw-images are resized
         #=======================================================================
         bw_resize = self.getSetting(var_name = 'output_resize',
-                                    var_type = 'int',
+                                    var_type = int,
                                     conf_sec = self.preprocessing_section)
         if bw_resize > 100:
             # Get path to frontispieces for 600 DPI pdf (bw)
@@ -99,8 +99,8 @@ class AddFrontispiecesToPdfs( Step ) :
         # Create temp folder for temp pdf-files
         temp_folder = os.path.join(self.temp_root,self.process_title)
         tools.create_folder(temp_folder)
-        self.addFrontispiecesToPdf(self.pdf_bw_path,temp_folder,self.frontispieces)
-        self.addFrontispiecesToPdf(self.pdf_color_path,temp_folder,self.frontispieces_bw)
+        self.addFrontispiecesToPdf(self.frontispieces,self.pdf_bw_path,temp_folder)
+        self.addFrontispiecesToPdf(self.frontispieces_bw,self.pdf_color_path,temp_folder)
         # Delete temp_folder
         fs.clear_folder(temp_folder, also_folder=True)
 
