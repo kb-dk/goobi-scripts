@@ -62,7 +62,8 @@ class RunAlephUpdate( Step ):
         bw_pdf_file = os.path.join(process_path, bw_pdf_path)+self.bw_pdf
         self.bw_pdf_size = fs.getFileSize(bw_pdf_file,mb=True)
 
-        # Get multivolume - assume no if error or different from 'Ja/ja'
+        # Get multivolume status - cast value to bool.
+        # Assign string 'multivolumes' if true, otherwise assign ''
         is_multivolume = self.getSetting('is_multivolume',var_type = bool, default = False)
         if is_multivolume:
             self.multivolumes = 'multivolumes'
