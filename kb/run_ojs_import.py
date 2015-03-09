@@ -91,6 +91,7 @@ class RunOJSImport( Step ):
         login = "{0}@{1}".format(self.ojs_server_user, self.ojs_server)
         cmd = 'ssh {0} sudo php {1} NativeImportExportPlugin import {2} {3} {4}'
         cmd = cmd.format(login,self.tool_path,self.xml_path, self.volume_title, self.ojs_app_user)
+        self.debug_message(cmd)
         result = processing.run_cmd(cmd,shell=True,print_output=False,raise_errors=False)
         if result['erred'] or 'error' in str(result['stderr']):
             err = ('Der opstod en fejl ved import af OJS-xml-filen på '

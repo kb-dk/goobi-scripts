@@ -579,6 +579,6 @@ def parseTitle(title):
     TODO: Make sure all references to journal titles
     use this method.
     '''
-    title = title.replace(' ','_')
+    title = title.replace(' ','_').lower()
     return title[0:10]
 
