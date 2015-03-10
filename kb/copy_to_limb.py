@@ -73,7 +73,7 @@ class CopyToLimb( Step ):
         elif limb_workflow_type == 'color':
             limb_hotfolder = self.getSetting('limb_color_hotfolder')
         self.hotfolder_dir = os.path.join(limb_hotfolder,process_title)
-        self.overwrite_destination_files = self.getSetting('overwrite_files', bool , default= False)
+        self.overwrite_destination_files = self.getSetting('overwrite_files', bool , default= True)
 
     def step(self):
         error = None
