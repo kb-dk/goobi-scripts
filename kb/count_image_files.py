@@ -7,6 +7,7 @@ Created on 09/12/2014
 from goobi.goobi_step import Step
 from tools import tools
 import os
+import time
 
 
 class CountImageFiles(Step):
@@ -33,20 +34,25 @@ class CountImageFiles(Step):
             self.getVariables()
             # Get the number of valid images
             image_count = tools.getFileCountWithExtension(self.image_path, self.valid_exts)
-            self.info_message("Der blev optalt {} billeder".format(image_count))
-            # write the number of images to a Goobi property
-            if self.goobi_com.addProperty(name=self.property_name, value=image_count, overwrite=True):
-                self.info_message("Succes: Billedantallet er nu gemt i Goobi (i)")
-                self.warning_message("Succes: Billedantallet er nu gemt i Goobi (w)")
-                self.error_message("Succes: Billedantallet er nu gemt i Goobi (e)")
-                self.debug_message("Succes: Billedantallet er nu gemt i Goobi (d)")
-            else:
-                self.error_message("Advarsel:  Billedantallet blev muligvis ikke gemt korrekt i Goobi")
+            self.error_message("Der blev optalt {} billeder".format(image_count))
+            # write the number of images to a Goobi property. It sometimes fail, hence the retry stuff
+            max_retry = 10
+            retry = 0
+            ok = False
+            while not ok:
+                ok = self.goobi_com.addProperty(name=self.property_name, value=image_count, overwrite=True)
+                retry += 1
+                if not ok:
+                    self.error_message("Billedantallet kunne ikke gemmes! Prøver igen... (retry={})".format(retry))
+                    time.sleep(5)
+                    if retry > max_retry:
+                        self.error("Kunne ikke gemme billedantallet!")
+                        return False
+            self.error_message("Billedantallet ({}) blev gemt korrekt i forsøg nr {}".format(image_count, retry))
         # not sure which exceptions to expect...
         except ValueError as e:
             error = str(e.with_traceback)
         return error
-
 
 if __name__ == '__main__':
     CountImageFiles().begin()
