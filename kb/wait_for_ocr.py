@@ -65,12 +65,14 @@ class WaitForOcr( Step ):
             if self.ocrIsReady():
                 msg = ('ocr output is ready - exiting.')
                 self.debug_message(msg)
+                self.error_message(msg)
                 return None # this is the only successful exit possible
             else:
                 # if they haven't arrived, sit and wait for a while
                 msg = ('ocr output not ready - sleeping for {0} seconds...')
                 msg = msg.format(self.retry_wait)
                 self.debug_message(msg)
+                self.error_message(msg)
                 retry_counter += 1
                 time.sleep(self.retry_wait)
         return "Timed out waiting for ocr output."
@@ -140,6 +142,7 @@ class WaitForOcr( Step ):
                    ' Waiting for OCR to be ready. Error: {0}')
             msg = msg.format(e.strerror)
             self.debug_message(msg)
+            self.error_message(msg)
             return False
         # legr: we can use limb_tools generally - they are not Limb specific
         # we should rename them someday
@@ -152,4 +155,4 @@ class WaitForOcr( Step ):
 
 if __name__ == '__main__':
     
-    WaitForOcr( ).begin()
+    WaitForOcr().begin()
