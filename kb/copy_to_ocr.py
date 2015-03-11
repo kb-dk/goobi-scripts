@@ -60,7 +60,7 @@ class CopyToOcr( Step ):
             ocr_transitfolder = self.getSetting('ocr_fraktur_transit')
             ocr_hotfolder = self.getSetting('ocr_fraktur_hotfolder')
         else:
-            err = ('Variablen "{0}" fra kaldet af "{1}" skal enten være '
+            err = ('Variablen "{0}" fra kaldet af "{1}" skal enten vaere '
                    '"fraktur" eller "antikva", men er pt. "{2}".')
             err = err.format('ocr_workflow_type',self.name,ocr_workflow_type)
             self.error_message(err)
@@ -75,34 +75,43 @@ class CopyToOcr( Step ):
         #=======================================================================
         # Set valid extensions for image files to check as preprocessed
         #=======================================================================
-        self.valid_exts = self.getConfigItem('valid_file_exts',None, self.valid_exts_section).split(';')
+        self.valid_exts = self.getConfigItem('valid_file_exts', None, self.valid_exts_section).split(';')
         #=======================================================================
         # Set variables for waiting for preprocessed images to be ready
         #=======================================================================
         self.pp_retry_wait = int(self.getConfigItem('preprocess_retry_wait'))
         self.pp_retry_num = int(self.getConfigItem('preprocess_retry_num'))
         img_list = fs.getFilesInFolderWithExts(self.master_folder, self.valid_exts)
-        self.expected_image_count = len(img_list)-2 # Source images miunus first and last image
+        # Source images miunus first and last image
+        self.expected_image_count = len(img_list)-2
 
     def waitForPreprocessedImages(self):
         retry = 0
         while retry <= self.pp_retry_num:
-            #===================================================================
+            # ==================================================================
             # Get current number of preprocessed images
-            #===================================================================
+            # ==================================================================
             pp_files = fs.getFilesInFolderWithExts(self.source_folder, self.valid_exts)
-            #===================================================================
-            # Break loop if all files are preprocessed 
-            #===================================================================
+            # ==================================================================
+            # Exit loop when preprocessed images are ready
+            # ==================================================================
             if len(pp_files) == self.expected_image_count:
-                #===============================================================
-                # Wait 30 sec to make sure files are completely copied
-                #===============================================================
+                # ==============================================================
+                # Wait 30 sec to make sure images are completely copied
+                # ==============================================================
                 time.sleep(30)
                 return True
-            #===================================================================
+            # ==================================================================
+            # This shouldn't happen, but we have seen pdf's with duplicate pages, so better check
+            # ==================================================================
+            if len(pp_files) > self.expected_image_count:
+                if len(pp_files) > 0:
+                    self.error_message("Der er flere preprocesserede billeder ({}) end scannede billeder ({})"
+                                       .format(pp_files, self.expected_image_count))
+                    return False
+            # ==================================================================
             # Wait "self.pp_retry_wait" seconds
-            #===================================================================
+            # ==================================================================
             time.sleep(self.pp_retry_wait)
             retry += 1
         return False
@@ -114,18 +123,20 @@ class CopyToOcr( Step ):
             msg = ('Copying files from {0} to {1} via transit {2}.')
             msg = msg.format(self.source_folder, self.hotfolder_dir, self.transit_dir)
             self.debug_message(msg)
+            self.error_message(msg)
             #===================================================================
             # Wait for preprocessed images to be ready
             # Returns false if it times out 
             #===================================================================
             if not self.waitForPreprocessedImages():
                 pp_files = fs.getFilesInFolderWithExts(self.source_folder, self.valid_exts)
-                raise Exception('Timed out while waiting for pre-processing of '
+                raise Exception('Timed out or count error while waiting for pre-processing of '
                                 'images. Current number of processed images: '
                                 '{0}. Expected amount: {1}'.format(pp_files,self.expected_image_count))
             #===================================================================
             # Copy files to OCR-server
             #===================================================================
+            self.error_message("Start copy of preprocessed images to OCR-server")
             tools.copy_files(source          = self.source_folder,
                              dest            = self.hotfolder_dir,
                              transit         = self.transit_dir,
@@ -134,6 +145,7 @@ class CopyToOcr( Step ):
                              max_retries     = self.retry_num,
                              logger          = self.glogger,
                              valid_exts      = self.valid_exts)
+            self.error_message("Finished copy of preprocessed images to OCR-server")
         except errors.TransferError as e:
             error = e.strerror
         except errors.TransferTimedOut as e:
