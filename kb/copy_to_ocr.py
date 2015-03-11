@@ -112,15 +112,17 @@ class CopyToOcr( Step ):
             # ==================================================================
             # Wait "self.pp_retry_wait" seconds
             # ==================================================================
-            time.sleep(self.pp_retry_wait)
             retry += 1
+            self.error_message("Preprocesserede billeder ikke klar, venter {} sek".format(self.pp_retry_wait))
+            self.error_message("Retry {} of {}".format(retry, self.pp_retry_num))
+            time.sleep(self.pp_retry_wait)
         return False
     
     def step(self):
         error = None
         try:
             self.getVariables()
-            msg = ('Copying files from {0} to {1} via transit {2}.')
+            msg = 'Copying files from {0} to {1} via transit {2}.'
             msg = msg.format(self.source_folder, self.hotfolder_dir, self.transit_dir)
             self.debug_message(msg)
             self.error_message(msg)
