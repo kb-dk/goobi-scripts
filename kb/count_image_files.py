@@ -43,12 +43,12 @@ class CountImageFiles(Step):
                 ok = self.goobi_com.addProperty(name=self.property_name, value=image_count, overwrite=True)
                 retry += 1
                 if not ok:
-                    self.error_message("Billedantallet kunne ikke gemmes! Prøver igen... (retry={})".format(retry))
+                    self.error_message("Billedantallet kunne ikke gemmes! Proever igen... (retry={})".format(retry))
                     time.sleep(5)
                     if retry > max_retry:
                         self.error("Kunne ikke gemme billedantallet!")
                         return False
-            self.error_message("Billedantallet ({}) blev gemt korrekt i forsøg nr {}".format(image_count, retry))
+            self.error_message("Billedantallet ({}) blev gemt korrekt i forsoeg nr {}".format(image_count, retry))
         # not sure which exceptions to expect...
         except ValueError as e:
             error = str(e.with_traceback)
