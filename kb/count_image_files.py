@@ -31,15 +31,14 @@ class CountImageFiles(Step):
         error = None
         try:
             self.getVariables()
-            # count the number of valid images
-            number_of_images = tools.getFileCountWithExtension(self.image_path, self.valid_exts)
+            # Get the number of valid images
+            image_count = tools.getFileCountWithExtension(self.image_path, self.valid_exts)
+            self.info_message("Der blev optalt {} billeder".format(image_count))
             # write the number of images to a Goobi property
-            if self.goobi_com.addProperty(self.property_name, number_of_images, True):
-                self.debug_message("Antal billeder fundet:")
-                self.debug_message("Property={}, and image count={}".format(self.property_name, number_of_images))
+            if self.goobi_com.addProperty(name=self.property_name, value=image_count, overwrite=True):
+                self.info_message("Succes: Billedantallet er nu gemt i Goobi")
             else:
-                self.debug_message("Advarsel: antal billeder blev muligvis ikke gemt korrekt")
-                self.debug_message("Property={}, and image count={}".format(self.property_name, number_of_images))
+                self.info_message("Advarsel:  Billedantallet blev muligvis ikke gemt korrekt i Goobi")
         # not sure which exceptions to expect...
         except ValueError as e:
             error = str(e.with_traceback)
