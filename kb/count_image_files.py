@@ -34,7 +34,7 @@ class CountImageFiles(Step):
             self.getVariables()
             # Get the number of valid images
             image_count = tools.getFileCountWithExtension(self.image_path, self.valid_exts)
-            self.error_message("Der blev optalt {} billeder".format(image_count))
+            self.debug_message("Der blev optalt {} billeder".format(image_count))
             # write the number of images to a Goobi property. It sometimes fail, hence the retry stuff
             max_retry = 10
             retry = 0
@@ -43,12 +43,12 @@ class CountImageFiles(Step):
                 ok = self.goobi_com.addProperty(name=self.property_name, value=image_count, overwrite=True)
                 retry += 1
                 if not ok:
-                    self.error_message("Billedantallet kunne ikke gemmes! Proever igen... (retry={})".format(retry))
+                    self.debug_message("Billedantallet kunne ikke gemmes! Proever igen... (retry={})".format(retry))
                     time.sleep(5)
                     if retry > max_retry:
-                        self.error_message("Kunne ikke gemme billedantallet!")
+                        self.debug_message("Kunne ikke gemme billedantallet!")
                         return False
-            self.error_message("Billedantallet ({}) blev gemt korrekt i forsoeg nr {}".format(image_count, retry))
+            self.debug_message("Billedantallet ({}) blev gemt korrekt i forsoeg nr {}".format(image_count, retry))
         # not sure which exceptions to expect...
         except ValueError as e:
             error = str(e.with_traceback)
