@@ -46,7 +46,7 @@ class CountImageFiles(Step):
                     self.error_message("Billedantallet kunne ikke gemmes! Proever igen... (retry={})".format(retry))
                     time.sleep(5)
                     if retry > max_retry:
-                        self.error("Kunne ikke gemme billedantallet!")
+                        self.error_message("Kunne ikke gemme billedantallet!")
                         return False
             self.error_message("Billedantallet ({}) blev gemt korrekt i forsoeg nr {}".format(image_count, retry))
         # not sure which exceptions to expect...
