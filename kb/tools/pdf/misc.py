@@ -53,7 +53,18 @@ def getDensity(src, layer):
     if output['erred'] or 'error' in str(output['stdout']):
         raise OSError('An error occured when identifying pdf-file with ' 
                       'command {0}. Error: {1}.'.format(cmd,output))
-    txt = (output['stdout'].decode('utf-8')).splitlines()
+    # txt = (output['stdout'].decode('utf-8')).splitlines()
+    txt_raw_list = (output['stdout']).splitlines()
+    line_counter = 0
+    txt = []
+    for t in txt_raw_list:
+        line_counter += 1
+        try:
+            t = t.decode('utf-8')
+        except UnicodeError as e:
+            t = "[skipped line {0} - Error: {1}]".format(line_counter, e)
+            print(t)
+        txt.append(t)
     res_s = 'Resolution: '
     res_e = 'x'
     rl = [l for l in txt if res_s in l]
