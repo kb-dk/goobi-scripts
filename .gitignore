@@ -3,3 +3,4 @@ kb/tools/tesseract
 .project
 .pydevproject
 *.pyc
+/.idea
