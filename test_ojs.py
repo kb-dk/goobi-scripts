@@ -3,10 +3,14 @@ __author__ = 'romc'
 import unittest
 from kb.tools import ojs
 
-class MyTestCase(unittest.TestCase):
-    def test_something(self):
-        ojs.getJournalPath(1,1)
-        self.assertEqual(True, False)
+class testJournalPath(unittest.TestCase):
+    """
+    Note that this test presumes a local tidsskrift.dk installation
+    running on localhost
+    """
+    def test(self):
+        path = ojs.getJournalPath('localhost','1904-4348')
+        self.assertEqual(path, 'magasin')
 
 
 if __name__ == '__main__':
