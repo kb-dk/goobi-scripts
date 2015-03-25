@@ -60,17 +60,11 @@ class RunOJSImport( Step ):
         self.ojs_journal_path = ojs.getJournalPath(self.ojs_server, issn)
         self.debug_message("Journal path is %s" % self.ojs_journal_path)
 
-        process_path = self.command_line.process_path
-        mets_file_name = self.getConfigItem('metadata_goobi_file', None, 'process_files')
-        mets_file = os.path.join(process_path, mets_file_name)
-        issue_data = mets_tools.getIssueData(mets_file)
-        self.volume_title = tools.parseTitle(issue_data['TitleDocMain'])
-        self.debug_message("Volume title is %s" % self.volume_title)
 
-        # build the path to the ojs xml file based in the form 
+        # build the path to the ojs xml file based in the form
         # <upload_dir>/<journal_name>/<process_name>/<process_name>.xml
         upload_dir = self.getConfigItem('upload_dir').\
-            format(self.volume_title, self.command_line.process_title)
+            format(self.ojs_journal_path, self.command_line.process_title)
 
         xml_name = "{0}.xml".format(self.command_line.process_title)
         self.xml_path = os.path.join(upload_dir,  xml_name)
@@ -87,7 +81,7 @@ class RunOJSImport( Step ):
         '''
         login = "{0}@{1}".format(self.ojs_server_user, self.ojs_server)
         cmd = 'ssh {0} sudo php {1} NativeImportExportPlugin import {2} {3} {4}'
-        cmd = cmd.format(login,self.tool_path,self.xml_path, self.volume_title, self.ojs_app_user)
+        cmd = cmd.format(login, self.tool_path, self.xml_path, self.ojs_journal_path, self.ojs_app_user)
         self.debug_message(cmd)
         result = processing.run_cmd(cmd,shell=True,print_output=False,raise_errors=False)
         if (result['erred']) or ('error' in str(result['stderr'])) or ('FEJL' in str(result['stderr'])):
