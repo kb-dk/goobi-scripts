@@ -7,7 +7,7 @@ import tools.tools as tools
 from tools.mets import mets_tools
 from tools.errors import DataError
 from tools.processing import processing
-
+from tools import ojs
 
 
 class RunOJSImport( Step ):
@@ -19,7 +19,8 @@ class RunOJSImport( Step ):
         self.essential_commandlines = {
             'process_id' : 'number',
             'process_path' : 'folder',
-            'process_title' : 'string'
+            'process_title' : 'string',
+            'issn' : 'string'
         }
 
     def step(self):
@@ -33,7 +34,7 @@ class RunOJSImport( Step ):
             self.runImport()
         except DataError as e:
             return "Execution halted due to error {0}".format(e.strerror)
-        except RuntimeError as e:
+        except (RuntimeError, Exception) as e:
             return e
         return None
 
@@ -54,22 +55,17 @@ class RunOJSImport( Step ):
         self.ojs_app_user = self.getConfigItem('ojs_app_user')
         self.tool_path = self.getConfigItem('tool_path')
 
+        # Get path to generate ojs_dir using ISSN API on Tidsskrift.dk
+        issn = self.command_line.issn
+        self.ojs_journal_path = ojs.getJournalPath(self.ojs_server, issn)
+        self.debug_message("Journal path is %s" % self.ojs_journal_path)
 
         process_path = self.command_line.process_path
         mets_file_name = self.getConfigItem('metadata_goobi_file', None, 'process_files')
         mets_file = os.path.join(process_path, mets_file_name)
         issue_data = mets_tools.getIssueData(mets_file)
-        
-        # Get path to generate ojs_dir -> system means "define it from system variables"
-        self.ojs_journal_path = self.getSetting('ojs_journal_path', default='system')
-        if self.ojs_journal_path == 'system':
-            self.volume_title = tools.parseTitle(issue_data['TitleDocMain'])
-            # TODO: write this one back as a property?
-            #self.goobi_com.addProperty(self.process_id, 'ojs_journal_path', self.volume_title, overwrite=True)
-        else:
-            self.volume_title = self.ojs_journal_path
-        
-        #self.volume_title = tools.parseTitle(issue_data['TitleDocMain'])
+        self.volume_title = tools.parseTitle(issue_data['TitleDocMain'])
+        self.debug_message("Volume title is %s" % self.volume_title)
 
         # build the path to the ojs xml file based in the form 
         # <upload_dir>/<journal_name>/<process_name>/<process_name>.xml
@@ -78,6 +74,7 @@ class RunOJSImport( Step ):
 
         xml_name = "{0}.xml".format(self.command_line.process_title)
         self.xml_path = os.path.join(upload_dir,  xml_name)
+        self.debug_message("XML path is %s" % self.xml_path)
 
     def runImport(self):
         '''
@@ -93,15 +90,13 @@ class RunOJSImport( Step ):
         cmd = cmd.format(login,self.tool_path,self.xml_path, self.volume_title, self.ojs_app_user)
         self.debug_message(cmd)
         result = processing.run_cmd(cmd,shell=True,print_output=False,raise_errors=False)
-        if result['erred'] or 'error' in str(result['stderr']):
+        if (result['erred']) or ('error' in str(result['stderr'])) or ('FEJL' in str(result['stderr'])):
             err = ('Der opstod en fejl ved import af OJS-xml-filen på '
                    ' www.tidsskrift.dk ved kørsel af kommandoen: {0}. '
                    'Fejlen er: {1}.')
             err = err.format(cmd,('stderr:'+result['output']+' output:'+result['output']))
             raise RuntimeError(err)
-        #subprocess.check_call(['ssh', login, 'sudo', 'php', self.tool_path, 
-        #    'NativeImportExportPlugin', 'import', self.xml_path, self.volume_title, self.ojs_app_user])
-        
+
 
 if __name__ == '__main__':
     
