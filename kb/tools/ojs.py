@@ -1,5 +1,6 @@
 __author__ = 'romc'
 import urllib.request
+import urllib.error
 
 def getJournalPath(server, issn):
     """
@@ -9,9 +10,13 @@ def getJournalPath(server, issn):
     :throw error if not found or invalid issn
     """
     url = 'http://' + server + "/issn.php" + "?eissn=%s" % issn
-    f = urllib.request.urlopen(url)
-    result = f.read().decode('utf-8')
-    if 'ERROR' in result:
-        raise Exception(result)
-    else:
-        return result
+    try:
+        f = urllib.request.urlopen(url)
+        result = f.read().decode('utf-8')
+        if 'ERROR' in result:
+            raise Exception(result)
+        else:
+            return result
+    except urllib.error.URLError as e:
+        raise Exception("Call to service {0} failed with error {1}".format(url, e.reason))
+
