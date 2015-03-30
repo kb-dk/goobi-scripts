@@ -90,7 +90,8 @@ class RunAlephUpdate( Step ):
         login        = "{0}@{1}".format(self.aleph_server_user, self.aleph_server)
         script_path  = '/kb/bin/digitization_item.csh'
         parameters   = barcode+color+blackwhite+multivolumes
-        cmd          = 'ssh {0} {1} {2}'.format(login,script_path,parameters)
+        cmd          = 'ssh {0} sudo -u aleph {1} {2}'.format(login, script_path, parameters)
+        print(cmd)
         # Call aleph script
         result = processing.run_cmd(cmd,shell=True,print_output=False,raise_errors=False)
         if result['erred'] or 'error' in str(result['stderr']):

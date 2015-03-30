@@ -9,7 +9,7 @@ class testJournalPath(unittest.TestCase):
     running on localhost
     """
     def test(self):
-        path = ojs.getJournalPath('localhost','1904-4348')
+        path = ojs.getJournalPath('ojs-test-01.kb.dk', '1904-4348')
         self.assertEqual(path, 'magasin')
 
 
