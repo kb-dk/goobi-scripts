@@ -59,7 +59,7 @@ class WaitForLimb( Step ):
         self.retry_wait = int(self.getConfigItem('retry_wait'))
         
         # Set flag for ignore if files already have been copied to goobi
-        self.ignore_goobi_folder = self.getSetting('ignore_goobi_folder', bool, default=False)
+        self.ignore_goobi_folder = self.getSetting('ignore_goobi_folder', bool, default=True)
         
     def step(self):
         '''

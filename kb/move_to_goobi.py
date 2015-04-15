@@ -80,7 +80,7 @@ class MoveToGoobi( Step ):
         self.input_files = os.path.join(process_path,input_files)
         
         # Set flag for ignore if files already have been copied to goobi
-        self.ignore_goobi_folder = self.getSetting('ignore_goobi_folder', bool, default=False)
+        self.ignore_goobi_folder = self.getSetting('ignore_goobi_folder', bool, default=True)
         
         self.sleep_interval = int(self.getConfigItem('sleep_interval', None, 'copy_to_limb'))
         self.retries = int(self.getConfigItem('retries', None, 'copy_to_limb'))

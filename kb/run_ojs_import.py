@@ -78,6 +78,11 @@ class RunOJSImport( Step ):
         NOTE - this script depends on the Goobi user (tomcat_user) being able to 
         ssh into the OJS server without password authentication, i.e. through a 
         public/private key setup. See the wiki for more details.
+
+        On the ojs server, uncomment as shown here:
+            sudo visudo
+                #Defaults requiretty
+        Otherwise, ssh user@server sudo ..., won't work
         '''
         login = "{0}@{1}".format(self.ojs_server_user, self.ojs_server)
         cmd = 'ssh {0} sudo php {1} NativeImportExportPlugin import {2} {3} {4}'
