@@ -83,7 +83,6 @@ class CreateOJSXML( Step ):
         self.front_matter = []
         self.articles = []
         self.back_matter = []
-        
 
     def createXML(self):
         '''
@@ -152,8 +151,7 @@ class CreateOJSXML( Step ):
         output_name = os.path.join(self.ojs_metadata_dir, self.command_line.process_title + '.xml')
         output = open(output_name, 'w')
         output.write(doc.toxml())#'utf-8'))
-    
-    
+
     def createArticlesForSection(self, articles, section_tag, doc, date):
         for art in articles:
             art = self.__translateArticleTitles(art)
@@ -212,6 +210,10 @@ class CreateOJSXML( Step ):
         start_page,end_page = article['start_page'], article['end_page']
         page_range = "{0}-{1}".format(start_page,end_page)
         pages_tag = self.createXMLTextTag(doc, 'pages', page_range) # TODO fix this to use range
+        # legr: Regarding the above todo
+        # legr: TODO - If range means real page numbers (as they get marked up in Limb,
+        # legr: TODO - then how am I supposed to find these? As far as I can see they never exists in Limbs TOC
+        # legr: TODO - ALTO or PDF???
         article_tag.appendChild(pages_tag)
         #=======================================================================
         # Add date published tag
@@ -249,7 +251,6 @@ class CreateOJSXML( Step ):
         galley_tag = self.createGalleyXML(doc, pdf_name)
         article_tag.appendChild(galley_tag)
         return article_tag
-       
 
     def createGalleyXML(self, doc, pdf_name):
         galley_tag = doc.createElement('galley')
@@ -264,7 +265,6 @@ class CreateOJSXML( Step ):
         file_tag.appendChild(link_tag)
         galley_tag.appendChild(file_tag)
         return galley_tag
-
 
     def createAuthorXML(self, doc, author):
         ''' 
@@ -294,7 +294,6 @@ class CreateOJSXML( Step ):
         author_tag.appendChild(email_tag)
 
         return author_tag
-
 
     def createEmptyElement(self, doc, name):
         tag = doc.createElement(name)
@@ -338,7 +337,6 @@ class CreateOJSXML( Step ):
 
         return doc
 
-
     def createXMLTextTag(self, doc, tag_name, tag_val):
         '''
         Convenience function to return xml text tag
@@ -351,9 +349,6 @@ class CreateOJSXML( Step ):
         tag.appendChild(text)
         return tag
 
-
-    
-    
     def __translateArticleTitles(self, article):
         if article['TitleDocMain'] == 'FrontMatter': article['TitleDocMain'] = 'Indledning'
         elif article['TitleDocMain'] == 'Back Matter': article['TitleDocMain'] = 'Diverse'

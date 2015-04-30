@@ -30,6 +30,10 @@ class CreateThumbnails( Step ) :
         }
     
     def step(self):
+        """
+        legr: create JPEGs from TIFFs
+        legr: These JPEGS are for use as thumbnails in Goobi's METS-editor
+        """
         error = None
         self.getVariables()
         try:

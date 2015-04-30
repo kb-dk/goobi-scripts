@@ -41,6 +41,9 @@ class CopyToLimb( Step ):
         #=======================================================================
         # Variable to check if ALTO, PDF and TOC files already exists on Goobi
         #=======================================================================
+        """
+        # legr: the following isn't used, so lets get rid of it:
+
         limb = self.getConfigItem('limb_output',None,self.limb_output_section)
         alto = self.getConfigItem('alto',None,self.limb_output_section)
         toc = self.getConfigItem('toc',None,self.limb_output_section)
@@ -51,10 +54,11 @@ class CopyToLimb( Step ):
         self.alto_dir = os.path.join(self.limb_dir, alto)
         self.toc_dir = os.path.join(self.limb_dir, toc)
         self.pdf_input_dir = os.path.join(self.limb_dir, pdf)
+        """
         
         # Set destination for paths
         
-        self.goobi_altos = os.path.join(process_path, 
+        self.goobi_altos = os.path.join(process_path,
             self.getConfigItem('metadata_alto_path', None, 'process_folder_structure'))
         self.goobi_toc = os.path.join(process_path, 
             self.getConfigItem('metadata_toc_path', None, 'process_folder_structure'))
@@ -76,6 +80,11 @@ class CopyToLimb( Step ):
         self.overwrite_destination_files = self.getSetting('overwrite_files', bool, default=False)
 
     def step(self):
+        """
+        legr: copy TIFF's from Goobi to Limb
+        legr: if "overwrite_destination_files=True" is added to the command line, we send TIFF's to Limb
+        legr:  even if we already has recieved ALTO's, PDF and TOC from a previous LIMB processing.
+        """
         error = None
         self.getVariables()
         msg = ('Copying files from {0} to {1} via transit {2}.')

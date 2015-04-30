@@ -82,6 +82,7 @@ class SplitPdf( Step ):
                 hash_name = tools.getHashName(article['TitleDocMain'])
                 start_page = article['start_page'] 
                 end_page = article['end_page']
+                # legr: TODO : should probably subtract 1 from end_page
                 output_name = tools.getArticleName(hash_name, start_page,end_page)
                 output_path = os.path.join(self.pdf_output_dir, output_name)
                 self.debug_message("creating file {0}".format(output_path))

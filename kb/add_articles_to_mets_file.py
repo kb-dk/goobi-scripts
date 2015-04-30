@@ -109,7 +109,6 @@ class AddArticlesToMetsFile( Step ):
                    'METS-editoren for hver enkelt artikel. Suk!')
             self.error_message(msg)
 
-        
     def writeXml(self):
         '''
         Write the xml generated back to file
@@ -132,8 +131,7 @@ class AddArticlesToMetsFile( Step ):
         self.issnSet = mets_tools.addFieldToDocType(self.meta_data,
                                                     'PeriodicalVolume',
                                                     'ISSN',issn)
-        
-    
+
     def buildXml(self):
         '''
         Given a toc object consisting of articles with dbc ids
@@ -286,7 +284,6 @@ class AddArticlesToMetsFile( Step ):
                         'start_page': start_page,
                         'end_page': end_page}
         return article_data
-    
 
     def __createAuthorElement(self, firstname, lastname):
         '''

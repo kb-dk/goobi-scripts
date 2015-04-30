@@ -111,11 +111,16 @@ def addNewDocStruct(dict_tree,doc_struct_info,parrent_attrib=None):
 #===============================================================================
 
 def containsImages(dict_tree):
-    
+
+    # legr: returns True if the meta.xml's file section is empty
+    # legr: (file section maps actual file path to ID="FILE_nnnn")
     empty_file_sec = file_sec_tools.isEmpty(file_sec_tools.get(dict_tree))
+    # legr: returns True if the meta.xml's physical struct map section is empty
+    # legr: (structMap TYPE="PHYSICAL" maps the above FILE_nnnn to PHYS_nnnn and adds ORDER and ORDERLABEL
     empty_phys_struct_map = phys_struct_map_tools.isEmpty(phys_struct_map_tools.get(dict_tree))
-    # Both file_sec_tools and physical struct map must be non empty 
-    return (not empty_file_sec and not empty_phys_struct_map)
+    # Both file_sec_tools and physical struct map must be non empty
+    # legr: returns False if one or both are empty
+    return not empty_file_sec and not empty_phys_struct_map
 
 def addImages(dict_tree,image_src):
     '''
