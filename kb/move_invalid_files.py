@@ -110,6 +110,13 @@ class FileValidator( Step ) :
                     #('WARNING - Invalid extension {0} found in source folder').format(tools.getFileExt(f))
                     error_level = 1
                     self.invalid_files.append(os.path.join(folder,f))
+                # legr: the following is added to prevent spaces in filenames - which causes trouble later on
+                if " " in f:
+                    msg = ("Der er mellemrum i filnavnet på de indskannede filer - det er ikke tilladt.")
+                    self.debug_message(msg)
+                    error_level= 2
+                    break
+
         return error_level, message
     
     def moveInvalidFiles(self, dest, valid_exts):
