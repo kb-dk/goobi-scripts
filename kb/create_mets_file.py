@@ -70,12 +70,13 @@ class CreateMetsFile(Step):
         use the DBC service to 	generate data for each article.
         When all data is created, append this to the exising
         meta.xml data
-        legr: update - the above is not what is happening - no TOC object is involved here!
         """
         # legr: Parse the META.XML and put it into a dictionary tree
         dt, _ = dict_tools.parseXmlToDict(self.meta_file)
 
-        # legr: Dont do anything if there are FILE_nnnn's and PHYS_nnnn's in the META.XML
+        # legr: Dont do anything if there already are FILE_nnnn's and PHYS_nnnn's in the META.XML
+        # legr: todo : what if a step is pushed back because of missing images. When they are added, this doesn't get
+        # legr: todo : updated? I think we need a possibilty to clean the mets-file.
         if not mets_tools.containsImages(dt):
             # legr: we are here because META.XML was empty, so FILE_nnnn and PHYS_nnnn references to actual files
             # legr: in /master_orig/

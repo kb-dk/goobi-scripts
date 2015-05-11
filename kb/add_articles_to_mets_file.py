@@ -240,7 +240,7 @@ class AddArticlesToMetsFile( Step ):
         start_page = article.start_page
         # legr: subtracted 1 from end_page to avoid duplicate when pages are "uncounted"
         # legr: When uncounted gets fixed, we need to test if this still apply.
-        end_page = article.end_page - 1
+        end_page = article.end_page
         #=======================================================================
         # Add authors
         #=======================================================================
