@@ -12,8 +12,7 @@ except NameError:  # python3
 class TOC(object):
     sections = [] # a list of Section objects (see below)
     
-    def __init__(self, path, dbc_service, pdfinfo, overlapping_articles,
-                 logger = None):
+    def __init__(self, path, dbc_service, pdfinfo, overlapping_articles, logger=None):
         '''
         Create a new toc representation
         based on the data in a LIMB *.toc file
@@ -163,50 +162,59 @@ class TOC(object):
         else:
             return default
     
-    def getPagesFromDbcData(self,dbc_data,toc_data):
-        '''
+    def getPagesFromDbcData(self, dbc_data, toc_data):
+        """
         Extracts start and end page from from DBC metadata for an article.
         Tries to set page offset for the pages in the volume. toc_data is used
         for this.
-        
+
         :param dbc_data: parsed metadata from DBC MarcX file
         :param toc_data: parsed metadata from TOC file from LIMB
-        '''
-        if not 'pages' in dbc_data:
+        """
+        if 'pages' not in dbc_data:
             err = ('Sektionen "pages" er ikke tilstede for artiklen "{0}" med '
                    'id {1}.')
-            err = err.format(dbc_data['title'],toc_data.article_id)
-            if self.logger: self.logger.info_message(err)
-        if not isinstance(dbc_data['pages'],basestring):
+            err = err.format(dbc_data['title'], toc_data.article_id)
+            if self.logger:
+                self.logger.info_message(err)
+        if not isinstance(dbc_data['pages'], basestring):
             err = ('Sektionen "pages" indeholder ikke tekst for artiklen "{0}" '
                    'med id {1}.')
-            err = err.format(dbc_data['title'],toc_data.article_id)
-            if self.logger: self.logger.info_message(err)
+            err = err.format(dbc_data['title'], toc_data.article_id)
+            if self.logger:
+                self.logger.info_message(err)
         pages = dbc_data['pages']
-        start_page = end_page = 0
-        # Different parsings of pages
-        ## of the format e.g. "S. 6-26, 124"
+        start_page = 0
+        end_page = 0
+        # Different parsings of pages:
+        # - of the format e.g. "S. 6-26, 124"
         re_twopages_1 = re.compile('[Ss]\.[ ]*\d+-\d+.*')
-        ## of the format e.g. "6-26"
+        # - of the format e.g. "6-26"
         re_twopages_2 = re.compile('\d+-\d+')
-        ## of the format e.g. "S. 6, 124"
-        re_onepage_1 = '[Ss]\.[ ]*\d+.*'
+        # - of the format e.g. "S. 6, 124" legr: the following was missing 're.compile()'
+        re_onepage_1 = re.compile('[Ss]\.[ ]*\d+.*')
         extr_re = re.compile('\d+')
         if not re_twopages_1.match(pages) or not re_twopages_2.match(pages):
-            start_page,end_page = list(map(lambda x: int(x), extr_re.findall(pages)[:2]))
+            start_page, end_page = list(map(lambda x: int(x), extr_re.findall(pages)[:2]))
         elif not re_onepage_1.match(pages):
             start_page = end_page = int(extr_re.findall(pages)[0])
         else:
             err = ('Det var ikke muligt at anvende start og slutsidetal for '
                    'artiklen "{0}" med id {1}. Disse skal indtastes manuelt '
                    ' og de øvrige af hæftets artiklers sidetal skal tjekkes.')
-            err = err.format(dbc_data['title'],toc_data.article_id)
-            if self.logger: self.logger.info_message(err)
-        if (self.page_offset is None# Not yet set
-            and toc_data.start_page > 1 # page number set for article
-            and not start_page == toc_data.start_page): # volume has offset, toc_data follow file number + can be both positive and negative
+            err = err.format(dbc_data['title'], toc_data.article_id)
+            if self.logger:
+                self.logger.info_message(err)
+        """
+        legr:
+        IF  page_offset is not yet set AND
+            page number has been set for article AND
+            volume has offset THEN
+            calculate offset (can be both positive and negative)
+        """
+        if self.page_offset is None and toc_data.start_page > 1 and not start_page == toc_data.start_page:
             self.page_offset = start_page-toc_data.start_page
-        return start_page,end_page
+        return start_page, end_page
     
     def getDBCData(self, article_id):
         url = self.dbc_service.format(article_id)

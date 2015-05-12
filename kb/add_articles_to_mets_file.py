@@ -142,8 +142,7 @@ class AddArticlesToMetsFile( Step ):
         self.createFrontMatterSection()
         self.createArticlesSection()
         self.createBackMatterSection()
-        mets_tools.addOffsetToPhysicalStructMap(self.meta_data,
-                                                self.toc_data.page_offset)
+        mets_tools.addOffsetToPhysicalStructMap(self.meta_data, self.toc_data.page_offset)
         self.meta_data = mets_tools.expandPagesFromChildrenToParent(self.meta_data)
         
     def createFrontMatterSection(self):
@@ -238,8 +237,6 @@ class AddArticlesToMetsFile( Step ):
         # Add start and endpage
         #=======================================================================
         start_page = article.start_page
-        # legr: subtracted 1 from end_page to avoid duplicate when pages are "uncounted"
-        # legr: When uncounted gets fixed, we need to test if this still apply.
         end_page = article.end_page
         #=======================================================================
         # Add authors
