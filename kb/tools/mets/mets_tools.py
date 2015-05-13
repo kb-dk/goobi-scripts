@@ -239,7 +239,7 @@ def getIssueData(mets_file):
             issue_data.update(getDmdMetadata(dmd_sec,dmd_id))
     return issue_data
 
-def getArticleData(data,sections):
+def getArticleData(data, sections):
     ret_sections = dict([(s,[]) for s in sections])
     mets_ns = 'http://www.loc.gov/METS/'
     #=======================================================================

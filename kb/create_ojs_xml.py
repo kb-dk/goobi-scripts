@@ -91,7 +91,7 @@ class CreateOJSXML( Step ):
         '''
         data = minidom.parse(self.mets_file)
         issue_data = mets_tools.getIssueData(self.mets_file)
-        article_data = mets_tools.getArticleData(data,['FrontMatter','Articles','BackMatter'])
+        article_data = mets_tools.getArticleData(data, ['FrontMatter', 'Articles', 'BackMatter'])
         # this is the dir where files will be uploaded to
         if self.ojs_journal_path == 'system':
             journal_title_path = tools.parseTitle(issue_data['TitleDocMain'])
@@ -207,13 +207,16 @@ class CreateOJSXML( Step ):
         #=======================================================================
         # Add page range
         #=======================================================================
-        start_page,end_page = article['start_page'], article['end_page']
-        page_range = "{0}-{1}".format(start_page,end_page)
-        pages_tag = self.createXMLTextTag(doc, 'pages', page_range) # TODO fix this to use range
-        # legr: Regarding the above todo
-        # legr: TODO - If range means real page numbers (as they get marked up in Limb,
-        # legr: TODO - then how am I supposed to find these? As far as I can see they never exists in Limbs TOC
-        # legr: TODO - ALTO or PDF???
+        start_page = article['start_page']
+        end_page = article['end_page']
+        # legr: Calculate offset so real start- and end page can be forwarded to OJS
+        offset = self.get_calculated_offset()
+        if offset == 0:
+            print("Warning: offset = 0. Maybe all pages are uncounted?")
+        else:
+            print("Information: Calculated offset value: {0}".format(offset))
+        page_range = "{0}-{1}".format(start_page + offset, end_page + offset)
+        pages_tag = self.createXMLTextTag(doc, 'pages', page_range)
         article_tag.appendChild(pages_tag)
         #=======================================================================
         # Add date published tag
@@ -251,6 +254,32 @@ class CreateOJSXML( Step ):
         galley_tag = self.createGalleyXML(doc, pdf_name)
         article_tag.appendChild(galley_tag)
         return article_tag
+
+    def get_calculated_offset(self):
+        """
+        Open the meta.xml and look for ORDERLABEL
+        If it is different from "uncounted", we have a real page number
+        We can then calculate an offset by subtracting the physical page number from the real page number.
+        We can then add this offset to the physical page number to the article page number in the
+        Limb TOC, to get the real page number for that article.
+        legr, 12-05-2015
+        """
+        dom = minidom.parse(self.mets_file)
+        # todo: move mets_namespace to config
+        mets_ns = 'http://www.loc.gov/METS/'
+        divs = dom.getElementsByTagNameNS(mets_ns, "div")
+        for div in divs:
+            _id = div.getAttribute('ID')
+            if "PHYS_" in _id:
+                _type = div.getAttribute('TYPE')
+                if "page" in _type:
+                    _orderlabel = div.getAttribute('ORDERLABEL')
+                    if "uncounted" not in _orderlabel:
+                        orderlabel_page_number = int(_orderlabel)
+                        phys_page_number = int(_id[5:9])
+                        offset = orderlabel_page_number - phys_page_number
+                        return offset
+        return 0
 
     def createGalleyXML(self, doc, pdf_name):
         galley_tag = doc.createElement('galley')
