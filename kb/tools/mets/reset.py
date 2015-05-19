@@ -5,22 +5,25 @@ from datetime import datetime
 from xml.etree.ElementTree import ElementTree, ParseError
 
 """
-    This function resets a METS-file (meta.xml) to it's initial state. This makes it possible to re-run the workflow.
-    The following is cleared out:
-    * all "dmdSec" with "ID" above "DMDLOG_0001"
-      * Corresponding elements in "structMap" with attrib "TYPE" = "LOGICAL" where "DMDID" == "ID" from above
-    * all subelemens within "fileSec"
-    * all subelemens within "structMap" with attrib "TYPE" == "PHYSICAL"
-    * all subelemens within "structLink"
+This function resets a METS-file (meta.xml) to it's initial state. This makes it possible to re-run the workflow.
+The following is cleared out:
+* all "dmdSec" with "ID" above "DMDLOG_0001"
+  * Corresponding elements in "structMap" with attrib "TYPE" = "LOGICAL" where "DMDID" == "ID" from above
+* all subelemens within "fileSec"
+* all subelemens within "structMap" with attrib "TYPE" == "PHYSICAL"
+* all subelemens within "structLink"
 """
 
-# Folder: the process folder that contains the meta.xml file
-# test: True=output is written to a test file. False: meta.xml is updated
-# debug: True=output is written to screen (meta.xml is NOT updated). False=meta.xml is updated.
+
 def reset_mets_file(folder, test=False, debug=False):
+    # Folder: the process folder that contains the meta.xml file
+    # test: True=output is written to a test file. False: meta.xml is updated
+    # debug: True=output is written to screen (meta.xml is NOT updated). False=meta.xml is updated.
+
     """
     Inner function - delete a specific element
     """
+
     def delete_sub_elements(_tree, elem_name, attrib_tuple=None):
         if attrib_tuple:
             if debug:
@@ -43,10 +46,11 @@ def reset_mets_file(folder, test=False, debug=False):
             else:
                 elem.remove(subelem)
         return _tree
+
     """
     Main function
     """
-    # First, let's get the file we want to clear
+    # First, let's parse the file we want to clear
     input_file = os.path.join(folder, 'meta.xml')
     output_file = input_file
     if test:
