@@ -23,8 +23,8 @@ class UploadToOJS( Step ):
         self.essential_commandlines = {
             'process_id' : 'number',
             'process_path' : 'folder',
-            'process_title' : 'string',
-            'issn' : 'string'
+            'process_title' : 'string'
+            # 'issn' : 'string' # Temporay: issn can't be mandatory until existing processes is finished.
         }
 
     def step(self):
@@ -53,7 +53,21 @@ class UploadToOJS( Step ):
         the current process dir, the pdf dir,
         and the ojs xml dir.
         '''
+
+        # Temporary, new processes should always have issn, so check should be in essential section
+        try:
+            self.issn = self.command_line.issn
+        except AttributeError as e:
+            self.debug_message("Warning, missing attribute. Details: {0}".format(e))
+            issn_missing = True
+
         process_path = self.command_line.process_path
+
+        # Temporary, until all new processes uses issn
+        if issn_missing:
+            mets_file_name = self.getConfigItem('metadata_goobi_file', None, 'process_files')
+            mets_file = os.path.join(process_path, mets_file_name)
+
         ojs_mount = self.getConfigItem('ojs_mount')
         ojs_metadata_dir = self.getConfigItem('metadata_ojs_path',
                                               section= self.folder_structure_section)
@@ -62,10 +76,28 @@ class UploadToOJS( Step ):
         pdf_path = self.getConfigItem('doc_pdf_path',
                                       section= self.folder_structure_section)
         self.pdf_input_dir = os.path.join(process_path, pdf_path)
-        
-        issn = self.command_line.issn
-        ojs_journal_path = ojs.getJournalPath(self.ojs_server, issn)
-        ojs_journal_folder = os.path.join(ojs_mount, ojs_journal_path)
+
+        # Temporary condition, until all new processes uses issn
+        if issn_missing:
+            issue_data = mets_tools.getIssueData(mets_file)
+            # Get path to generate ojs_dir -> system means "define it from system variables"
+            self.ojs_journal_path = self.getSetting('ojs_journal_path', default='system')
+            if self.ojs_journal_path == 'system':
+                volume_title = tools.parseTitle(issue_data['TitleDocMain'])
+                # TODO: write this one back as a property?
+                # self.goobi_com.addProperty(self.process_id, 'ojs_journal_path', volume_title, overwrite=True)
+            else:
+                volume_title = self.ojs_journal_path
+            # volume_title = tools.parseTitle(issue_data['TitleDocMain'])
+        else:
+            # We have a process with issn, so:
+            issn = self.command_line.issn
+            ojs_journal_path = ojs.getJournalPath(self.ojs_server, issn)
+            ojs_journal_folder = os.path.join(ojs_mount, ojs_journal_path)
+
+        # Temporary condition, until all new processes uses issn
+        if issn_missing:
+            ojs_journal_folder = os.path.join(ojs_mount, volume_title)
 
         # Create folder and set owner to gid 1000 => ojs-group
         tools.find_or_create_dir(ojs_journal_folder,change_owner=1000)
@@ -78,9 +110,11 @@ class UploadToOJS( Step ):
                               self.pdf_input_dir,
                               self.ojs_dest_dir)
 
-        self.debug_message("metadata_dir is %s" % self.ojs_metadata_dir)
-        self.debug_message("pdf_input_dir is %s" % self.pdf_input_dir)
-        self.debug_message("dest_dir is %s" % self.ojs_dest_dir)
+        # Temporary condition, in the future, issn is always available
+        if not issn_missing:
+            self.debug_message("metadata_dir is %s" % self.ojs_metadata_dir)
+            self.debug_message("pdf_input_dir is %s" % self.pdf_input_dir)
+            self.debug_message("dest_dir is %s" % self.ojs_dest_dir)
 
     def transferPDFs(self):
         tools.copy_files(source = self.pdf_input_dir,
