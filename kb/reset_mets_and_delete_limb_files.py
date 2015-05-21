@@ -22,10 +22,13 @@ class ResetMetsAndDeleteLimbFiles(Step):
             self.check_paths()
             # Clean up the METS file (meta.xml)
             reset.reset_mets_file(self.command_line.process_path)
-            # Clear files from Limb (if any)
+            # Clear files from Limb and Goobi (if any)
             fs.clear_folder(self.goobi_altos)
             fs.clear_folder(self.goobi_toc)
+            fs.clear_folder(self.goobi_ojs)
             fs.clear_folder(self.goobi_pdf)
+            fs.clear_folder(self.splitted_pdfs)
+            fs.clear_folder(self.thumbnails)
         except ValueError as e:
             error = e
         except IOError as e:
@@ -45,10 +48,23 @@ class ResetMetsAndDeleteLimbFiles(Step):
         self.goobi_toc = os.path.join(
             self.command_line.process_path,
             self.getConfigItem('metadata_toc_path', section='process_folder_structure'))
+        # Path to the OJS file produced by Goobi script
+        self.goobi_ojs = os.path.join(
+            self.command_line.process_path,
+            self.getConfigItem('metadata_ojs_path', section='process_folder_structure'))
         # Path to the PDF file produced by Limb
         self.goobi_pdf = os.path.join(
             self.command_line.process_path,
             self.getConfigItem('doc_limbpdf_path', section='process_folder_structure'))
+        # Path to the splitted pdf's created from the Limb pdf
+        self.splitted_pdfs = os.path.join(
+            self.command_line.process_path,
+            self.getConfigItem('doc_pdf_path', section='process_folder_structure'))
+        # Path to the jpeg thumbnails created from the original tiffs
+        self.thumbnails = os.path.join(
+            self.command_line.process_path,
+            self.getConfigItem('img_master_jpeg_path', section='process_folder_structure'))
+
 
     def check_paths(self):
         # Check if the file meta.xml exist
