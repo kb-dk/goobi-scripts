@@ -45,7 +45,7 @@ class CreateThumbnails( Step ) :
                                   resize          = self.resize,
                                   valid_exts      = self.valid_exts)
             time_used = tools.get_delta_time(time.time()-t)
-            self.debug_message('Thumbsnails of images for process {0} '
+            self.debug_message('Thumbnails of images for process {0} '
                                'converted in {1}'.format(self.process_id,time_used))
         except image_tools.ConvertError as e:
             error = str(e)

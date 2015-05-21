@@ -29,6 +29,8 @@ def createPdfFromFolder(src, file_dest,temp_folder,
     '''
     image_paths = fs.getFilesInFolderWithExts(src, valid_exts)
     for image in image_paths:
+        # Handle spaces in filenames
+        image = '"' + image + '"'
         input_path = os.path.join(src,image)
         file_name,_ = os.path.splitext(image)
         output_file_name = file_name+'.pdf'
@@ -59,6 +61,8 @@ def convertFolder(input_folder, output_folder,quality=50,resize_type='width',
     images = sorted([f for f in os.listdir(input_folder)
                      if os.path.splitext(f)[-1].lstrip('.') in valid_exts])
     for index, image in enumerate(images):
+        # Handle spaces in filemames
+        image = '"' + image + '"'
         input_path = os.path.join(input_folder,image)
         output_file_name = str(index).zfill(8)+'.jpg'
         output_path = os.path.join(output_folder,output_file_name)
