@@ -55,10 +55,13 @@ class UploadToOJS( Step ):
         '''
 
         # Temporary, new processes should always have issn, so check should be in essential section
+        # Initially assume we have an ISSN on the command line
+        issn_missing = False
         try:
             self.issn = self.command_line.issn
         except AttributeError as e:
             self.debug_message("Warning, missing attribute. Details: {0}".format(e))
+            # We dont have an ISSN on the commandline, so use old code
             issn_missing = True
 
         process_path = self.command_line.process_path
