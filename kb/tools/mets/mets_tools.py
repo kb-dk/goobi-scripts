@@ -330,8 +330,17 @@ def getDmdMetadata(dmd_sec,dmd_id):
     for elem in dmd_sec.getElementsByTagNameNS(goobi_ns,'metadata'):
         name = elem.getAttribute('name')
         if name == 'Author':
-            firstName = elem.getElementsByTagNameNS(goobi_ns,'firstName')[0].firstChild.nodeValue
-            lastName = elem.getElementsByTagNameNS(goobi_ns,'lastName')[0].firstChild.nodeValue
+            # legr: "try - except" added to fix index out of range error
+            try:
+                firstName = elem.getElementsByTagNameNS(goobi_ns,'firstName')[0].firstChild.nodeValue
+            except IndexError as e:
+                print("Fejl: der mangler et 'firstName' tag. Details: {0}".format(e))
+                firstName = "-"
+            try:
+                lastName = elem.getElementsByTagNameNS(goobi_ns,'lastName')[0].firstChild.nodeValue
+            except IndexError as e:
+                print("Fejl: der mangler et 'lastName' tag. Details: {0}".format(e))
+                lastName = "-"
             author = {'firstName':firstName,
                       'lastName':lastName}
             if 'Author' in metadata:
