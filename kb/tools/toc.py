@@ -159,7 +159,7 @@ class TOC(object):
             return authors
         except KeyError:
             print("Advarsel - der findes ingen 'other authors'")
-            authors.append("na")
+            authors.append(('-', '-'))
             return authors
     
     def getFromDbcData(self,dbc_data, key,default=''):
