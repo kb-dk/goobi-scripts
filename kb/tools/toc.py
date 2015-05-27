@@ -157,7 +157,7 @@ class TOC(object):
             for a in dbc_data['other_authors']:
                 authors.append((a['given_name'],a['family_name']))
             return authors
-        except:
+        except KeyError:
             authors.append("na")
             return authors
     
