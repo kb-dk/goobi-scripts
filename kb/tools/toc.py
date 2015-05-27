@@ -158,6 +158,7 @@ class TOC(object):
                 authors.append((a['given_name'],a['family_name']))
             return authors
         except KeyError:
+            print("Advarsel - der findes ingen 'other authors'")
             authors.append("na")
             return authors
     
