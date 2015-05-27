@@ -152,9 +152,14 @@ class TOC(object):
         family_name = self.getFromDbcData(dbc_data,'author_family_name')
         authors.append((given_name, family_name))
         # create elements for any other authors
-        for a in dbc_data['other_authors']:
-            authors.append((a['given_name'],a['family_name']))
-        return authors
+        # legr: added functionality to handle missing other author
+        try:
+            for a in dbc_data['other_authors']:
+                authors.append((a['given_name'],a['family_name']))
+            return authors
+        except:
+            authors.append("na")
+            return authors
     
     def getFromDbcData(self,dbc_data, key,default=''):
         if key in dbc_data:
