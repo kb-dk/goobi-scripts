@@ -10,10 +10,11 @@ class ValidateIssn(Step):
     It will return an error message if ISSN
     is invalid or is not found
     """
+
     def setup(self):
         self.name = 'Validate ISSN'
         self.config_main_section = 'ojs'
-        self.essential_config_sections = set( ['ojs'] )
+        self.essential_config_sections = {'ojs'}
 
     def step(self):
         try:
@@ -22,11 +23,12 @@ class ValidateIssn(Step):
         except Exception as e:
             return e
 
-
+    # noinspection PyPep8Naming
     def getVariables(self):
         self.server = self.getConfigItem('ojs_server', section='ojs')
         self.issn = self.command_line.issn
 
+    # noinspection PyPep8Naming
     def validateIssn(self):
         self.debug_message("Calling journal_path API with server {0} and issn {1}".format(self.server, self.issn))
         path = ojs.getJournalPath(self.server, self.issn)

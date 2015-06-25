@@ -69,7 +69,7 @@ class RunOJSImport(Step):
             self.issn_missing = True
 
         if self.issn_missing:
-            # Old method: generate ojs path from title, or: use property if different from 'system'
+            # Old method: generate ojs path from title, or get from command line
             process_path = self.command_line.process_path
             mets_file_name = self.getConfigItem('metadata_goobi_file', None, 'process_files')
             mets_file = os.path.join(process_path, mets_file_name)

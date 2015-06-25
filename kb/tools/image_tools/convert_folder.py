@@ -60,7 +60,8 @@ def convertFolder(input_folder, output_folder,quality=50,resize_type='width',
     '''
     images = sorted([f for f in os.listdir(input_folder)
                      if os.path.splitext(f)[-1].lstrip('.') in valid_exts])
-    for index, image in enumerate(images):
+
+    for index, image in enumerate(images, start=1):
         # Handle spaces in filemames
         image = '"' + image + '"'
         input_path = os.path.join(input_folder,image)

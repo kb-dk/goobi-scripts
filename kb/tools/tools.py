@@ -342,11 +342,11 @@ def pdfinfo(infile):
  
     return output
 
-def copy_files(source,dest,transit=None,delete_original=False,wait_interval=60,
-               max_retries=5,logger=None,change_owner=None,valid_exts=None):
+def copy_files(source, dest, transit=None, delete_original=False, wait_interval=60,
+               max_retries=5, logger=None, change_owner=None, valid_exts=None):
     """
     Copies all file (non recursive) from 'source' directory to 'dest'.
-    if 'trasit' directory is given then the files are first copied to this directory, which is then moved to 'dest' dir
+    if 'transit' directory is given then the files are first copied to this directory, which is then moved to 'dest' dir
     if 'delete_originat' is True, then the original files (in source) are deleted.
     :param source: string, path to file or source folder
     :param dest: string, path to destination folder

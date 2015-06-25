@@ -21,11 +21,17 @@ class CountImageFiles(Step):
 
     def getVariables(self):
         # Build path to images - get process path (from command line) and image path (from config.ini)
-        self.image_path = os.path.join(self.command_line.process_path,
-                                       self.getConfigItem('img_master_path', section=self.folder_structure_section))
+        self.image_path = os.path.join(
+            self.command_line.process_path,
+            self.getConfigItem('img_master_path', section=self.folder_structure_section))
         # Get a list of valid extensions (from config.ini)
         self.valid_exts = self.getConfigItem('valid_file_exts', section=self.valid_exts_section).split(";")
-        # Get the property name we have defined in goobi_processProperties.xml (from config.ini)
+        # Get the property name we have defined in goobi_processProperties.xml (via config.ini)
+        # Details:
+        # in config.ini we have e section called [count_images_files] which has a variable:
+        # property_name = image_count
+        # As [count_image_files] has been declared to be the config_main_section, the following line essentially says:
+        # self.property_name = "image_count"
         self.property_name = self.getConfigItem('property_name')
 
     def step(self):
@@ -48,8 +54,13 @@ class CountImageFiles(Step):
                     if retry > max_retry:
                         error = "Fejl, Kunne ikke gemme billedantallet i Goobi's database!"
                         self.debug_message(error)
-                        return error
+                        # return error
+                        # Return None for now, we don't want a wep api lockup to stop the workflow
+                        # Until a "sudo service tomcat restart", imagecount will be 0.
+                        # todo: solve problem with web api lockup
+                        return None
             self.debug_message("Billedantallet ({}) blev gemt korrekt i forsoeg nr {}".format(image_count, retry))
+
         # not sure which exceptions to expect...
         except ValueError as e:
             error = str(e.with_traceback)
