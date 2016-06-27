@@ -140,7 +140,8 @@ def deskewImage(src,dest_folder,angle,quality=None,resize=None):
         resize = '-resize {0}%'.format(resize)
     else:
         resize = ''
-    cmd = 'convert {0} -rotate {1} {2} {3} {4}'.format(src,angle,resize,quality,dest)
+    # legr: added +repage to avoid "negative image positions unsupported"-error
+    cmd = 'convert {0} -rotate {1} {2} {3} +repage {4}'.format(src,angle,resize,quality,dest)
     processing.run_cmd(cmd,shell=True)
     return dest
 

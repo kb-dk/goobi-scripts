@@ -112,21 +112,16 @@ def addNewDocStruct(dict_tree,doc_struct_info,parrent_attrib=None):
 
 def containsImages(dict_tree):
 
-    # legr: returns True if the meta.xml's file section is empty
-    # legr: (file section maps actual file path to ID="FILE_nnnn")
     empty_file_sec = file_sec_tools.isEmpty(file_sec_tools.get(dict_tree))
-    # legr: returns True if the meta.xml's physical struct map section is empty
-    # legr: (structMap TYPE="PHYSICAL" maps the above FILE_nnnn to PHYS_nnnn and adds ORDER and ORDERLABEL
     empty_phys_struct_map = phys_struct_map_tools.isEmpty(phys_struct_map_tools.get(dict_tree))
     # Both file_sec_tools and physical struct map must be non empty
-    # legr: returns False if one or both are empty
-    return not empty_file_sec and not empty_phys_struct_map
+    return (not empty_file_sec and not empty_phys_struct_map)
 
 def addImages(dict_tree,image_src):
     '''
     Returns a dict_tree where all the images from image_src has been inserted
     into the physical struct map and file section
-    
+
     :param dict_tree: dict tree to insert images
     :param image_src: folder in which the images exist
     '''
@@ -239,12 +234,12 @@ def getIssueData(mets_file):
             issue_data.update(getDmdMetadata(dmd_sec,dmd_id))
     return issue_data
 
-def getArticleData(data, sections):
+def getArticleData(data,sections):
     ret_sections = dict([(s,[]) for s in sections])
     mets_ns = 'http://www.loc.gov/METS/'
     #=======================================================================
     # Dig in and get DMDID for elements in sections front matter, articles
-    # and back matter 
+    # and back matter
     #=======================================================================
     structMap = getElemByNsNameType(data, mets_ns, 'structMap', 'LOGICAL')
     section_dmd_ids = dict([(s,[]) for s in sections])
@@ -275,15 +270,24 @@ def getArticleData(data, sections):
             temp_pages = list(map(lambda x: int(x), pages[log_id])) # Convert to integers
             start_page = temp_pages[0]
             end_page = temp_pages[-1]
+            # legr: debug begin
+            if ret_sections is None:
+                print("++++++++++ ERROR: ret_sections is None! Call to addPagesToArticle WILL fail!!!")
+                print("Start page: {0}".format(start_page))
+                print("End page  : {0}".format(end_page))
+                print("dmd id    : {0}".format(dmd_id))
+            else:
+                print("++++++++++ OK: ret_sections has data")
+            # legr: debug end
             ret_sections = addPagesToArticle(dmd_id,start_page,end_page,ret_sections)
     #=======================================================================
     # Sort articles by pages
     #=======================================================================
     for section_type, articles in ret_sections.items():
         ret_sections[section_type] = sorted(articles,
-                                            key=lambda k: k['start_page']) 
+                                            key=lambda k: k['start_page'])
     return ret_sections
-            
+
 def addPagesToArticle(dmd_id, start_page, end_page,section_data):
     for section_type,articles in section_data.items():
         for article in articles:
@@ -300,7 +304,7 @@ def getPages(data):
     Returns a dictionary with a mapping log_id -> list of order.
     This makes it possible to see which pages are linked to which log_ids
     Log_ids are linked to dmd_ids..
-    
+
     :param data:
     '''
     mets_ns = 'http://www.loc.gov/METS/'
@@ -323,14 +327,13 @@ def getPages(data):
             else: # create new list for log_id
                 ret_pages[from_log_id] = [pages[to_phys_page]]
     return ret_pages
-    
+
 def getDmdMetadata(dmd_sec,dmd_id):
     metadata = dict()
     goobi_ns = 'http://meta.goobi.org/v1.5.1/'
     for elem in dmd_sec.getElementsByTagNameNS(goobi_ns,'metadata'):
         name = elem.getAttribute('name')
         if name == 'Author':
-            # legr: "try - except" added to fix index out of range error
             try:
                 firstName = elem.getElementsByTagNameNS(goobi_ns,'firstName')[0].firstChild.nodeValue
             except IndexError as e:

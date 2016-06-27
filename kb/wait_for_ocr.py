@@ -146,6 +146,7 @@ class WaitForOcr( Step ):
         pdf_ok = limb_tools.pageCountMatches(self.pdf_input_dir,
                                              self.input_files,
                                              self.valid_exts)
+
         if pdf_ok:
             return True
         return False
